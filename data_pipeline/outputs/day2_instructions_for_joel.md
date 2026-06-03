@@ -73,6 +73,11 @@ To refresh all non-endpoint artifacts and QA snapshots in one command:
 1. source .venv/bin/activate
 2. python -m scripts.refresh_non_endpoint_artifacts
 
+To view a local test page of current status:
+
+1. open outputs/day2_test_page.html
+2. (optional) run python -m http.server 8000 and open http://localhost:8000/outputs/day2_test_page.html
+
 ## What We Will Validate Together
 
 1. HTTP status is 200/201.
@@ -92,3 +97,5 @@ To refresh all non-endpoint artifacts and QA snapshots in one command:
 7. outputs/day2_contact_leads_review.md
 8. outputs/day2_contact_leads_review.csv
 9. outputs/day2_contact_leads.json (see rejected_matches section)
+10. outputs/day2_status_snapshot.md
+11. outputs/day2_test_page.html

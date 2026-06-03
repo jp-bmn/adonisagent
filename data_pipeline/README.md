@@ -80,6 +80,18 @@ Run a one-command refresh for all non-endpoint artifacts:
 python -m scripts.refresh_non_endpoint_artifacts
 ```
 
+Generate only the status snapshot and test page:
+
+```bash
+python -m scripts.generate_status_snapshot
+```
+
+View the test page locally:
+
+1. Open `outputs/day2_test_page.html` in your browser, or
+2. Run `python -m http.server 8000` from `data_pipeline` and open:
+	- `http://localhost:8000/outputs/day2_test_page.html`
+
 Output file:
 
 1. `outputs/day1_raw_signals.json`
@@ -98,6 +110,8 @@ Output file:
 14. `outputs/day2_contact_leads.json`
 15. `outputs/day2_contact_leads_review.md`
 16. `outputs/day2_contact_leads_review.csv`
+17. `outputs/day2_status_snapshot.md`
+18. `outputs/day2_test_page.html`
 
 ## Notes
 
