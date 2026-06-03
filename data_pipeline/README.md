@@ -55,6 +55,8 @@ Optional tuning values:
 16. `EXECUTIVE_BRIEF_INCLUDE_URGENT_OVERRIDE` (default `true`)
 17. `PDF_INGESTION_ENABLED` (default `true`)
 18. `PDF_MAX_WORDS` (default `3000`)
+19. `REPLAY_MAX_ATTEMPTS` (default `3`)
+20. `REPLAY_BACKOFF_SECONDS` (default `2`)
 
 ## Run Day 1 Collection
 
@@ -110,3 +112,10 @@ python -m scripts.replay_outbox
 ```
 
 Successful replays are renamed from `*_signal_batch.json` to `*_delivered.json`.
+Failed replay payloads are moved to `outputs/outbox/failed` with a sidecar error file.
+
+To requeue failed payloads for another replay attempt:
+
+```bash
+python -m scripts.requeue_failed_outbox
+```

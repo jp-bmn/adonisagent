@@ -31,3 +31,15 @@ def mark_delivered(payload_file: Path) -> Path:
     delivered_file = payload_file.with_name(payload_file.name.replace("_signal_batch.json", "_delivered.json"))
     payload_file.rename(delivered_file)
     return delivered_file
+
+
+def move_to_failed(payload_file: Path, error_message: str) -> Path:
+    failed_dir = payload_file.parent / "failed"
+    failed_dir.mkdir(parents=True, exist_ok=True)
+
+    failed_file = failed_dir / payload_file.name.replace("_signal_batch.json", "_failed.json")
+    payload_file.rename(failed_file)
+
+    meta_file = failed_file.with_suffix(".error.txt")
+    meta_file.write_text(error_message.strip() + "\n", encoding="utf-8")
+    return failed_file

@@ -30,6 +30,8 @@ class Settings:
     executive_brief_include_urgent_override: bool = True
     pdf_ingestion_enabled: bool = True
     pdf_max_words: int = 3000
+    replay_max_attempts: int = 3
+    replay_backoff_seconds: int = 2
 
 
 def load_settings() -> Settings:
@@ -107,6 +109,8 @@ def load_settings() -> Settings:
         "on",
     }
     pdf_max_words = int(os.getenv("PDF_MAX_WORDS", "3000").strip() or "3000")
+    replay_max_attempts = int(os.getenv("REPLAY_MAX_ATTEMPTS", "3").strip() or "3")
+    replay_backoff_seconds = int(os.getenv("REPLAY_BACKOFF_SECONDS", "2").strip() or "2")
 
     if not serper_api_key:
         raise ValueError("Missing SERPER_API_KEY. Add it to data_pipeline/.env.")
@@ -134,4 +138,6 @@ def load_settings() -> Settings:
         executive_brief_include_urgent_override=executive_brief_include_urgent_override,
         pdf_ingestion_enabled=pdf_ingestion_enabled,
         pdf_max_words=pdf_max_words,
+        replay_max_attempts=replay_max_attempts,
+        replay_backoff_seconds=replay_backoff_seconds,
     )
