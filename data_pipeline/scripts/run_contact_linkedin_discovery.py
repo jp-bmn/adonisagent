@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import json
 from pathlib import Path
 
@@ -41,6 +42,49 @@ def _write_lead_review_markdown(leads: list[dict[str, object]]) -> Path:
     review_path = Path("outputs/day2_contact_leads_review.md")
     review_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return review_path
+
+
+def _write_lead_review_csv(leads: list[dict[str, object]]) -> Path:
+    ranked = sorted(
+        leads,
+        key=lambda row: float(row.get("linkedin_match_score", 0.0)),
+        reverse=True,
+    )
+
+    csv_path = Path("outputs/day2_contact_leads_review.csv")
+    with csv_path.open("w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.DictWriter(
+            csv_file,
+            fieldnames=[
+                "rank",
+                "full_name",
+                "hospital",
+                "role_hint",
+                "linkedin_match_score",
+                "match_bucket",
+                "recommended_for_manual_review",
+                "match_reason",
+                "linkedin_url",
+            ],
+        )
+        writer.writeheader()
+        for index, row in enumerate(ranked, start=1):
+            writer.writerow(
+                {
+                    "rank": index,
+                    "full_name": row.get("full_name", ""),
+                    "hospital": row.get("hospital", ""),
+                    "role_hint": row.get("role_hint", ""),
+                    "linkedin_match_score": row.get("linkedin_match_score", ""),
+                    "match_bucket": row.get("match_bucket", ""),
+                    "recommended_for_manual_review": row.get(
+                        "recommended_for_manual_review", False
+                    ),
+                    "match_reason": row.get("match_reason", ""),
+                    "linkedin_url": row.get("linkedin_url", ""),
+                }
+            )
+    return csv_path
 
 
 def run() -> Path:
@@ -84,6 +128,7 @@ def run() -> Path:
     medium_confidence_count = 0
     low_confidence_count = 0
     missing_match_count = 0
+    filtered_low_score_count = 0
     for lead in leads:
         match = discover_best_linkedin_match(
             serper=serper,
@@ -91,19 +136,33 @@ def run() -> Path:
             hospital=lead.hospital,
             num_results=5,
         )
-        if match.linkedin_url:
+
+        linkedin_url = match.linkedin_url
+        match_bucket = match.match_bucket
+        match_reason = match.match_reason
+        if linkedin_url and match.match_score < settings.linkedin_min_match_score:
+            linkedin_url = ""
+            match_bucket = "missing"
+            match_reason = (
+                f"{match.match_reason}|below_minimum_threshold={settings.linkedin_min_match_score:.2f}"
+            )
+            filtered_low_score_count += 1
+
+        if linkedin_url:
             found_count += 1
 
-        recommended_for_manual_review = bool(match.linkedin_url) and match.match_score >= 0.70
+        recommended_for_manual_review = bool(linkedin_url) and (
+            match.match_score >= settings.linkedin_recommended_match_score
+        )
         if recommended_for_manual_review:
             recommended_count += 1
-        if match.match_bucket == "high":
+        if match_bucket == "high":
             high_confidence_count += 1
-        elif match.match_bucket == "medium":
+        elif match_bucket == "medium":
             medium_confidence_count += 1
-        elif match.match_bucket == "low":
+        elif match_bucket == "low":
             low_confidence_count += 1
-        elif match.match_bucket == "missing":
+        elif match_bucket == "missing":
             missing_match_count += 1
 
         enriched.append(
@@ -113,22 +172,26 @@ def run() -> Path:
                 "role_hint": lead.role_hint,
                 "source_title": lead.source_title,
                 "discovery_query": match.query,
-                "linkedin_url": match.linkedin_url,
+                "linkedin_url": linkedin_url,
                 "linkedin_verified": False,
                 "linkedin_match_score": match.match_score,
-                "match_reason": match.match_reason,
-                "match_bucket": match.match_bucket,
+                "match_reason": match_reason,
+                "match_bucket": match_bucket,
                 "recommended_for_manual_review": recommended_for_manual_review,
             }
         )
 
     review_path = _write_lead_review_markdown(enriched)
+    review_csv_path = _write_lead_review_csv(enriched)
 
     output = {
         "lead_count": len(leads),
         "linkedin_found_count": found_count,
         "linkedin_missing_count": max(0, len(leads) - found_count),
         "recommended_for_manual_review_count": recommended_count,
+        "linkedin_min_match_score": settings.linkedin_min_match_score,
+        "linkedin_recommended_match_score": settings.linkedin_recommended_match_score,
+        "filtered_low_score_count": filtered_low_score_count,
         "match_bucket_counts": {
             "high": high_confidence_count,
             "medium": medium_confidence_count,
@@ -136,6 +199,7 @@ def run() -> Path:
             "missing": missing_match_count,
         },
         "review_report_path": str(review_path),
+        "review_csv_path": str(review_csv_path),
         "leads": enriched,
     }
 

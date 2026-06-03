@@ -57,6 +57,8 @@ Optional tuning values:
 18. `PDF_MAX_WORDS` (default `3000`)
 19. `REPLAY_MAX_ATTEMPTS` (default `3`)
 20. `REPLAY_BACKOFF_SECONDS` (default `2`)
+21. `LINKEDIN_MIN_MATCH_SCORE` (default `0.20`)
+22. `LINKEDIN_RECOMMENDED_MATCH_SCORE` (default `0.70`)
 
 ## Run Day 1 Collection
 
@@ -89,6 +91,7 @@ Output file:
 13. `outputs/day2_executive_brief_audit.json`
 14. `outputs/day2_contact_leads.json`
 15. `outputs/day2_contact_leads_review.md`
+16. `outputs/day2_contact_leads_review.csv`
 
 ## Notes
 
@@ -131,4 +134,6 @@ python -m scripts.requeue_failed_outbox
 Contact lead output includes `linkedin_match_score`, `match_reason`,
 `match_bucket`, and `recommended_for_manual_review` to prioritize manual
 verification. A ranked review table is written to
-`outputs/day2_contact_leads_review.md`.
+`outputs/day2_contact_leads_review.md` and a CSV queue to
+`outputs/day2_contact_leads_review.csv`. LinkedIn URLs below
+`LINKEDIN_MIN_MATCH_SCORE` are auto-cleared.

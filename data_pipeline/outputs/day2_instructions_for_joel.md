@@ -14,6 +14,10 @@ From: Michael
    - outputs/day2_run_log.json
 5. Outbox queue is active, so payloads are safely queued while waiting for your URL:
    - outputs/outbox
+6. Contact lead triage output is generated each run for manual validation:
+   - outputs/day2_contact_leads.json
+   - outputs/day2_contact_leads_review.md
+   - outputs/day2_contact_leads_review.csv
 
 ## What I Need From You
 
@@ -67,6 +71,7 @@ Then run:
 2. Your API receives all sent signals.
 3. Your response includes inserted/duplicate/rejected counts.
 4. Delivery log on my side shows delivered=true.
+5. Lead review queue keeps only above-threshold LinkedIn candidates (low-score URLs are auto-cleared).
 
 ## Artifacts To Review
 
@@ -76,3 +81,5 @@ Then run:
 4. outputs/day2_signal_summary.csv
 5. outputs/day2_backend_ingestion_contract_joel.md
 6. outputs/day2_signal_ingest_example_payload.json
+7. outputs/day2_contact_leads_review.md
+8. outputs/day2_contact_leads_review.csv
