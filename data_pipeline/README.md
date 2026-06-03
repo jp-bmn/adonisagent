@@ -104,6 +104,10 @@ Client preview page:
 1. Open `outputs/day2_client_feed_preview.html` in your browser.
 2. With local server on port 8000, use:
 	- `http://localhost:8000/outputs/day2_client_feed_preview.html`
+3. Dark variant:
+	- `outputs/day2_client_feed_preview_dark.html`
+4. Preserved original light version:
+	- `outputs/day2_client_feed_preview_light_v1.html`
 
 Output file:
 
@@ -126,6 +130,8 @@ Output file:
 17. `outputs/day2_status_snapshot.md`
 18. `outputs/day2_test_page.html`
 19. `outputs/day2_client_feed_preview.html`
+20. `outputs/day2_client_feed_preview_dark.html`
+21. `outputs/day2_client_feed_preview_light_v1.html`
 
 ## Notes
 

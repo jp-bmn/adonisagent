@@ -61,48 +61,63 @@ def _render_signal_card(signal: dict[str, object]) -> str:
     )
 
 
-def run(max_items: int = 40) -> Path:
-    outputs_dir = Path("outputs")
-    outputs_dir.mkdir(parents=True, exist_ok=True)
+def _build_page(
+    now_utc: str,
+    signals: list[dict[str, object]],
+    tier_counts: Counter[str],
+    top_sources: str,
+    cards_html: str,
+    theme: str,
+) -> str:
+    if theme == "dark":
+        palette = {
+            "bg": "#10151c",
+            "gradient": "#1a2636",
+            "card": "#16212f",
+            "ink": "#edf2f7",
+            "muted": "#a9b7c8",
+            "line": "#28384d",
+            "urgent": "#f97066",
+            "worth": "#56b4fc",
+            "filtered": "#9ca3af",
+            "accent": "#4fd1c5",
+        }
+        title = "Adonis Client Feed Preview (Dark)"
+    else:
+        palette = {
+            "bg": "#eef3f6",
+            "gradient": "#dfeef2",
+            "card": "#ffffff",
+            "ink": "#1b2430",
+            "muted": "#55606f",
+            "line": "#d8e0e8",
+            "urgent": "#b42318",
+            "worth": "#0b4f8c",
+            "filtered": "#6b7280",
+            "accent": "#0f766e",
+        }
+        title = "Adonis Client Feed Preview"
 
-    classified = _read_json(outputs_dir / "day2_classified_candidates.json")
-    rows = classified.get("signals", [])
-    if not isinstance(rows, list):
-        rows = []
-
-    signals = [row for row in rows if isinstance(row, dict)]
-    ranked = _sort_signals(signals)[: max(1, max_items)]
-
-    tier_counts: Counter[str] = Counter(str(s.get("tier", "worth_knowing")) for s in signals)
-    source_counts: Counter[str] = Counter(str(s.get("source", "Unknown")) for s in signals)
-
-    cards_html = "\n".join(_render_signal_card(s) for s in ranked)
-    top_sources = "\n".join(
-        f"<li>{html.escape(source)}: {count}</li>"
-        for source, count in source_counts.most_common(8)
-    )
-
-    now_utc = datetime.now(timezone.utc).isoformat()
-    page = f"""<!doctype html>
+    return f"""<!doctype html>
 <html lang=\"en\">
 <head>
   <meta charset=\"utf-8\" />
   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
-  <title>Adonis Client Feed Preview</title>
+  <title>{title}</title>
   <style>
     :root {{
-      --bg: #eef3f6;
-      --card: #ffffff;
-      --ink: #1b2430;
-      --muted: #55606f;
-      --line: #d8e0e8;
-      --urgent: #b42318;
-      --worth: #0b4f8c;
-      --filtered: #6b7280;
-      --accent: #0f766e;
+      --bg: {palette['bg']};
+      --card: {palette['card']};
+      --ink: {palette['ink']};
+      --muted: {palette['muted']};
+      --line: {palette['line']};
+      --urgent: {palette['urgent']};
+      --worth: {palette['worth']};
+      --filtered: {palette['filtered']};
+      --accent: {palette['accent']};
     }}
     * {{ box-sizing: border-box; }}
-    body {{ margin: 0; font-family: ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif; color: var(--ink); background: linear-gradient(180deg, #dfeef2 0%, var(--bg) 35%); }}
+    body {{ margin: 0; font-family: ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif; color: var(--ink); background: linear-gradient(180deg, {palette['gradient']} 0%, var(--bg) 35%); }}
     .wrap {{ max-width: 1120px; margin: 0 auto; padding: 24px 18px 34px; }}
     h1 {{ margin: 0; font-size: 2rem; }}
     .stamp {{ margin: 4px 0 14px; color: var(--muted); }}
@@ -127,7 +142,7 @@ def run(max_items: int = 40) -> Path:
 </head>
 <body>
   <div class=\"wrap\">
-    <h1>Adonis Client Feed Preview</h1>
+    <h1>{title}</h1>
     <div class=\"stamp\">Generated: {now_utc}</div>
     <section class=\"stats\">
       <div class=\"stat\"><div class=\"k\">Total Classified</div><div class=\"v\">{len(signals)}</div></div>
@@ -149,11 +164,65 @@ def run(max_items: int = 40) -> Path:
 </html>
 """
 
-    out_path = outputs_dir / "day2_client_feed_preview.html"
-    out_path.write_text(page, encoding="utf-8")
-    return out_path
+
+def run(max_items: int = 40) -> dict[str, Path]:
+    outputs_dir = Path("outputs")
+    outputs_dir.mkdir(parents=True, exist_ok=True)
+
+    classified = _read_json(outputs_dir / "day2_classified_candidates.json")
+    rows = classified.get("signals", [])
+    if not isinstance(rows, list):
+        rows = []
+
+    signals = [row for row in rows if isinstance(row, dict)]
+    ranked = _sort_signals(signals)[: max(1, max_items)]
+
+    tier_counts: Counter[str] = Counter(str(s.get("tier", "worth_knowing")) for s in signals)
+    source_counts: Counter[str] = Counter(str(s.get("source", "Unknown")) for s in signals)
+
+    cards_html = "\n".join(_render_signal_card(s) for s in ranked)
+    top_sources = "\n".join(
+        f"<li>{html.escape(source)}: {count}</li>"
+        for source, count in source_counts.most_common(8)
+    )
+
+    now_utc = datetime.now(timezone.utc).isoformat()
+
+    light_path = outputs_dir / "day2_client_feed_preview.html"
+    dark_path = outputs_dir / "day2_client_feed_preview_dark.html"
+    archived_light_v1_path = outputs_dir / "day2_client_feed_preview_light_v1.html"
+
+    if light_path.exists() and not archived_light_v1_path.exists():
+        archived_light_v1_path.write_text(light_path.read_text(encoding="utf-8"), encoding="utf-8")
+
+    light_page = _build_page(
+        now_utc=now_utc,
+        signals=signals,
+        tier_counts=tier_counts,
+        top_sources=top_sources,
+        cards_html=cards_html,
+        theme="light",
+    )
+    dark_page = _build_page(
+        now_utc=now_utc,
+        signals=signals,
+        tier_counts=tier_counts,
+        top_sources=top_sources,
+        cards_html=cards_html,
+        theme="dark",
+    )
+
+    light_path.write_text(light_page, encoding="utf-8")
+    dark_path.write_text(dark_page, encoding="utf-8")
+    return {
+        "light": light_path,
+        "dark": dark_path,
+        "light_v1": archived_light_v1_path,
+    }
 
 
 if __name__ == "__main__":
-    page_path = run()
-    print(f"Wrote client feed preview to {page_path}")
+  pages = run()
+  print(f"Wrote client feed preview (light) to {pages['light']}")
+  print(f"Wrote client feed preview (dark) to {pages['dark']}")
+  print(f"Saved original light version at {pages['light_v1']}")

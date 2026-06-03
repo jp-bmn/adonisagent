@@ -83,6 +83,8 @@ Note:
 
 1. outputs/day2_test_page.html is an internal QA/status dashboard.
 2. outputs/day2_client_feed_preview.html is the client-style feed preview.
+3. outputs/day2_client_feed_preview_dark.html is the dark client-style variant.
+4. outputs/day2_client_feed_preview_light_v1.html preserves the originally approved light version.
 
 ## What We Will Validate Together
 
@@ -106,3 +108,5 @@ Note:
 10. outputs/day2_status_snapshot.md
 11. outputs/day2_test_page.html
 12. outputs/day2_client_feed_preview.html
+13. outputs/day2_client_feed_preview_dark.html
+14. outputs/day2_client_feed_preview_light_v1.html
