@@ -126,3 +126,6 @@ To requeue failed payloads for another replay attempt:
 ```bash
 python -m scripts.requeue_failed_outbox
 ```
+
+Contact lead output includes `linkedin_match_score`, `match_reason`, and
+`recommended_for_manual_review` to prioritize manual verification.
