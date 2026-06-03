@@ -113,6 +113,7 @@ Output file:
 16. Executive brief only includes signals at or above the configured confidence threshold.
 17. Urgent signals can be force-included in the brief even below threshold when override is enabled.
 18. Serper PDF results are parsed with pdfplumber and routed as filing-derived signals.
+19. Handoff summary now includes a lead QA snapshot (review counts and top rejected examples) when `outputs/day2_contact_leads.json` is present.
 
 ## Replay Outbox Later
 

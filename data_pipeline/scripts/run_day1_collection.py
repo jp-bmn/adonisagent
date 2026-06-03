@@ -142,6 +142,7 @@ def _build_handoff_markdown(
     settings_dedup_days: int,
     tier_counter: Counter[str],
     rules_hits: int,
+    contact_lead_snapshot: dict[str, object] | None = None,
 ) -> str:
     per_hospital = Counter(signal.hospital for signal in included_signals)
     top_signals = sorted(
@@ -188,7 +189,80 @@ def _build_handoff_markdown(
     lines.append("## Next Step")
     lines.append("- Feed these candidates into rules-engine and classification in the next milestone.")
     lines.append("")
+
+    lines.append("## Lead QA Snapshot")
+    if not contact_lead_snapshot or not bool(contact_lead_snapshot.get("available", False)):
+        lines.append("- Contact lead QA snapshot: unavailable (run scripts.run_contact_linkedin_discovery).")
+    else:
+        lines.append(
+            f"- Lead count: {int(contact_lead_snapshot.get('lead_count', 0))}"
+        )
+        lines.append(
+            f"- Recommended for manual review: {int(contact_lead_snapshot.get('recommended_for_manual_review_count', 0))}"
+        )
+        lines.append(
+            f"- Rejected low-score matches: {int(contact_lead_snapshot.get('rejected_matches_count', 0))}"
+        )
+        lines.append(
+            f"- Match bucket counts: {contact_lead_snapshot.get('match_bucket_counts', {})}"
+        )
+
+        review_report_path = str(contact_lead_snapshot.get("review_report_path", "")).strip()
+        review_csv_path = str(contact_lead_snapshot.get("review_csv_path", "")).strip()
+        if review_report_path:
+            lines.append(f"- Review markdown: {review_report_path}")
+        if review_csv_path:
+            lines.append(f"- Review CSV: {review_csv_path}")
+
+        top_rejected = contact_lead_snapshot.get("top_rejected_examples", [])
+        if isinstance(top_rejected, list) and top_rejected:
+            lines.append("")
+            lines.append("### Top Rejected Examples")
+            for item in top_rejected:
+                if not isinstance(item, dict):
+                    continue
+                lines.append(
+                    "- "
+                    f"{item.get('full_name', '')} | "
+                    f"hospital={item.get('hospital', '')} | "
+                    f"score={item.get('linkedin_match_score', '')} | "
+                    f"reason={item.get('rejection_reason', '')}"
+                )
+
+    lines.append("")
     return "\n".join(lines)
+
+
+def _load_contact_lead_snapshot(path: Path) -> dict[str, object]:
+    if not path.exists():
+        return {"available": False}
+
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"available": False}
+
+    rejected_matches = payload.get("rejected_matches", [])
+    if not isinstance(rejected_matches, list):
+        rejected_matches = []
+
+    top_rejected = sorted(
+        [row for row in rejected_matches if isinstance(row, dict)],
+        key=lambda row: float(row.get("linkedin_match_score", 0.0) or 0.0),
+    )[:3]
+
+    return {
+        "available": True,
+        "lead_count": int(payload.get("lead_count", 0) or 0),
+        "recommended_for_manual_review_count": int(
+            payload.get("recommended_for_manual_review_count", 0) or 0
+        ),
+        "rejected_matches_count": int(payload.get("rejected_matches_count", 0) or 0),
+        "match_bucket_counts": payload.get("match_bucket_counts", {}),
+        "review_report_path": str(payload.get("review_report_path", "")),
+        "review_csv_path": str(payload.get("review_csv_path", "")),
+        "top_rejected_examples": top_rejected,
+    }
 
 
 def _write_signal_csv(path: Path, signals: list[RawSignal]) -> None:
@@ -609,6 +683,7 @@ def run() -> Path:
     daily_diff_md_path = output_dir / "day2_daily_diff.md"
     executive_brief_path = output_dir / "day2_executive_brief.md"
     executive_brief_audit_path = output_dir / "day2_executive_brief_audit.json"
+    contact_leads_path = output_dir / "day2_contact_leads.json"
 
     previous_classified = _load_previous_classified(classified_path)
 
@@ -874,6 +949,7 @@ def run() -> Path:
             settings_dedup_days=settings.dedup_days,
             tier_counter=tier_counter,
             rules_hits=rules_engine_hits,
+            contact_lead_snapshot=_load_contact_lead_snapshot(contact_leads_path),
         ),
         encoding="utf-8",
     )
