@@ -74,6 +74,12 @@ Run contact and LinkedIn discovery from classified candidates:
 python -m scripts.run_contact_linkedin_discovery
 ```
 
+Run a one-command refresh for all non-endpoint artifacts:
+
+```bash
+python -m scripts.refresh_non_endpoint_artifacts
+```
+
 Output file:
 
 1. `outputs/day1_raw_signals.json`

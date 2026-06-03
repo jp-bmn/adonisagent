@@ -66,6 +66,13 @@ Then run:
 2. python -m scripts.run_day1_collection
 3. python -m scripts.replay_outbox (flushes queued payloads)
 
+## While Waiting For Stub URL
+
+To refresh all non-endpoint artifacts and QA snapshots in one command:
+
+1. source .venv/bin/activate
+2. python -m scripts.refresh_non_endpoint_artifacts
+
 ## What We Will Validate Together
 
 1. HTTP status is 200/201.
