@@ -1,70 +1,125 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Adonis Client Feed Preview (Dark)</title>
-  <style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Adonis Intel - Client Preview (Dark)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #10151c;
-      --card: #16212f;
-      --ink: #edf2f7;
-      --muted: #a9b7c8;
-      --line: #28384d;
-      --urgent: #f97066;
-      --worth: #56b4fc;
-      --filtered: #9ca3af;
-      --accent: #4fd1c5;
+        --ad-bg: #0D1117;
+        --ad-surface: #161C26;
+        --ad-surface2: #1E2633;
+        --ad-border: rgba(255,255,255,0.08);
+        --ad-border2: rgba(255,255,255,0.13);
+        --ad-green: #00C48C;
+        --ad-green-dim: rgba(0,196,140,0.10);
+        --ad-green-border: rgba(0,196,140,0.20);
+        --ad-text: #F0F4F8;
+        --ad-muted: #8896A8;
+        --ad-subtle: #BCC8D4;
+        --ad-danger: #FF5C5C;
+        --ad-danger-bg: rgba(255,92,92,0.10);
+        --ad-warn: #F5A623;
+        --ad-warn-bg: rgba(245,166,35,0.10);
     }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif; color: var(--ink); background: linear-gradient(180deg, #1a2636 0%, var(--bg) 35%); }
-    .wrap { max-width: 1120px; margin: 0 auto; padding: 24px 18px 34px; }
-    h1 { margin: 0; font-size: 2rem; }
-    .stamp { margin: 4px 0 14px; color: var(--muted); }
-    .stats { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 12px; }
-    .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
-    .stat .k { color: var(--muted); font-size: 0.85rem; }
-    .stat .v { font-size: 1.4rem; font-weight: 700; }
-    .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
-    .feed { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-    .meta { display: flex; justify-content: space-between; align-items: center; }
-    .chip { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; padding: 3px 8px; border-radius: 999px; color: white; }
-    .tier-urgent { background: var(--urgent); }
-    .tier-worth { background: var(--worth); }
-    .tier-filtered { background: var(--filtered); }
-    .confidence { color: var(--muted); font-size: 0.8rem; }
-    h3 { margin: 0; font-size: 1rem; line-height: 1.3; }
-    p { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.35; }
-    .foot { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 0.82rem; }
-    .source-link { margin-left: auto; color: var(--accent); text-decoration: none; font-weight: 600; }
-  </style>
+    html, body { height: 100%; background: var(--ad-bg); font-family: 'Inter', sans-serif; color: var(--ad-text); font-size: 13px; }
+    .app { display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { display: flex; align-items: center; gap: 14px; padding: 0 20px; height: 48px; background: var(--ad-surface); border-bottom: 1px solid var(--ad-border); }
+    .logo { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; color: var(--ad-green); }
+    .logo-sub { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--ad-muted); }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .tb-btn { font-size: 11px; font-weight: 500; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--ad-border2); color: var(--ad-muted); background: transparent; }
+    .body { display: flex; flex: 1; min-height: 0; }
+    .sidebar { width: 196px; border-right: 1px solid var(--ad-border); background: var(--ad-surface); overflow-y: auto; padding: 16px 0; }
+    .sb-section { padding: 0 12px; margin-bottom: 22px; }
+    .sb-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ad-muted); margin-bottom: 8px; padding: 0 6px; }
+    .sb-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12px; color: var(--ad-muted); border: 1px solid transparent; }
+    .sb-item.active { background: var(--ad-green-dim); color: var(--ad-green); border-color: var(--ad-green-border); }
+    .sb-badge { margin-left: auto; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 20px; }
+    .sb-badge-danger { background: var(--ad-danger-bg); color: var(--ad-danger); }
+    .hosp-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .main-header { padding: 14px 20px 12px; background: var(--ad-surface); border-bottom: 1px solid var(--ad-border); }
+    .main-title { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+    .main-sub { font-size: 12px; color: var(--ad-muted); }
+    .main-sub strong { color: var(--ad-danger); font-weight: 600; }
+    .filter-row { display: flex; gap: 7px; padding: 9px 20px; background: var(--ad-surface); border-bottom: 1px solid var(--ad-border); flex-wrap: wrap; }
+    .filter-btn { font-size: 11px; font-weight: 500; padding: 4px 11px; border-radius: 20px; border: 1px solid var(--ad-border2); color: var(--ad-muted); background: transparent; }
+    .filter-btn.on.danger { background: var(--ad-danger-bg); color: var(--ad-danger); border-color: rgba(255,92,92,0.28); }
+    .filter-btn.on.warn { background: var(--ad-warn-bg); color: var(--ad-warn); border-color: rgba(245,166,35,0.28); }
+    .filter-btn.on { background: var(--ad-surface2); color: var(--ad-text); }
+    .feed { flex: 1; overflow-y: auto; padding: 14px 20px; display: flex; flex-direction: column; gap: 10px; }
+    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ad-muted); padding: 2px 0; }
+    .card { background: var(--ad-surface); border: 1px solid var(--ad-border); border-radius: 10px; padding: 13px 15px; }
+    .card.urgent { border-left: 2px solid var(--ad-danger); border-radius: 0 10px 10px 0; }
+    .card-top { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; flex-wrap: wrap; }
+    .hosp-name { font-size: 13px; font-weight: 600; }
+    .badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
+    .badge-danger { background: var(--ad-danger-bg); color: var(--ad-danger); }
+    .badge-warn { background: var(--ad-warn-bg); color: var(--ad-warn); }
+    .badge-muted { background: rgba(255,255,255,0.06); color: var(--ad-muted); }
+    .badge-type { background: var(--ad-green-dim); color: var(--ad-green); }
+    .card-time { margin-left: auto; font-size: 11px; color: var(--ad-muted); }
+    .card-summary { font-size: 12px; color: var(--ad-subtle); line-height: 1.6; margin-bottom: 7px; }
+    .card-why { font-size: 11px; font-weight: 500; line-height: 1.55; margin-bottom: 10px; padding: 6px 10px; background: var(--ad-green-dim); border-left: 2px solid var(--ad-green); color: var(--ad-green); border-radius: 0 5px 5px 0; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; }
+    .card-meta { font-size: 11px; color: var(--ad-muted); }
+    .card-actions { display: flex; gap: 5px; }
+    .act-icon { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--ad-border2); color: var(--ad-muted); background: transparent; text-decoration: none; }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; color: var(--ad-muted); text-align: center; gap: 8px; }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Adonis Client Feed Preview (Dark)</h1>
-    <div class="stamp">Generated: 2026-06-03T16:22:12.670577+00:00</div>
-    <section class="stats">
-      <div class="stat"><div class="k">Total Classified</div><div class="v">4</div></div>
-      <div class="stat"><div class="k">Urgent</div><div class="v">4</div></div>
-      <div class="stat"><div class="k">Worth Knowing</div><div class="v">0</div></div>
-      <div class="stat"><div class="k">Filtered Out</div><div class="v">0</div></div>
-    </section>
-    <section class="panel">
-      <strong>Top Sources</strong>
-      <ul>
-        <li>Epic Systems: 1</li>
-<li>Worcester Telegram: 1</li>
-<li>WPR: 1</li>
-<li>The Washington Post: 1</li>
-      </ul>
-    </section>
-    <section class="feed">
-      <article class="card"><div class="meta"><span class="chip tier-urgent">urgent</span><span class="confidence">conf 1.00</span></div><h3>Healthcare Providers and Epic Act to Safeguard Patients’ Health Information</h3><p>Today, Epic and a group of healthcare providers are taking legal action to defend patient privacy and protect sensitive medical information.</p><div class="foot"><span>UMass Memorial</span><span>Epic Systems</span><a class="source-link" href="https://www.epic.com/epic/post/what-you-put-up-with-is-what-you-stand-for/" target="_blank" rel="noreferrer">Open source</a></div></article>
-<article class="card"><div class="meta"><span class="chip tier-urgent">urgent</span><span class="confidence">conf 1.00</span></div><h3>UMass Memorial Health reaches new contract with Blue Cross Blue Shield of MA</h3><p>Nearly 200000 patients had faced the risk of having to find new medical providers had the sides not come to an agreement.</p><div class="foot"><span>UMass Memorial</span><span>Worcester Telegram</span><a class="source-link" href="https://www.telegram.com/story/business/2025/11/13/umass-memorial-health-blue-cross-new-contract/87248300007/" target="_blank" rel="noreferrer">Open source</a></div></article>
-<article class="card"><div class="meta"><span class="chip tier-urgent">urgent</span><span class="confidence">conf 1.00</span></div><h3>Epic, health care providers sue over alleged misuse of patient records</h3><p>The companies improperly accessed and monetized nearly 300000 patient medical records from Epic users, according to Epic.</p><div class="foot"><span>UMass Memorial</span><span>WPR</span><a class="source-link" href="https://www.wpr.org/news/epic-health-care-providers-sue-over-alleged-misuse-patient-records" target="_blank" rel="noreferrer">Open source</a></div></article>
-<article class="card"><div class="meta"><span class="chip tier-urgent">urgent</span><span class="confidence">conf 1.00</span></div><h3>Can your health records be sold for profit? A lawsuit says it’s happening.</h3><p>Epic Systems says 300000 people&#x27;s digital health information records were accessed and sold from health records networks to law firms.</p><div class="foot"><span>UMass Memorial</span><span>The Washington Post</span><a class="source-link" href="https://www.washingtonpost.com/health/2026/01/22/electronic-health-record-fraud-lawsuit/" target="_blank" rel="noreferrer">Open source</a></div></article>
-    </section>
-  </div>
+<div class="app">
+    <div class="topbar">
+        <span class="logo">ADONIS <span class="logo-sub">· INTEL</span></span>
+        <div class="topbar-right">
+            <button class="tb-btn"><i class="ti ti-bell" style="font-size:13px"></i> Alerts</button>
+            <button class="tb-btn"><i class="ti ti-settings" style="font-size:13px"></i> Preferences</button>
+        </div>
+    </div>
+    <div class="body">
+        <div class="sidebar">
+            <div class="sb-section">
+                <div class="sb-label">Views</div>
+                <div class="sb-item active"><i class="ti ti-layout-list"></i> All signals <span class="sb-badge sb-badge-danger">8</span></div>
+                <div class="sb-item"><i class="ti ti-alert-circle"></i> Urgent <span class="sb-badge sb-badge-danger">3</span></div>
+            </div>
+            <div class="sb-section">
+                <div class="sb-label">My accounts</div>
+                <div class="sb-item active"><i class="ti ti-building-hospital"></i> All accounts</div>
+                <div class="sb-item"><span class="hosp-dot" style="background:#378ADD"></span>NewYork-Presbyterian</div>
+<div class="sb-item"><span class="hosp-dot" style="background:#00C48C"></span>UMass Memorial</div>
+            </div>
+        </div>
+        <div class="main">
+            <div class="main-header">
+                <div class="main-title">My intel feed</div>
+                <div class="main-sub">Generated 2026-06-03T16:34:01.881341+00:00 · 2 accounts · <strong>3 urgent signals</strong></div>
+            </div>
+            <div class="filter-row">
+                <button class="filter-btn on danger"><i class="ti ti-alert-circle" style="font-size:11px"></i> Urgent</button>
+                <button class="filter-btn on warn">Medium</button>
+                <button class="filter-btn on">Low</button>
+            </div>
+            <div class="feed">
+                <div class="section-label">Urgent — act now</div>
+                <div class="card urgent"><div class="card-top"><span class="hosp-dot" style="background:#378ADD"></span><span class="hosp-name">NewYork-Presbyterian</span><span class="badge badge-danger">Urgent</span><span class="badge badge-type">Vendor Dispute</span><span class="card-time">conf 1.00</span></div><p class="card-summary">DOJ sues NewYork-Presbyterian Hospital over alleged anticompetitive contracts</p><p class="card-why">Potential revenue cycle impact or buying-signal relevance for Adonis territory accounts.</p><div class="card-footer"><div class="card-meta"><span>Healthcare Finance News</span></div><div class="card-actions"><button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button><a class="act-icon" title="Open article" href="https://www.healthcarefinancenews.com/news/doj-sues-newyork-presbyterian-hospital-over-alleged-anticompetitive-contracts" target="_blank" rel="noreferrer"><i class="ti ti-external-link"></i></a></div></div></div>
+<div class="card urgent"><div class="card-top"><span class="hosp-dot" style="background:#00C48C"></span><span class="hosp-name">UMass Memorial</span><span class="badge badge-danger">Urgent</span><span class="badge badge-type">Vendor Dispute</span><span class="card-time">conf 1.00</span></div><p class="card-summary">Epic&#x27;s lawsuit against Health Gorilla raises broader issues about the future of data sharing, industry executives say</p><p class="card-why">Potential revenue cycle impact or buying-signal relevance for Adonis territory accounts.</p><div class="card-footer"><div class="card-meta"><span>Fierce Healthcare</span></div><div class="card-actions"><button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button><a class="act-icon" title="Open article" href="https://www.fiercehealthcare.com/health-tech/epics-lawsuit-against-health-gorilla-raises-broader-issues-about-future-data-sharing" target="_blank" rel="noreferrer"><i class="ti ti-external-link"></i></a></div></div></div>
+<div class="card urgent"><div class="card-top"><span class="hosp-dot" style="background:#00C48C"></span><span class="hosp-name">UMass Memorial</span><span class="badge badge-danger">Urgent</span><span class="badge badge-type">Restructuring</span><span class="card-time">conf 1.00</span></div><p class="card-summary">UMass Memorial Health ends some services as Medicaid cuts loom</p><p class="card-why">Potential revenue cycle impact or buying-signal relevance for Adonis territory accounts.</p><div class="card-footer"><div class="card-meta"><span>The Boston Globe</span></div><div class="card-actions"><button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button><a class="act-icon" title="Open article" href="https://www.bostonglobe.com/2025/08/14/business/umass-memorial-psych-program-closure/" target="_blank" rel="noreferrer"><i class="ti ti-external-link"></i></a></div></div></div>
+                <div class="section-label">This week</div>
+                <div class="card"><div class="card-top"><span class="hosp-dot" style="background:#00C48C"></span><span class="hosp-name">UMass Memorial</span><span class="badge badge-warn">Worth_Knowing</span><span class="badge badge-type">Ai Adoption Outside Rcm</span><span class="card-time">conf 0.90</span></div><p class="card-summary">How five AI startups are strategizing around Epic’s big push</p><p class="card-why">Useful context for account monitoring and weekly AE planning.</p><div class="card-footer"><div class="card-meta"><span>Modern Healthcare</span></div><div class="card-actions"><button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button><a class="act-icon" title="Open article" href="http://www.modernhealthcare.com/health-tech/ai/mh-epic-ai-tools-abridge-innovaccer-ambience/" target="_blank" rel="noreferrer"><i class="ti ti-external-link"></i></a></div></div></div>
+<div class="card"><div class="card-top"><span class="hosp-dot" style="background:#378ADD"></span><span class="hosp-name">NewYork-Presbyterian</span><span class="badge badge-warn">Worth_Knowing</span><span class="badge badge-type">Leadership Change</span><span class="card-time">conf 0.75</span></div><p class="card-summary">NewYork-Presbyterian CEO is retiring, successor named</p><p class="card-why">Useful context for account monitoring and weekly AE planning.</p><div class="card-footer"><div class="card-meta"><span>Chief Healthcare Executive</span></div><div class="card-actions"><button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button><a class="act-icon" title="Open article" href="https://www.chiefhealthcareexecutive.com/view/newyork-presbyterian-ceo-is-retiring-successor-named" target="_blank" rel="noreferrer"><i class="ti ti-external-link"></i></a></div></div></div>
+<div class="card"><div class="card-top"><span class="hosp-dot" style="background:#00C48C"></span><span class="hosp-name">UMass Memorial</span><span class="badge badge-warn">Worth_Knowing</span><span class="badge badge-type">Leadership Change</span><span class="card-time">conf 0.75</span></div><p class="card-summary">Bill Gates meets Willy Wonka: How Epic&#x27;s 82-year-old billionaire CEO, Judy Faulkner, built her software factory</p><p class="card-why">Useful context for account monitoring and weekly AE planning.</p><div class="card-footer"><div class="card-meta"><span>CNBC</span></div><div class="card-actions"><button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button><a class="act-icon" title="Open article" href="https://www.cnbc.com/2025/08/16/how-epics-82-year-old-ceo-judy-faulkner-built-her-software-factory.html" target="_blank" rel="noreferrer"><i class="ti ti-external-link"></i></a></div></div></div>
+<div class="card"><div class="card-top"><span class="hosp-dot" style="background:#00C48C"></span><span class="hosp-name">UMass Memorial</span><span class="badge badge-warn">Worth_Knowing</span><span class="badge badge-type">Financial Event</span><span class="card-time">conf 0.75</span></div><p class="card-summary">Six of 10 Central Mass. hospitals were profitable in fiscal 2024</p><p class="card-why">Useful context for account monitoring and weekly AE planning.</p><div class="card-footer"><div class="card-meta"><span>Worcester Business Journal</span></div><div class="card-actions"><button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button><a class="act-icon" title="Open article" href="https://wbjournal.com/article/six-of-10-central-mass-hospitals-were-profitable-in-fiscal-2024/" target="_blank" rel="noreferrer"><i class="ti ti-external-link"></i></a></div></div></div>
+<div class="card"><div class="card-top"><span class="hosp-dot" style="background:#378ADD"></span><span class="hosp-name">NewYork-Presbyterian</span><span class="badge badge-warn">Worth_Knowing</span><span class="badge badge-type">Leadership Change</span><span class="card-time">conf 0.63</span></div><p class="card-summary">New York-Presbyterian CEO Steven Corwin to step down</p><p class="card-why">Useful context for account monitoring and weekly AE planning.</p><div class="card-footer"><div class="card-meta"><span>Crain&#x27;s New York</span></div><div class="card-actions"><button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button><a class="act-icon" title="Open article" href="https://www.crainsnewyork.com/health-pulse/new-york-presbyterian-ceo-steven-corwin-announces-resignation/" target="_blank" rel="noreferrer"><i class="ti ti-external-link"></i></a></div></div></div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

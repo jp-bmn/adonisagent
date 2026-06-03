@@ -61,6 +61,212 @@ def _render_signal_card(signal: dict[str, object]) -> str:
     )
 
 
+def _render_dark_signal_card(signal: dict[str, object], hospital_color: str) -> str:
+        hospital = html.escape(str(signal.get("hospital", "Unknown hospital")))
+        title = html.escape(str(signal.get("title", "Untitled signal")))
+        source = html.escape(str(signal.get("source", "Unknown source")))
+        url = html.escape(str(signal.get("url", "")))
+        tier_raw = str(signal.get("tier", "worth_knowing"))
+        tier = html.escape(tier_raw)
+        signal_type = html.escape(str(signal.get("signal_type", "strategy")).replace("_", " ").title())
+        confidence = float(signal.get("confidence_score", 0.0) or 0.0)
+        summary = str(signal.get("one_sentence_summary", "")).strip() or str(signal.get("excerpt", "")).strip()
+        summary = html.escape(summary)
+        why = html.escape(str(signal.get("why_relevant_to_adonis", "")).strip() or "Relevant signal for outreach prioritization.")
+
+        urgency_badge = "badge badge-muted"
+        card_class = "card"
+        if tier_raw == "urgent":
+                urgency_badge = "badge badge-danger"
+                card_class = "card urgent"
+        elif tier_raw == "worth_knowing":
+                urgency_badge = "badge badge-warn"
+
+        link_html = ""
+        if url:
+                link_html = (
+                        f'<a class="act-icon" title="Open article" href="{url}" target="_blank" rel="noreferrer">'
+                        '<i class="ti ti-external-link"></i></a>'
+                )
+
+        return (
+                f'<div class="{card_class}">'
+                '<div class="card-top">'
+                f'<span class="hosp-dot" style="background:{hospital_color}"></span>'
+                f'<span class="hosp-name">{hospital}</span>'
+                f'<span class="{urgency_badge}">{tier.title()}</span>'
+                f'<span class="badge badge-type">{signal_type}</span>'
+                f'<span class="card-time">conf {confidence:.2f}</span>'
+                '</div>'
+                f'<p class="card-summary">{title}</p>'
+                f'<p class="card-why">{why}</p>'
+                '<div class="card-footer">'
+                f'<div class="card-meta"><span>{source}</span></div>'
+                '<div class="card-actions">'
+                '<button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button>'
+                f'{link_html}'
+                '</div></div></div>'
+        )
+
+
+def _build_dark_intel_page(
+        now_utc: str,
+        signals: list[dict[str, object]],
+        ranked: list[dict[str, object]],
+        tier_counts: Counter[str],
+) -> str:
+        hospitals = []
+        for signal in ranked:
+                hospital = str(signal.get("hospital", "Unknown hospital"))
+                if hospital not in hospitals:
+                        hospitals.append(hospital)
+
+        palette = ["#378ADD", "#00C48C", "#D85A30", "#F5A623", "#A78BFA", "#7DD3FC"]
+        hospital_colors = {hospital: palette[idx % len(palette)] for idx, hospital in enumerate(hospitals)}
+
+        urgent_signals = [s for s in ranked if str(s.get("tier", "")) == "urgent"]
+        week_signals = [s for s in ranked if str(s.get("tier", "")) != "urgent"]
+
+        urgent_cards = "\n".join(
+                _render_dark_signal_card(signal, hospital_colors.get(str(signal.get("hospital", "")), "#378ADD"))
+                for signal in urgent_signals[:12]
+        )
+        week_cards = "\n".join(
+                _render_dark_signal_card(signal, hospital_colors.get(str(signal.get("hospital", "")), "#378ADD"))
+                for signal in week_signals[:24]
+        )
+
+        hospital_items = "\n".join(
+                (
+                        '<div class="sb-item">'
+                        f'<span class="hosp-dot" style="background:{hospital_colors[hospital]}"></span>'
+                        f'{html.escape(hospital)}'
+                        '</div>'
+                )
+                for hospital in hospitals
+        )
+
+        return f"""<!doctype html>
+<html lang=\"en\">
+<head>
+<meta charset=\"UTF-8\" />
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
+<title>Adonis Intel - Client Preview (Dark)</title>
+<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\" />
+<link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap\" rel=\"stylesheet\" />
+<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css\" />
+<style>
+    *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
+    :root {{
+        --ad-bg: #0D1117;
+        --ad-surface: #161C26;
+        --ad-surface2: #1E2633;
+        --ad-border: rgba(255,255,255,0.08);
+        --ad-border2: rgba(255,255,255,0.13);
+        --ad-green: #00C48C;
+        --ad-green-dim: rgba(0,196,140,0.10);
+        --ad-green-border: rgba(0,196,140,0.20);
+        --ad-text: #F0F4F8;
+        --ad-muted: #8896A8;
+        --ad-subtle: #BCC8D4;
+        --ad-danger: #FF5C5C;
+        --ad-danger-bg: rgba(255,92,92,0.10);
+        --ad-warn: #F5A623;
+        --ad-warn-bg: rgba(245,166,35,0.10);
+    }}
+    html, body {{ height: 100%; background: var(--ad-bg); font-family: 'Inter', sans-serif; color: var(--ad-text); font-size: 13px; }}
+    .app {{ display: flex; flex-direction: column; min-height: 100vh; }}
+    .topbar {{ display: flex; align-items: center; gap: 14px; padding: 0 20px; height: 48px; background: var(--ad-surface); border-bottom: 1px solid var(--ad-border); }}
+    .logo {{ font-size: 13px; font-weight: 700; letter-spacing: 0.08em; color: var(--ad-green); }}
+    .logo-sub {{ font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--ad-muted); }}
+    .topbar-right {{ margin-left: auto; display: flex; align-items: center; gap: 8px; }}
+    .tb-btn {{ font-size: 11px; font-weight: 500; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--ad-border2); color: var(--ad-muted); background: transparent; }}
+    .body {{ display: flex; flex: 1; min-height: 0; }}
+    .sidebar {{ width: 196px; border-right: 1px solid var(--ad-border); background: var(--ad-surface); overflow-y: auto; padding: 16px 0; }}
+    .sb-section {{ padding: 0 12px; margin-bottom: 22px; }}
+    .sb-label {{ font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ad-muted); margin-bottom: 8px; padding: 0 6px; }}
+    .sb-item {{ display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12px; color: var(--ad-muted); border: 1px solid transparent; }}
+    .sb-item.active {{ background: var(--ad-green-dim); color: var(--ad-green); border-color: var(--ad-green-border); }}
+    .sb-badge {{ margin-left: auto; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 20px; }}
+    .sb-badge-danger {{ background: var(--ad-danger-bg); color: var(--ad-danger); }}
+    .hosp-dot {{ width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }}
+    .main {{ flex: 1; display: flex; flex-direction: column; min-width: 0; }}
+    .main-header {{ padding: 14px 20px 12px; background: var(--ad-surface); border-bottom: 1px solid var(--ad-border); }}
+    .main-title {{ font-size: 15px; font-weight: 600; margin-bottom: 3px; }}
+    .main-sub {{ font-size: 12px; color: var(--ad-muted); }}
+    .main-sub strong {{ color: var(--ad-danger); font-weight: 600; }}
+    .filter-row {{ display: flex; gap: 7px; padding: 9px 20px; background: var(--ad-surface); border-bottom: 1px solid var(--ad-border); flex-wrap: wrap; }}
+    .filter-btn {{ font-size: 11px; font-weight: 500; padding: 4px 11px; border-radius: 20px; border: 1px solid var(--ad-border2); color: var(--ad-muted); background: transparent; }}
+    .filter-btn.on.danger {{ background: var(--ad-danger-bg); color: var(--ad-danger); border-color: rgba(255,92,92,0.28); }}
+    .filter-btn.on.warn {{ background: var(--ad-warn-bg); color: var(--ad-warn); border-color: rgba(245,166,35,0.28); }}
+    .filter-btn.on {{ background: var(--ad-surface2); color: var(--ad-text); }}
+    .feed {{ flex: 1; overflow-y: auto; padding: 14px 20px; display: flex; flex-direction: column; gap: 10px; }}
+    .section-label {{ font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ad-muted); padding: 2px 0; }}
+    .card {{ background: var(--ad-surface); border: 1px solid var(--ad-border); border-radius: 10px; padding: 13px 15px; }}
+    .card.urgent {{ border-left: 2px solid var(--ad-danger); border-radius: 0 10px 10px 0; }}
+    .card-top {{ display: flex; align-items: center; gap: 7px; margin-bottom: 9px; flex-wrap: wrap; }}
+    .hosp-name {{ font-size: 13px; font-weight: 600; }}
+    .badge {{ font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }}
+    .badge-danger {{ background: var(--ad-danger-bg); color: var(--ad-danger); }}
+    .badge-warn {{ background: var(--ad-warn-bg); color: var(--ad-warn); }}
+    .badge-muted {{ background: rgba(255,255,255,0.06); color: var(--ad-muted); }}
+    .badge-type {{ background: var(--ad-green-dim); color: var(--ad-green); }}
+    .card-time {{ margin-left: auto; font-size: 11px; color: var(--ad-muted); }}
+    .card-summary {{ font-size: 12px; color: var(--ad-subtle); line-height: 1.6; margin-bottom: 7px; }}
+    .card-why {{ font-size: 11px; font-weight: 500; line-height: 1.55; margin-bottom: 10px; padding: 6px 10px; background: var(--ad-green-dim); border-left: 2px solid var(--ad-green); color: var(--ad-green); border-radius: 0 5px 5px 0; }}
+    .card-footer {{ display: flex; justify-content: space-between; align-items: center; }}
+    .card-meta {{ font-size: 11px; color: var(--ad-muted); }}
+    .card-actions {{ display: flex; gap: 5px; }}
+    .act-icon {{ display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--ad-border2); color: var(--ad-muted); background: transparent; text-decoration: none; }}
+    .empty-state {{ display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; color: var(--ad-muted); text-align: center; gap: 8px; }}
+</style>
+</head>
+<body>
+<div class=\"app\">
+    <div class=\"topbar\">
+        <span class=\"logo\">ADONIS <span class=\"logo-sub\">· INTEL</span></span>
+        <div class=\"topbar-right\">
+            <button class=\"tb-btn\"><i class=\"ti ti-bell\" style=\"font-size:13px\"></i> Alerts</button>
+            <button class=\"tb-btn\"><i class=\"ti ti-settings\" style=\"font-size:13px\"></i> Preferences</button>
+        </div>
+    </div>
+    <div class=\"body\">
+        <div class=\"sidebar\">
+            <div class=\"sb-section\">
+                <div class=\"sb-label\">Views</div>
+                <div class=\"sb-item active\"><i class=\"ti ti-layout-list\"></i> All signals <span class=\"sb-badge sb-badge-danger\">{len(signals)}</span></div>
+                <div class=\"sb-item\"><i class=\"ti ti-alert-circle\"></i> Urgent <span class=\"sb-badge sb-badge-danger\">{tier_counts.get('urgent', 0)}</span></div>
+            </div>
+            <div class=\"sb-section\">
+                <div class=\"sb-label\">My accounts</div>
+                <div class=\"sb-item active\"><i class=\"ti ti-building-hospital\"></i> All accounts</div>
+                {hospital_items}
+            </div>
+        </div>
+        <div class=\"main\">
+            <div class=\"main-header\">
+                <div class=\"main-title\">My intel feed</div>
+                <div class=\"main-sub\">Generated {now_utc} · {len(hospitals)} accounts · <strong>{tier_counts.get('urgent', 0)} urgent signals</strong></div>
+            </div>
+            <div class=\"filter-row\">
+                <button class=\"filter-btn on danger\"><i class=\"ti ti-alert-circle\" style=\"font-size:11px\"></i> Urgent</button>
+                <button class=\"filter-btn on warn\">Medium</button>
+                <button class=\"filter-btn on\">Low</button>
+            </div>
+            <div class=\"feed\">
+                <div class=\"section-label\">Urgent — act now</div>
+                {urgent_cards if urgent_cards else '<div class="empty-state"><i class="ti ti-check"></i><p>No urgent signals right now.</p></div>'}
+                <div class=\"section-label\">This week</div>
+                {week_cards if week_cards else '<div class="empty-state"><i class="ti ti-notes"></i><p>No additional signals in this view.</p></div>'}
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+"""
+
+
 def _build_page(
     now_utc: str,
     signals: list[dict[str, object]],
@@ -70,19 +276,12 @@ def _build_page(
     theme: str,
 ) -> str:
     if theme == "dark":
-        palette = {
-            "bg": "#10151c",
-            "gradient": "#1a2636",
-            "card": "#16212f",
-            "ink": "#edf2f7",
-            "muted": "#a9b7c8",
-            "line": "#28384d",
-            "urgent": "#f97066",
-            "worth": "#56b4fc",
-            "filtered": "#9ca3af",
-            "accent": "#4fd1c5",
-        }
-        title = "Adonis Client Feed Preview (Dark)"
+        return _build_dark_intel_page(
+            now_utc=now_utc,
+            signals=signals,
+            ranked=_sort_signals(signals),
+            tier_counts=tier_counts,
+        )
     else:
         palette = {
             "bg": "#eef3f6",
@@ -222,7 +421,7 @@ def run(max_items: int = 40) -> dict[str, Path]:
 
 
 if __name__ == "__main__":
-  pages = run()
-  print(f"Wrote client feed preview (light) to {pages['light']}")
-  print(f"Wrote client feed preview (dark) to {pages['dark']}")
-  print(f"Saved original light version at {pages['light_v1']}")
+        pages = run()
+        print(f"Wrote client feed preview (light) to {pages['light']}")
+        print(f"Wrote client feed preview (dark) to {pages['dark']}")
+        print(f"Saved original light version at {pages['light_v1']}")
