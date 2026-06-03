@@ -88,6 +88,7 @@ Output file:
 12. `outputs/day2_executive_brief.md`
 13. `outputs/day2_executive_brief_audit.json`
 14. `outputs/day2_contact_leads.json`
+15. `outputs/day2_contact_leads_review.md`
 
 ## Notes
 
@@ -127,5 +128,7 @@ To requeue failed payloads for another replay attempt:
 python -m scripts.requeue_failed_outbox
 ```
 
-Contact lead output includes `linkedin_match_score`, `match_reason`, and
-`recommended_for_manual_review` to prioritize manual verification.
+Contact lead output includes `linkedin_match_score`, `match_reason`,
+`match_bucket`, and `recommended_for_manual_review` to prioritize manual
+verification. A ranked review table is written to
+`outputs/day2_contact_leads_review.md`.

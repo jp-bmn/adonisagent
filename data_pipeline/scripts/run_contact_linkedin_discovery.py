@@ -8,7 +8,39 @@ from pathlib import Path
 from adonis_data.clients.serper import SerperClient
 from adonis_data.config import load_settings
 from adonis_data.enrich.contact_leads import extract_contact_leads
-from adonis_data.enrich.linkedin_discovery import discover_linkedin_url, score_linkedin_match
+from adonis_data.enrich.linkedin_discovery import discover_best_linkedin_match
+
+
+def _write_lead_review_markdown(leads: list[dict[str, object]]) -> Path:
+    ranked = sorted(
+        leads,
+        key=lambda row: float(row.get("linkedin_match_score", 0.0)),
+        reverse=True,
+    )
+
+    lines = [
+        "# Day 2 LinkedIn Lead Review",
+        "",
+        "| Rank | Name | Hospital | Score | Bucket | Recommended | URL |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for index, row in enumerate(ranked, start=1):
+        url = str(row.get("linkedin_url", ""))
+        url_cell = "" if not url else f"[profile]({url})"
+        lines.append(
+            "| "
+            f"{index} | "
+            f"{row.get('full_name', '')} | "
+            f"{row.get('hospital', '')} | "
+            f"{row.get('linkedin_match_score', '')} | "
+            f"{row.get('match_bucket', '')} | "
+            f"{row.get('recommended_for_manual_review', False)} | "
+            f"{url_cell} |"
+        )
+
+    review_path = Path("outputs/day2_contact_leads_review.md")
+    review_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return review_path
 
 
 def run() -> Path:
@@ -47,25 +79,32 @@ def run() -> Path:
 
     enriched: list[dict[str, object]] = []
     found_count = 0
+    recommended_count = 0
     high_confidence_count = 0
+    medium_confidence_count = 0
+    low_confidence_count = 0
+    missing_match_count = 0
     for lead in leads:
-        query, linkedin_url = discover_linkedin_url(
+        match = discover_best_linkedin_match(
             serper=serper,
             full_name=lead.full_name,
             hospital=lead.hospital,
             num_results=5,
         )
-        if linkedin_url:
+        if match.linkedin_url:
             found_count += 1
 
-        match_score, match_reason = score_linkedin_match(
-            full_name=lead.full_name,
-            hospital=lead.hospital,
-            linkedin_url=linkedin_url,
-        )
-        recommended_for_manual_review = bool(linkedin_url) and match_score >= 0.70
+        recommended_for_manual_review = bool(match.linkedin_url) and match.match_score >= 0.70
         if recommended_for_manual_review:
+            recommended_count += 1
+        if match.match_bucket == "high":
             high_confidence_count += 1
+        elif match.match_bucket == "medium":
+            medium_confidence_count += 1
+        elif match.match_bucket == "low":
+            low_confidence_count += 1
+        elif match.match_bucket == "missing":
+            missing_match_count += 1
 
         enriched.append(
             {
@@ -73,20 +112,30 @@ def run() -> Path:
                 "hospital": lead.hospital,
                 "role_hint": lead.role_hint,
                 "source_title": lead.source_title,
-                "discovery_query": query,
-                "linkedin_url": linkedin_url,
+                "discovery_query": match.query,
+                "linkedin_url": match.linkedin_url,
                 "linkedin_verified": False,
-                "linkedin_match_score": round(match_score, 3),
-                "match_reason": match_reason,
+                "linkedin_match_score": match.match_score,
+                "match_reason": match.match_reason,
+                "match_bucket": match.match_bucket,
                 "recommended_for_manual_review": recommended_for_manual_review,
             }
         )
+
+    review_path = _write_lead_review_markdown(enriched)
 
     output = {
         "lead_count": len(leads),
         "linkedin_found_count": found_count,
         "linkedin_missing_count": max(0, len(leads) - found_count),
-        "recommended_for_manual_review_count": high_confidence_count,
+        "recommended_for_manual_review_count": recommended_count,
+        "match_bucket_counts": {
+            "high": high_confidence_count,
+            "medium": medium_confidence_count,
+            "low": low_confidence_count,
+            "missing": missing_match_count,
+        },
+        "review_report_path": str(review_path),
         "leads": enriched,
     }
 
