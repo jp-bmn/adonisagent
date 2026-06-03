@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+from collections import Counter
 from pathlib import Path
 
 from adonis_data.clients.serper import SerperClient
@@ -12,7 +13,10 @@ from adonis_data.enrich.contact_leads import extract_contact_leads
 from adonis_data.enrich.linkedin_discovery import discover_best_linkedin_match
 
 
-def _write_lead_review_markdown(leads: list[dict[str, object]]) -> Path:
+def _write_lead_review_markdown(
+    leads: list[dict[str, object]],
+    rejected_matches: list[dict[str, object]],
+) -> Path:
     ranked = sorted(
         leads,
         key=lambda row: float(row.get("linkedin_match_score", 0.0)),
@@ -38,6 +42,36 @@ def _write_lead_review_markdown(leads: list[dict[str, object]]) -> Path:
             f"{row.get('recommended_for_manual_review', False)} | "
             f"{url_cell} |"
         )
+
+    lines.extend(["", "## Rejected Match Reasons", ""])
+    if not rejected_matches:
+        lines.append("No matches were rejected by minimum-score filtering in this run.")
+    else:
+        reason_counter = Counter(
+            str(item.get("rejection_reason", "unknown_rejection_reason"))
+            for item in rejected_matches
+        )
+        for reason, count in reason_counter.most_common():
+            lines.append(f"- {reason}: {count}")
+
+        lines.extend(
+            [
+                "",
+                "| Name | Hospital | Score | Reason | Candidate URL |",
+                "| --- | --- | --- | --- | --- |",
+            ]
+        )
+        for item in rejected_matches:
+            candidate_url = str(item.get("candidate_url", ""))
+            candidate_url_cell = "" if not candidate_url else f"[profile]({candidate_url})"
+            lines.append(
+                "| "
+                f"{item.get('full_name', '')} | "
+                f"{item.get('hospital', '')} | "
+                f"{item.get('linkedin_match_score', '')} | "
+                f"{item.get('rejection_reason', '')} | "
+                f"{candidate_url_cell} |"
+            )
 
     review_path = Path("outputs/day2_contact_leads_review.md")
     review_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -197,7 +231,7 @@ def run() -> Path:
             }
         )
 
-    review_path = _write_lead_review_markdown(enriched)
+    review_path = _write_lead_review_markdown(enriched, rejected_matches)
     review_csv_path = _write_lead_review_csv(enriched)
 
     output = {
