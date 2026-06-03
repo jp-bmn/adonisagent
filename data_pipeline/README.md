@@ -66,6 +66,12 @@ From this directory (`data_pipeline`), run:
 python -m scripts.run_day1_collection
 ```
 
+Run contact and LinkedIn discovery from classified candidates:
+
+```bash
+python -m scripts.run_contact_linkedin_discovery
+```
+
 Output file:
 
 1. `outputs/day1_raw_signals.json`
@@ -81,6 +87,7 @@ Output file:
 11. `outputs/day2_daily_diff.md`
 12. `outputs/day2_executive_brief.md`
 13. `outputs/day2_executive_brief_audit.json`
+14. `outputs/day2_contact_leads.json`
 
 ## Notes
 

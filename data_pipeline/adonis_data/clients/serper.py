@@ -25,3 +25,17 @@ class SerperClient:
             timeout_seconds=self._timeout_seconds,
         )
         return data.get("news", [])
+
+    def search_web(self, query: str, num_results: int = 10) -> list[dict[str, Any]]:
+        payload = {"q": query, "num": num_results}
+        headers = {
+            "X-API-KEY": self._api_key,
+            "Content-Type": "application/json",
+        }
+        data = post_json(
+            url="https://google.serper.dev/search",
+            headers=headers,
+            payload=payload,
+            timeout_seconds=self._timeout_seconds,
+        )
+        return data.get("organic", [])
