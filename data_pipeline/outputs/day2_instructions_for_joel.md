@@ -18,6 +18,7 @@ From: Michael
    - outputs/day2_contact_leads.json
    - outputs/day2_contact_leads_review.md
    - outputs/day2_contact_leads_review.csv
+   - Low-score filtered candidates are captured under `rejected_matches` in outputs/day2_contact_leads.json
 
 ## What I Need From You
 
@@ -83,3 +84,4 @@ Then run:
 6. outputs/day2_signal_ingest_example_payload.json
 7. outputs/day2_contact_leads_review.md
 8. outputs/day2_contact_leads_review.csv
+9. outputs/day2_contact_leads.json (see rejected_matches section)

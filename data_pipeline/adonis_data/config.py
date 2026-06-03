@@ -33,7 +33,7 @@ class Settings:
     replay_max_attempts: int = 3
     replay_backoff_seconds: int = 2
     linkedin_min_match_score: float = 0.20
-    linkedin_recommended_match_score: float = 0.70
+    linkedin_recommended_match_score: float = 0.75
 
 
 def load_settings() -> Settings:
@@ -117,7 +117,7 @@ def load_settings() -> Settings:
         os.getenv("LINKEDIN_MIN_MATCH_SCORE", "0.20").strip() or "0.20"
     )
     linkedin_recommended_match_score = float(
-        os.getenv("LINKEDIN_RECOMMENDED_MATCH_SCORE", "0.70").strip() or "0.70"
+        os.getenv("LINKEDIN_RECOMMENDED_MATCH_SCORE", "0.75").strip() or "0.75"
     )
 
     if not serper_api_key:

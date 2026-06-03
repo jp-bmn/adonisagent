@@ -58,7 +58,7 @@ Optional tuning values:
 19. `REPLAY_MAX_ATTEMPTS` (default `3`)
 20. `REPLAY_BACKOFF_SECONDS` (default `2`)
 21. `LINKEDIN_MIN_MATCH_SCORE` (default `0.20`)
-22. `LINKEDIN_RECOMMENDED_MATCH_SCORE` (default `0.70`)
+22. `LINKEDIN_RECOMMENDED_MATCH_SCORE` (default `0.75`)
 
 ## Run Day 1 Collection
 
@@ -136,4 +136,5 @@ Contact lead output includes `linkedin_match_score`, `match_reason`,
 verification. A ranked review table is written to
 `outputs/day2_contact_leads_review.md` and a CSV queue to
 `outputs/day2_contact_leads_review.csv`. LinkedIn URLs below
-`LINKEDIN_MIN_MATCH_SCORE` are auto-cleared.
+`LINKEDIN_MIN_MATCH_SCORE` are auto-cleared and captured in
+`rejected_matches` inside `outputs/day2_contact_leads.json` for auditability.

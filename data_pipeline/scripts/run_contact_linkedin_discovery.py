@@ -129,6 +129,7 @@ def run() -> Path:
     low_confidence_count = 0
     missing_match_count = 0
     filtered_low_score_count = 0
+    rejected_matches: list[dict[str, object]] = []
     for lead in leads:
         match = discover_best_linkedin_match(
             serper=serper,
@@ -141,6 +142,21 @@ def run() -> Path:
         match_bucket = match.match_bucket
         match_reason = match.match_reason
         if linkedin_url and match.match_score < settings.linkedin_min_match_score:
+            rejected_matches.append(
+                {
+                    "full_name": lead.full_name,
+                    "hospital": lead.hospital,
+                    "role_hint": lead.role_hint,
+                    "discovery_query": match.query,
+                    "candidate_url": linkedin_url,
+                    "linkedin_match_score": match.match_score,
+                    "original_match_bucket": match.match_bucket,
+                    "rejection_reason": (
+                        f"below_minimum_threshold={settings.linkedin_min_match_score:.2f}"
+                    ),
+                    "match_reason": match.match_reason,
+                }
+            )
             linkedin_url = ""
             match_bucket = "missing"
             match_reason = (
@@ -200,6 +216,8 @@ def run() -> Path:
         },
         "review_report_path": str(review_path),
         "review_csv_path": str(review_csv_path),
+        "rejected_matches_count": len(rejected_matches),
+        "rejected_matches": rejected_matches,
         "leads": enriched,
     }
 
