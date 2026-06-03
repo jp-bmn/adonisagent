@@ -1,0 +1,10 @@
+.DS_Store
+.venv/
+
+__pycache__/
+*.pyc
+
+data_pipeline/.env
+data_pipeline/outputs/*.json
+data_pipeline/outputs/*.csv
+data_pipeline/outputs/outbox/
