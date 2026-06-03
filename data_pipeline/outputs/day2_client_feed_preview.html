@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Adonis Client Feed Preview</title>
+  <style>
+    :root {
+      --bg: #eef3f6;
+      --card: #ffffff;
+      --ink: #1b2430;
+      --muted: #55606f;
+      --line: #d8e0e8;
+      --urgent: #b42318;
+      --worth: #0b4f8c;
+      --filtered: #6b7280;
+      --accent: #0f766e;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif; color: var(--ink); background: linear-gradient(180deg, #dfeef2 0%, var(--bg) 35%); }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 24px 18px 34px; }
+    h1 { margin: 0; font-size: 2rem; }
+    .stamp { margin: 4px 0 14px; color: var(--muted); }
+    .stats { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 12px; }
+    .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+    .stat .k { color: var(--muted); font-size: 0.85rem; }
+    .stat .v { font-size: 1.4rem; font-weight: 700; }
+    .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+    .feed { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .meta { display: flex; justify-content: space-between; align-items: center; }
+    .chip { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; padding: 3px 8px; border-radius: 999px; color: white; }
+    .tier-urgent { background: var(--urgent); }
+    .tier-worth { background: var(--worth); }
+    .tier-filtered { background: var(--filtered); }
+    .confidence { color: var(--muted); font-size: 0.8rem; }
+    h3 { margin: 0; font-size: 1rem; line-height: 1.3; }
+    p { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.35; }
+    .foot { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 0.82rem; }
+    .source-link { margin-left: auto; color: var(--accent); text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Adonis Client Feed Preview</h1>
+    <div class="stamp">Generated: 2026-06-03T16:14:10.392680+00:00</div>
+    <section class="stats">
+      <div class="stat"><div class="k">Total Classified</div><div class="v">0</div></div>
+      <div class="stat"><div class="k">Urgent</div><div class="v">0</div></div>
+      <div class="stat"><div class="k">Worth Knowing</div><div class="v">0</div></div>
+      <div class="stat"><div class="k">Filtered Out</div><div class="v">0</div></div>
+    </section>
+    <section class="panel">
+      <strong>Top Sources</strong>
+      <ul>
+        
+      </ul>
+    </section>
+    <section class="feed">
+      
+    </section>
+  </div>
+</body>
+</html>

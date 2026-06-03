@@ -86,11 +86,24 @@ Generate only the status snapshot and test page:
 python -m scripts.generate_status_snapshot
 ```
 
+Generate a client-facing feed preview page (from classified signals):
+
+```bash
+python -m scripts.generate_client_feed_preview
+```
+
 View the test page locally:
 
 1. Open `outputs/day2_test_page.html` in your browser, or
 2. Run `python -m http.server 8000` from `data_pipeline` and open:
 	- `http://localhost:8000/outputs/day2_test_page.html`
+3. Run `python -m scripts.open_test_page` to open it directly (auto-generates the page if missing).
+
+Client preview page:
+
+1. Open `outputs/day2_client_feed_preview.html` in your browser.
+2. With local server on port 8000, use:
+	- `http://localhost:8000/outputs/day2_client_feed_preview.html`
 
 Output file:
 
@@ -112,6 +125,7 @@ Output file:
 16. `outputs/day2_contact_leads_review.csv`
 17. `outputs/day2_status_snapshot.md`
 18. `outputs/day2_test_page.html`
+19. `outputs/day2_client_feed_preview.html`
 
 ## Notes
 

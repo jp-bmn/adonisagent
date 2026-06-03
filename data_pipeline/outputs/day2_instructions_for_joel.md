@@ -77,6 +77,12 @@ To view a local test page of current status:
 
 1. open outputs/day2_test_page.html
 2. (optional) run python -m http.server 8000 and open http://localhost:8000/outputs/day2_test_page.html
+3. python -m scripts.open_test_page
+
+Note:
+
+1. outputs/day2_test_page.html is an internal QA/status dashboard.
+2. outputs/day2_client_feed_preview.html is the client-style feed preview.
 
 ## What We Will Validate Together
 
@@ -99,3 +105,4 @@ To view a local test page of current status:
 9. outputs/day2_contact_leads.json (see rejected_matches section)
 10. outputs/day2_status_snapshot.md
 11. outputs/day2_test_page.html
+12. outputs/day2_client_feed_preview.html
