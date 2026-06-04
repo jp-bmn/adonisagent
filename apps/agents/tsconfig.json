@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "../../",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "paths": {
@@ -10,6 +10,6 @@
       "@adonis/db": ["../../packages/db/src"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../../packages/shared/src/**/*", "../../packages/db/src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
