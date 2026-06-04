@@ -6,15 +6,8 @@
   <title>Adonis Client Feed Preview</title>
   <style>
     :root {
-      --bg: #eef3f6;
-      --card: #ffffff;
-      --ink: #1b2430;
-      --muted: #55606f;
-      --line: #d8e0e8;
-      --urgent: #b42318;
-      --worth: #0b4f8c;
-      --filtered: #6b7280;
-      --accent: #0f766e;
+      --bg: #eef3f6; --card: #ffffff; --ink: #1b2430; --muted: #55606f; --line: #d8e0e8;
+      --urgent: #b42318; --worth: #0b4f8c; --filtered: #6b7280; --accent: #0f766e;
     }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif; color: var(--ink); background: linear-gradient(180deg, #dfeef2 0%, var(--bg) 35%); }
@@ -30,9 +23,7 @@
     .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
     .meta { display: flex; justify-content: space-between; align-items: center; }
     .chip { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; padding: 3px 8px; border-radius: 999px; color: white; }
-    .tier-urgent { background: var(--urgent); }
-    .tier-worth { background: var(--worth); }
-    .tier-filtered { background: var(--filtered); }
+    .tier-urgent { background: var(--urgent); } .tier-worth { background: var(--worth); } .tier-filtered { background: var(--filtered); }
     .confidence { color: var(--muted); font-size: 0.8rem; }
     h3 { margin: 0; font-size: 1rem; line-height: 1.3; }
     p { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.35; }
@@ -43,36 +34,21 @@
 <body>
   <div class="wrap">
     <h1>Adonis Client Feed Preview</h1>
-    <div class="stamp">Generated: 2026-06-03T16:34:01.881341+00:00</div>
+    <div class="stamp">Generated: 2026-06-04T15:56:01.638174+00:00</div>
     <section class="stats">
-      <div class="stat"><div class="k">Total Classified</div><div class="v">8</div></div>
-      <div class="stat"><div class="k">Urgent</div><div class="v">3</div></div>
-      <div class="stat"><div class="k">Worth Knowing</div><div class="v">5</div></div>
+      <div class="stat"><div class="k">Total Classified</div><div class="v">4</div></div>
+      <div class="stat"><div class="k">Urgent</div><div class="v">2</div></div>
+      <div class="stat"><div class="k">Worth Knowing</div><div class="v">2</div></div>
       <div class="stat"><div class="k">Filtered Out</div><div class="v">0</div></div>
     </section>
-    <section class="panel">
-      <strong>Top Sources</strong>
-      <ul>
-        <li>Crain&#x27;s New York: 1</li>
+    <section class="panel"><strong>Top Sources</strong><ul><li>Chief Healthcare Executive: 1</li>
 <li>Healthcare Finance News: 1</li>
-<li>Chief Healthcare Executive: 1</li>
-<li>CNBC: 1</li>
-<li>Fierce Healthcare: 1</li>
-<li>Modern Healthcare: 1</li>
-<li>The Boston Globe: 1</li>
-<li>Worcester Business Journal: 1</li>
-      </ul>
-    </section>
-    <section class="feed">
-      <article class="card"><div class="meta"><span class="chip tier-urgent">urgent</span><span class="confidence">conf 1.00</span></div><h3>DOJ sues NewYork-Presbyterian Hospital over alleged anticompetitive contracts</h3><p>The large New York City hospital system used its market power to restrict contacts with insurers, insulating it from price competition,.</p><div class="foot"><span>NewYork-Presbyterian</span><span>Healthcare Finance News</span><a class="source-link" href="https://www.healthcarefinancenews.com/news/doj-sues-newyork-presbyterian-hospital-over-alleged-anticompetitive-contracts" target="_blank" rel="noreferrer">Open source</a></div></article>
-<article class="card"><div class="meta"><span class="chip tier-urgent">urgent</span><span class="confidence">conf 1.00</span></div><h3>Epic&#x27;s lawsuit against Health Gorilla raises broader issues about the future of data sharing, industry executives say</h3><p>In the lawsuit, Epic and the providers allege that Health Gorilla and its clients exploited nationwide interoperability frameworks.</p><div class="foot"><span>UMass Memorial</span><span>Fierce Healthcare</span><a class="source-link" href="https://www.fiercehealthcare.com/health-tech/epics-lawsuit-against-health-gorilla-raises-broader-issues-about-future-data-sharing" target="_blank" rel="noreferrer">Open source</a></div></article>
-<article class="card"><div class="meta"><span class="chip tier-urgent">urgent</span><span class="confidence">conf 1.00</span></div><h3>UMass Memorial Health ends some services as Medicaid cuts loom</h3><p>The Worcester safety-net hospital has already shut several programs, including two primary care clinics and a substance use treatment center.</p><div class="foot"><span>UMass Memorial</span><span>The Boston Globe</span><a class="source-link" href="https://www.bostonglobe.com/2025/08/14/business/umass-memorial-psych-program-closure/" target="_blank" rel="noreferrer">Open source</a></div></article>
-<article class="card"><div class="meta"><span class="chip tier-worth">worth_knowing</span><span class="confidence">conf 0.90</span></div><h3>How five AI startups are strategizing around Epic’s big push</h3><p>Artificial intelligence-focused companies that have made inroads among health systems suddenly find themselves with a new competitor: Epic.</p><div class="foot"><span>UMass Memorial</span><span>Modern Healthcare</span><a class="source-link" href="http://www.modernhealthcare.com/health-tech/ai/mh-epic-ai-tools-abridge-innovaccer-ambience/" target="_blank" rel="noreferrer">Open source</a></div></article>
-<article class="card"><div class="meta"><span class="chip tier-worth">worth_knowing</span><span class="confidence">conf 0.75</span></div><h3>NewYork-Presbyterian CEO is retiring, successor named</h3><p>Dr.</p><div class="foot"><span>NewYork-Presbyterian</span><span>Chief Healthcare Executive</span><a class="source-link" href="https://www.chiefhealthcareexecutive.com/view/newyork-presbyterian-ceo-is-retiring-successor-named" target="_blank" rel="noreferrer">Open source</a></div></article>
-<article class="card"><div class="meta"><span class="chip tier-worth">worth_knowing</span><span class="confidence">conf 0.75</span></div><h3>Bill Gates meets Willy Wonka: How Epic&#x27;s 82-year-old billionaire CEO, Judy Faulkner, built her software factory</h3><p>Judy Faulkner has run Epic Systems for 46 years and has a detailed plan for what happens when she&#x27;s no longer the boss.</p><div class="foot"><span>UMass Memorial</span><span>CNBC</span><a class="source-link" href="https://www.cnbc.com/2025/08/16/how-epics-82-year-old-ceo-judy-faulkner-built-her-software-factory.html" target="_blank" rel="noreferrer">Open source</a></div></article>
-<article class="card"><div class="meta"><span class="chip tier-worth">worth_knowing</span><span class="confidence">conf 0.75</span></div><h3>Six of 10 Central Mass. hospitals were profitable in fiscal 2024</h3><p>While the profitability of hospitals throughout the commonwealth varied widely in fiscal 2024, Athol Hospital has risen to the top as the.</p><div class="foot"><span>UMass Memorial</span><span>Worcester Business Journal</span><a class="source-link" href="https://wbjournal.com/article/six-of-10-central-mass-hospitals-were-profitable-in-fiscal-2024/" target="_blank" rel="noreferrer">Open source</a></div></article>
-<article class="card"><div class="meta"><span class="chip tier-worth">worth_knowing</span><span class="confidence">conf 0.63</span></div><h3>New York-Presbyterian CEO Steven Corwin to step down</h3><p>Corwin was named CEO of the health system in 2011.</p><div class="foot"><span>NewYork-Presbyterian</span><span>Crain&#x27;s New York</span><a class="source-link" href="https://www.crainsnewyork.com/health-pulse/new-york-presbyterian-ceo-steven-corwin-announces-resignation/" target="_blank" rel="noreferrer">Open source</a></div></article>
-    </section>
+<li>Healthcare Dive: 1</li>
+<li>Worcester Telegram: 1</li></ul></section>
+    <section class="feed"><article class="card"><div class="meta"><span class="chip tier-urgent">Urgent</span><span class="confidence">conf 1.00</span></div><h3>DOJ sues NewYork-Presbyterian Hospital over alleged anticompetitive contracts</h3><p>The Department of Justice&#x27;s Antitrust Division has filed a civil lawsuit challenging NewYork-Presbyterian&#x27;s contract restrictions that the.</p><div class="foot"><span>NewYork-Presbyterian</span><span>Healthcare Finance News</span><a class="source-link" href="https://www.healthcarefinancenews.com/news/doj-sues-newyork-presbyterian-hospital-over-alleged-anticompetitive-contracts" target="_blank" rel="noreferrer">Open source</a></div></article>
+<article class="card"><div class="meta"><span class="chip tier-urgent">Urgent</span><span class="confidence">conf 1.00</span></div><h3>Justice Department sues NewYork-Presbyterian in second hospital antitrust case this year</h3><p>Federal regulators accused the health system of using its market power to force insurers into “all-or-nothing” contracts.</p><div class="foot"><span>NewYork-Presbyterian</span><span>Healthcare Dive</span><a class="source-link" href="https://www.healthcaredive.com/news/justice-department-sues-newyork-presbyterian-in-second-hospital-antitrust-c/815891/" target="_blank" rel="noreferrer">Open source</a></div></article>
+<article class="card"><div class="meta"><span class="chip tier-worth">Worth Knowing</span><span class="confidence">conf 0.75</span></div><h3>NewYork-Presbyterian CEO is retiring, successor named</h3><p>Dr.</p><div class="foot"><span>NewYork-Presbyterian</span><span>Chief Healthcare Executive</span><a class="source-link" href="https://www.chiefhealthcareexecutive.com/view/newyork-presbyterian-ceo-is-retiring-successor-named" target="_blank" rel="noreferrer">Open source</a></div></article>
+<article class="card"><div class="meta"><span class="chip tier-worth">Worth Knowing</span><span class="confidence">conf 0.75</span></div><h3>Trump&#x27;s &#x27;big beautiful bill&#x27; creates potential dilemma for UMass Memorial Health leader</h3><p>Dr.</p><div class="foot"><span>UMass Memorial</span><span>Worcester Telegram</span><a class="source-link" href="https://www.telegram.com/story/news/2025/07/03/trumps-big-beautiful-bill-creates-dilemma-for-umass-memorial-health/84447201007/" target="_blank" rel="noreferrer">Open source</a></div></article></section>
   </div>
 </body>
 </html>

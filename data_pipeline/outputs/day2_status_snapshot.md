@@ -1,22 +1,22 @@
 # Day 2 Status Snapshot
 
-Generated: 2026-06-03T16:06:41.027542+00:00
+Generated: 2026-06-04T15:56:01.637211+00:00
 
 ## Pipeline
-- signals_new: 10
-- signals_skipped: 10
-- rules_engine_hits: 6
-- duration_ms: 3675
+- signals_new: 4
+- signals_skipped: 16
+- rules_engine_hits: 2
+- duration_ms: 3758
 
 ## Delivery
 - delivery_enabled: False
 - delivered: False
 
 ## Contact Lead QA
-- lead_count: 5
-- recommended_for_manual_review_count: 3
+- lead_count: 3
+- recommended_for_manual_review_count: 1
 - rejected_matches_count: 2
-- match_bucket_counts: high=3, medium=0, low=0, missing=2
+- match_bucket_counts: high=1, medium=0, low=0, missing=2
 
 ## Artifacts
 - review_markdown: outputs/day2_contact_leads_review.md

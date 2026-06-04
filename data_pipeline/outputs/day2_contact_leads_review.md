@@ -12,5 +12,5 @@
 
 | Name | Hospital | Score | Reason | Candidate URL |
 | --- | --- | --- | --- | --- |
-| Steven Corwin | NewYork-Presbyterian | 0.05 | below_minimum_threshold=0.20 | [profile](https://www.linkedin.com/in/juan-garcia-43530286) |
+| Steven Corwin | NewYork-Presbyterian | 0.05 | below_minimum_threshold=0.20 | [profile](https://www.linkedin.com/in/tithi-adhikary-ab1719126) |
 | Judy Faulkner | UMass Memorial | 0.05 | below_minimum_threshold=0.20 | [profile](https://www.linkedin.com/in/kjf4059) |
