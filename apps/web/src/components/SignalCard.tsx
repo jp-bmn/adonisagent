@@ -9,6 +9,7 @@ interface SignalCardProps {
 
 export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
   const isUrgent = signal.tier === 'urgent';
+  // worth_knowing = standard digest signal; filtered_out should not be rendered
   const label = SIGNAL_TYPE_LABELS[signal.signal_type] ?? signal.signal_type;
   const headline = signal.title ?? label;
   const date = signal.published_date ?? signal.created_at;
@@ -121,7 +122,7 @@ export const PREVIEW_SIGNALS: ApiSignal[] = [
     id: 'preview-3',
     hospital_id: 'f3ab9c05-4b2b-42e9-9653-2e9dc8f98476',
     signal_type: 'financial_event',
-    tier: 'standard',
+    tier: 'worth_knowing',
     confidence_score: 68,
     review_status: 'approved',
     title: 'UMass Memorial reports $47M operating loss in FY2025',

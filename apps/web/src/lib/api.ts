@@ -14,7 +14,7 @@ const DEFAULT_USER_ID = 'df7c14fd-cde3-4025-be00-ca42f4d31741';
 // Types — derived from live API responses (backend uses snake_case field names)
 // ---------------------------------------------------------------------------
 
-export type SignalTier = 'urgent' | 'standard' | 'filtered_out';
+export type SignalTier = 'urgent' | 'worth_knowing' | 'filtered_out';
 
 export type SignalType =
   | 'ai_adoption_outside_rcm'
