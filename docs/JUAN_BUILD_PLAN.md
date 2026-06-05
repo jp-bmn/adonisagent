@@ -1,4 +1,5 @@
 # Juan's Build Plan — Frontend Lead
+
 ## June 3 → June 24 · Demo Day at Blackstone
 
 **Sources:** PRD (May 2026) + PRD Addendum v1 (June 2 midpoint). Where they conflict, addendum wins.
@@ -55,10 +56,11 @@ state · `/alerts` and `/export` are literal placeholder divs · no auth · no t
     - Headline + 2–3 sentence summary + rationale
     - Source link (opens in new tab), hospital name tag, `detected_at` date
     - Category label (e.g. "Leadership hire", "Epic event")
-    
+
     Seed the component file with 2–3 hardcoded sample signals in a `__preview__` block
     at the bottom so it renders without a DB connection during development.
     Export through `src/components/index.ts`.
+
   - **Why here:** Everything downstream depends on this component — feed, alerts, profile.
     Build it first so the demo can show real-looking UI even if Michael's scraper hasn't
     run yet.
@@ -73,8 +75,9 @@ state · `/alerts` and `/export` are literal placeholder divs · no auth · no t
     Create `apps/web/src/lib/supabase.ts` with:
     - `createServerClient()` — for Server Components and API routes
     - `createBrowserClient()` — for any future client components that need it
-    
+
     Copy `.env.example` → `.env.local` and fill in values from Michael.
+
   - **Why here:** Every DB-wired page below depends on this. Cannot wire a single
     real query without it.
   - **Needs from Michael (ask now):**
@@ -94,9 +97,10 @@ state · `/alerts` and `/export` are literal placeholder divs · no auth · no t
     - "Updates this week" — standard signals, same window
     - "Accounts monitored" — count of hospitals
     - "Sources scanned" — count from most recent `agent_runs` row
-    
+
     Show "Last refreshed" timestamp from the most recent `agent_runs` entry.
     Keep the seed-data empty state for when the DB returns zero rows.
+
   - **Why here:** This is the first thing Reed sees. Real signals = demo is 80% won.
   - **Needs from Michael:** T-03 complete + at least one scrape cycle run with signals
     in the DB.
@@ -110,8 +114,9 @@ state · `/alerts` and `/export` are literal placeholder divs · no auth · no t
     `SEED_HOSPITALS`. Add two new columns to the table:
     - "Signals (7d)" — count of signals for that hospital in the past 7 days
     - An urgency dot (red) if any urgent signal exists in the past 7 days
-    
+
     Keep `SEED_HOSPITALS` as the fallback if the DB fetch errors.
+
   - **Why here:** Reed will navigate here from the feed. Real counts make it credible.
   - **Needs from Michael:** T-03 complete.
   - **Estimate:** 2 h
@@ -155,6 +160,7 @@ state · `/alerts` and `/export` are literal placeholder divs · no auth · no t
     Use real source URLs from Becker's or hospital newsrooms. Match the exact
     `Signal` schema from `packages/shared/src/types.ts`. Mark `delivered_in_digest`
     and `alert_fired` as `false`.
+
   - **Why:** Reed cannot see all-empty states. The scraper is Michael's pipeline with
     multiple moving parts — treat it as a bonus, not the plan.
   - **Needs from Michael:** T-03 complete (Supabase provisioned + env vars shared).
@@ -190,11 +196,12 @@ state · `/alerts` and `/export` are literal placeholder divs · no auth · no t
     `Jeff` · `David`. Implement as a URL search param (`?ae=michael`) so it works
     with server components and is shareable. Filter calls `listHospitalsForUser()`
     and scopes `listSignals()` to those hospital IDs.
-    
+
     **Territory data note:** Danielle is OOO until June 18 — territory assignments
     (which hospitals → Michael/Jeff/David) arrive after the feature freeze. Build the
     UI and filtering logic now using placeholder hospital assignments so the UI is
     fully functional. Wire real assignments when Danielle delivers during polish week.
+
   - **Needs from Michael:** `users` table + `user_hospitals` junction populated
     (even with placeholder territory data). Ask Michael to seed placeholder assignments
     by June 10.
@@ -270,9 +277,9 @@ state · `/alerts` and `/export` are literal placeholder divs · no auth · no t
     Each assistant message renders inline source citations as clickable links.
 
     **API route:** `app/api/chat/route.ts` — calls the Anthropic SDK with streaming
-    + tool use. Pass the logged-in user's role and territory in the system prompt on
-    every request so the assistant naturally scopes to what they should see (admin
-    sees everything, an AE sees only their hospitals).
+    - tool use. Pass the logged-in user's role and territory in the system prompt on
+      every request so the assistant naturally scopes to what they should see (admin
+      sees everything, an AE sees only their hospitals).
 
     **Tools the assistant can call** (each tool calls the existing DB query helpers
     in `packages/db/src/queries.ts`):
@@ -343,16 +350,16 @@ state · `/alerts` and `/export` are literal placeholder divs · no auth · no t
 
 ## Blockers to surface to the team now
 
-| What I need | From | Needed by | Blocks |
-|-------------|------|-----------|--------|
-| SUPABASE_URL + SUPABASE_ANON_KEY | Michael | ASAP | T-03 and everything after |
-| Schema + seed SQL deployed to Supabase | Michael | ASAP | T-03 |
-| At least one scrape cycle with real signals | Michael | June 9 | T-04, T-06 |
-| `users` + `user_hospitals` seeded (placeholders ok) | Michael | June 10 | T-08, T-11 |
-| Supabase Auth configured + 4 user accounts | Michael | June 10 | T-11 |
-| Contact ingestion running | Michael | June 10 | T-09 |
-| `ANTHROPIC_API_KEY` in server environment | Michael | June 10 | T-13 |
-| Real territory assignments (Michael/Jeff/David) | Danielle (via Joel) | June 18 | T-16 |
+| What I need                                         | From                | Needed by | Blocks                    |
+| --------------------------------------------------- | ------------------- | --------- | ------------------------- |
+| SUPABASE_URL + SUPABASE_ANON_KEY                    | Michael             | ASAP      | T-03 and everything after |
+| Schema + seed SQL deployed to Supabase              | Michael             | ASAP      | T-03                      |
+| At least one scrape cycle with real signals         | Michael             | June 9    | T-04, T-06                |
+| `users` + `user_hospitals` seeded (placeholders ok) | Michael             | June 10   | T-08, T-11                |
+| Supabase Auth configured + 4 user accounts          | Michael             | June 10   | T-11                      |
+| Contact ingestion running                           | Michael             | June 10   | T-09                      |
+| `ANTHROPIC_API_KEY` in server environment           | Michael             | June 10   | T-13                      |
+| Real territory assignments (Michael/Jeff/David)     | Danielle (via Joel) | June 18   | T-16                      |
 
 ---
 
@@ -360,14 +367,14 @@ state · `/alerts` and `/export` are literal placeholder divs · no auth · no t
 
 Reed is reviewing a working dashboard. These are the only tasks that **must** look real:
 
-| Task | Why it's required |
-|------|-------------------|
-| T-01 Nav active state | Without it the sidebar looks broken |
-| T-02 Signal card | The visual centerpiece — everything else is decoration |
-| T-03 Supabase client | Prerequisite for all live data |
-| T-04 Signal feed live | First page Reed sees |
-| T-05 Hospitals list live | He will click here |
-| T-06 Hospital profile live | He will drill into at least one hospital |
+| Task                       | Why it's required                                      |
+| -------------------------- | ------------------------------------------------------ |
+| T-01 Nav active state      | Without it the sidebar looks broken                    |
+| T-02 Signal card           | The visual centerpiece — everything else is decoration |
+| T-03 Supabase client       | Prerequisite for all live data                         |
+| T-04 Signal feed live      | First page Reed sees                                   |
+| T-05 Hospitals list live   | He will click here                                     |
+| T-06 Hospital profile live | He will drill into at least one hospital               |
 
 Territory filter, auth, alerts, export, contacts polish, timeline — all can be shown
 as "shipping this week" during the Reed demo. The signal feed and one hospital
@@ -384,4 +391,4 @@ heard "Copilot" as Microsoft Copilot (addendum §4 naming note).
 
 ---
 
-*Updated June 2, 2026 · Juan Franco · incorporates PRD Addendum v1*
+_Updated June 2, 2026 · Juan Franco · incorporates PRD Addendum v1_
