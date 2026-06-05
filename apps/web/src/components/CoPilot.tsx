@@ -1,24 +1,18 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { fetchSignals } from '@/lib/api';
 
 interface Message {
   role: 'user' | 'assistant';
   text: string;
 }
 
-type ClaudeModel = 'claude-haiku-4-5-20251001' | 'claude-sonnet-4-6' | 'claude-opus-4-7';
-
-const MODELS: { id: ClaudeModel; label: string; note: string }[] = [
-  { id: 'claude-haiku-4-5-20251001', label: 'Haiku', note: 'Fast · low cost' },
-  { id: 'claude-sonnet-4-6', label: 'Sonnet', note: 'Balanced' },
-  { id: 'claude-opus-4-7', label: 'Opus', note: 'Most capable' },
-];
-
 const STORAGE_KEY = 'adonis-copilot-history';
-const MODEL_KEY = 'adonis-copilot-model';
-const MAX_STORED = 200; // messages kept in localStorage (full scrollable history)
-const MAX_CONTEXT = 40; // messages sent to Claude per request (working memory)
+const PILL_KEY = 'adonis-copilot-pill-shown';
+const OPENED_KEY = 'adonis-copilot-opened';
+const MAX_STORED = 200;
+const MAX_CONTEXT = 40;
 
 const STUB_REPLY =
   "I can answer questions about your accounts and recent signals. Try asking: 'What happened with NYP this week?' or 'Summarize urgent signals.'";
@@ -40,27 +34,20 @@ function saveMessages(msgs: Message[]) {
   }
 }
 
-function loadModel(): ClaudeModel {
-  try {
-    const saved = localStorage.getItem(MODEL_KEY) as ClaudeModel | null;
-    return MODELS.find((m) => m.id === saved)?.id ?? 'claude-sonnet-4-6';
-  } catch {
-    return 'claude-sonnet-4-6';
-  }
-}
-
 export default function CoPilot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [model, setModel] = useState<ClaudeModel>('claude-sonnet-4-6');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showModelPicker, setShowModelPicker] = useState(false);
+  const [showPill, setShowPill] = useState(false);
+  const [pillSlideIn, setPillSlideIn] = useState(false);
+  const [pulsing, setPulsing] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const pillDismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setMessages(loadMessages());
-    setModel(loadModel());
   }, []);
 
   useEffect(() => {
@@ -71,14 +58,48 @@ export default function CoPilot() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  function handleModelChange(m: ClaudeModel) {
-    setModel(m);
-    setShowModelPicker(false);
-    try {
-      localStorage.setItem(MODEL_KEY, m);
-    } catch {
-      // ignore
-    }
+  // Discoverability pill — show once per session
+  useEffect(() => {
+    if (sessionStorage.getItem(PILL_KEY)) return;
+    const showTimer = setTimeout(() => {
+      setShowPill(true);
+      setTimeout(() => setPillSlideIn(true), 50);
+      pillDismissTimer.current = setTimeout(() => {
+        dismissPill();
+        setPulsing(true);
+      }, 6000);
+    }, 800);
+    return () => clearTimeout(showTimer);
+  }, []);
+
+  // Unread dot — urgent signals from the last 24h
+  useEffect(() => {
+    if (sessionStorage.getItem(OPENED_KEY)) return;
+    fetchSignals(undefined, { tier: 'urgent' })
+      .then((signals) => {
+        const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+        const recent = signals.filter((s) => {
+          const d = s.published_date ?? s.created_at;
+          return new Date(d).getTime() > cutoff;
+        });
+        setHasUnread(recent.length > 0);
+      })
+      .catch(() => {});
+  }, []);
+
+  function dismissPill() {
+    setPillSlideIn(false);
+    setTimeout(() => setShowPill(false), 300);
+    sessionStorage.setItem(PILL_KEY, '1');
+    if (pillDismissTimer.current) clearTimeout(pillDismissTimer.current);
+  }
+
+  function handleBubbleClick() {
+    if (showPill) dismissPill();
+    setPulsing(false);
+    setHasUnread(false);
+    sessionStorage.setItem(OPENED_KEY, '1');
+    setOpen((o) => !o);
   }
 
   function clearHistory() {
@@ -95,14 +116,12 @@ export default function CoPilot() {
     setLoading(true);
     // TODO T-13: replace stub with real API call.
     // Send only the last MAX_CONTEXT messages so API calls stay fast and cheap.
-    // The user sees the full history in the UI; Claude reasons on recent context only.
     //
     // const res = await fetch('/api/copilot', {
     //   method: 'POST',
     //   headers: { 'Content-Type': 'application/json' },
     //   body: JSON.stringify({
     //     message: text,
-    //     model,
     //     history: updated.slice(-MAX_CONTEXT),
     //   }),
     // });
@@ -119,12 +138,88 @@ export default function CoPilot() {
     }
   }
 
-  const currentModel = MODELS.find((m) => m.id === model)!;
-
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+    <>
+      {/* Keyframes for pulse ring */}
+      <style>{`
+        @keyframes copilot-ring {
+          0% { box-shadow: 0 0 0 0 rgba(239,239,200,0.5); }
+          70% { box-shadow: 0 0 0 14px rgba(239,239,200,0); }
+          100% { box-shadow: 0 0 0 0 rgba(239,239,200,0); }
+        }
+        .copilot-pulse { animation: copilot-ring 1.2s ease-out; }
+      `}</style>
+
+      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
+        {/* Discoverability pill */}
+        {showPill && (
+          <div
+            style={{
+              transition: 'opacity 300ms, transform 300ms',
+              opacity: pillSlideIn ? 1 : 0,
+              transform: pillSlideIn ? 'translateX(0)' : 'translateX(12px)',
+              background: 'white',
+              color: '#0F3D3E',
+              fontSize: '13px',
+              padding: '8px 14px',
+              borderRadius: '20px',
+              boxShadow: '0 4px 14px rgba(15,61,62,0.18)',
+              whiteSpace: 'nowrap',
+              fontWeight: 500,
+            }}
+          >
+            Ask about any signal
+          </div>
+        )}
+
+        {/* Bubble */}
+        <div className="relative flex-none">
+          {/* Pulse ring */}
+          {pulsing && !open && (
+            <span
+              key={Date.now()}
+              className="absolute inset-0 rounded-full copilot-pulse pointer-events-none"
+            />
+          )}
+
+          {/* Unread dot */}
+          {hasUnread && !open && (
+            <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white z-10" />
+          )}
+
+          <button
+            onClick={handleBubbleClick}
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              background: '#0F3D3E',
+              color: '#EFEFC8',
+              boxShadow: '0 4px 14px rgba(15,61,62,0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '22px',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'background 150ms',
+            }}
+            title="Adonis Intel co-pilot"
+          >
+            {open ? (
+              <span style={{ fontSize: 24, lineHeight: 1 }}>×</span>
+            ) : (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Chat panel — anchored above the bubble */}
       {open && (
-        <div className="w-80 bg-white border border-line rounded-xl shadow-xl flex flex-col overflow-hidden">
+        <div className="fixed bottom-24 right-6 z-50 w-80 bg-white border border-line rounded-xl shadow-xl flex flex-col overflow-hidden">
           {/* Header */}
           <div className="bg-navy-900 px-4 py-3 flex items-center justify-between">
             <div>
@@ -150,33 +245,6 @@ export default function CoPilot() {
             </div>
           </div>
 
-          {/* Model picker */}
-          <div className="bg-navy-900 border-t border-white/10 px-4 pb-2 relative">
-            <button
-              onClick={() => setShowModelPicker((v) => !v)}
-              className="text-[10px] font-mono text-slate-400 hover:text-white transition flex items-center gap-1"
-            >
-              <span className="text-slate-500">model:</span> {currentModel.label} ·{' '}
-              {currentModel.note} ▾
-            </button>
-            {showModelPicker && (
-              <div className="absolute left-4 top-6 bg-white border border-line rounded-lg shadow-lg z-10 overflow-hidden">
-                {MODELS.map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => handleModelChange(m.id)}
-                    className={`w-full text-left px-4 py-2.5 text-xs flex items-center justify-between gap-6 hover:bg-paper transition ${
-                      m.id === model ? 'font-semibold text-ink' : 'text-slate-600'
-                    }`}
-                  >
-                    <span>{m.label}</span>
-                    <span className="text-slate-400 font-normal">{m.note}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-72 min-h-[8rem]">
             {messages.length === 0 && (
@@ -185,10 +253,7 @@ export default function CoPilot() {
               </p>
             )}
             {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-[85%] text-xs px-3 py-2 rounded-xl leading-relaxed ${
                     m.role === 'user'
@@ -229,14 +294,6 @@ export default function CoPilot() {
           </div>
         </div>
       )}
-
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="w-12 h-12 rounded-full bg-navy-900 text-white shadow-xl flex items-center justify-center hover:bg-navy-700 transition text-lg"
-        title="Adonis Intel co-pilot"
-      >
-        {open ? '×' : '💬'}
-      </button>
-    </div>
+    </>
   );
 }

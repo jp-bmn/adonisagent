@@ -31,7 +31,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
             {hospital.name[0]}
           </div>
           <div className="flex-1">
-            <h1 className="font-serif text-2xl font-semibold text-ink leading-tight">
+            <h1 className="font-serif text-2xl font-semibold text-brand leading-tight">
               {hospital.name}
             </h1>
             <div className="text-sm text-slate-500 mt-1 flex items-center gap-3 flex-wrap">

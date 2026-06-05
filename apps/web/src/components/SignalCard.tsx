@@ -15,13 +15,17 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
   const date = signal.published_date ?? signal.created_at;
 
   return (
-    <div className="bg-white border border-line rounded-xl p-5 space-y-3">
+    <div
+      className={`bg-white border border-line p-5 space-y-3 ${
+        isUrgent ? 'border-l-[3px] border-l-urgent rounded-r-xl' : 'rounded-xl'
+      }`}
+    >
       {/* Top row: tier badge + category label + hospital tag */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <span
             className={`text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded font-semibold ${
-              isUrgent ? 'bg-urgentBg text-urgent' : 'bg-standard/10 text-standard'
+              isUrgent ? 'bg-urgentBg text-urgent' : 'bg-brandBg text-brand'
             }`}
           >
             {isUrgent ? 'Urgent' : 'Update'}
@@ -34,7 +38,7 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
       </div>
 
       {/* Headline */}
-      <p className="font-serif text-base font-semibold text-ink leading-snug">{headline}</p>
+      <p className="font-serif text-base font-semibold text-brand leading-snug">{headline}</p>
 
       {/* Summary */}
       {signal.summary && <p className="text-sm text-slate-600 leading-relaxed">{signal.summary}</p>}
@@ -45,7 +49,7 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
           href={signal.source_url}
           target="_blank"
           rel="noreferrer"
-          className="text-xs text-accent hover:underline truncate max-w-[60%]"
+          className="text-xs text-brand hover:underline truncate max-w-[60%]"
         >
           {signal.source_name ?? sourceHostname(signal.source_url)}
         </a>

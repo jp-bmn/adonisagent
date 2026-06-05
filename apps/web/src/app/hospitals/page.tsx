@@ -7,7 +7,7 @@ export default async function HospitalsPage() {
   return (
     <div className="px-8 py-7">
       <header className="mb-6">
-        <h1 className="font-serif text-2xl font-semibold text-ink">Hospitals</h1>
+        <h1 className="font-serif text-2xl font-semibold text-brand">Hospitals</h1>
         <p className="text-sm text-slate-500 mt-1">{hospitals.length} accounts monitored</p>
       </header>
 
