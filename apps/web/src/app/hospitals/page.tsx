@@ -6,9 +6,7 @@ export default function HospitalsPage() {
     <div className="px-8 py-7">
       <header className="mb-6">
         <h1 className="font-serif text-2xl font-semibold text-ink">Hospitals</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          {SEED_HOSPITALS.length} accounts monitored
-        </p>
+        <p className="text-sm text-slate-500 mt-1">{SEED_HOSPITALS.length} accounts monitored</p>
       </header>
 
       <div className="bg-white border border-line rounded-xl overflow-hidden">

@@ -30,12 +30,14 @@ docs/            PRD, architecture, this file, roadmap
 ```
 
 ### When you create a new file
+
 - Place it under the right workspace (`apps/*` or `packages/*`), not at root
 - Use TypeScript (`.ts` or `.tsx`)
 - Export through the package's `src/index.ts` so consumers import from `@adonis/<pkg>`
 - Don't create `index.tsx` files in random places
 
 ### When you edit shared types
+
 - Edit `packages/shared/src/types.ts`
 - If you add a new SignalCategory, also update `packages/shared/src/signals.ts` (`SIGNAL_CONFIG`)
 - If you change the DB schema, update both `packages/db/schema.sql` AND the matching type
@@ -98,6 +100,7 @@ The fuller list (target ~30–50) arrives from Reed before the midpoint. The see
 ## What success looks like for an agent edit
 
 A change you make should:
+
 - Compile (`pnpm typecheck` passes)
 - Lint clean (`pnpm lint` passes)
 - Match the existing code style (Prettier handles formatting)
