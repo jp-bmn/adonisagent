@@ -21,9 +21,7 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
         <div className="flex items-center gap-2">
           <span
             className={`text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded font-semibold ${
-              isUrgent
-                ? 'bg-urgentBg text-urgent'
-                : 'bg-standard/10 text-standard'
+              isUrgent ? 'bg-urgentBg text-urgent' : 'bg-standard/10 text-standard'
             }`}
           >
             {isUrgent ? 'Urgent' : 'Update'}
@@ -36,14 +34,10 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
       </div>
 
       {/* Headline */}
-      <p className="font-serif text-base font-semibold text-ink leading-snug">
-        {headline}
-      </p>
+      <p className="font-serif text-base font-semibold text-ink leading-snug">{headline}</p>
 
       {/* Summary */}
-      {signal.summary && (
-        <p className="text-sm text-slate-600 leading-relaxed">{signal.summary}</p>
-      )}
+      {signal.summary && <p className="text-sm text-slate-600 leading-relaxed">{signal.summary}</p>}
 
       {/* Footer: source + date */}
       <div className="flex items-center justify-between gap-3 pt-1">
@@ -55,9 +49,7 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
         >
           {signal.source_name ?? sourceHostname(signal.source_url)}
         </a>
-        <span className="text-xs text-slate-400 flex-none">
-          {formatDate(date)}
-        </span>
+        <span className="text-xs text-slate-400 flex-none">{formatDate(date)}</span>
       </div>
     </div>
   );

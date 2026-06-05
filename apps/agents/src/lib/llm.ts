@@ -86,10 +86,7 @@ Score guidance: 80-100 urgent, 40-79 standard, 0-39 noise.
 
 Be conservative: when in doubt, score lower. False positives erode rep trust faster than false negatives.`;
 
-export async function classifyWithLLM(
-  hospital: Hospital,
-  item: RawItem
-): Promise<Classification> {
+export async function classifyWithLLM(hospital: Hospital, item: RawItem): Promise<Classification> {
   if (!client) {
     throw new Error('ANTHROPIC_API_KEY not configured');
   }
@@ -111,11 +108,13 @@ Classify this item.`;
     messages: [{ role: 'user', content: userPrompt }],
   });
 
-  const text =
-    resp.content[0]?.type === 'text' ? resp.content[0].text : '';
+  const text = resp.content[0]?.type === 'text' ? resp.content[0].text : '';
 
   // Strip ```json fences if Claude wrapped the response
-  const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+  const cleaned = text
+    .replace(/```json\s*/g, '')
+    .replace(/```\s*/g, '')
+    .trim();
 
   let parsed;
   try {

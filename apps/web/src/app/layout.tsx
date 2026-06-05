@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
+import CoPilot from '@/components/CoPilot';
 
 export const metadata: Metadata = {
   title: 'Adonis Account Intelligence',
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Sidebar />
           <main className="flex-1">{children}</main>
         </div>
+        <CoPilot />
       </body>
     </html>
   );
@@ -36,4 +38,3 @@ function Sidebar() {
     </aside>
   );
 }
-

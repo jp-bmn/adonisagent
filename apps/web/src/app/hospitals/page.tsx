@@ -38,7 +38,10 @@ export default async function HospitalsPage() {
                   </Link>
                 </td>
                 <td className="px-5 py-4 text-sm text-slate-600">
-                  {h.ae_users.filter((u) => !u.is_admin).map((u) => u.name).join(', ') || '—'}
+                  {h.ae_users
+                    .filter((u) => !u.is_admin)
+                    .map((u) => u.name)
+                    .join(', ') || '—'}
                 </td>
                 <td className="px-5 py-4 text-sm text-slate-500">{h.division_note ?? '—'}</td>
               </tr>

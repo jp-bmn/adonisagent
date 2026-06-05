@@ -1,13 +1,30 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { fetchSignals, fetchHospitals } from '@/lib/api';
-import { SignalCard } from '@/components';
+import { SignalCard, TerritoryFilter } from '@/components';
 
-export default async function HomePage() {
-  const [signals, hospitals] = await Promise.all([fetchSignals(), fetchHospitals()]);
+interface PageProps {
+  searchParams: Promise<{ ae_id?: string }>;
+}
+
+export default async function HomePage({ searchParams }: PageProps) {
+  const { ae_id } = await searchParams;
+  const [signals, hospitals] = await Promise.all([
+    fetchSignals(undefined, { ae_id }),
+    fetchHospitals(),
+  ]);
 
   const hospitalMap = Object.fromEntries(hospitals.map((h) => [h.id, h.name]));
   const urgentCount = signals.filter((s) => s.tier === 'urgent').length;
   const worthKnowingCount = signals.filter((s) => s.tier === 'worth_knowing').length;
+
+  const aeMap = new Map<string, string>();
+  hospitals.forEach((h) =>
+    h.ae_users.forEach((u) => {
+      if (!u.is_admin) aeMap.set(u.id, u.name);
+    })
+  );
+  const aes = Array.from(aeMap.entries()).map(([id, name]) => ({ id, name }));
 
   return (
     <div className="px-8 py-7">
@@ -18,10 +35,9 @@ export default async function HomePage() {
             Live · agents run Mon/Wed/Fri · {signals.length} signals
           </p>
         </div>
-        <div className="bg-white border border-line rounded-lg px-3 py-1.5 text-xs font-mono text-slate-600">
-          Territory: <strong className="text-ink">Admin (Danielle)</strong> · {hospitals.length}{' '}
-          accounts
-        </div>
+        <Suspense>
+          <TerritoryFilter aes={aes} />
+        </Suspense>
       </header>
 
       <div className="grid grid-cols-4 gap-3 mb-6">
@@ -60,15 +76,7 @@ export default async function HomePage() {
   );
 }
 
-function Kpi({
-  value,
-  label,
-  tone,
-}: {
-  value: string | number;
-  label: string;
-  tone?: 'urgent';
-}) {
+function Kpi({ value, label, tone }: { value: string | number; label: string; tone?: 'urgent' }) {
   return (
     <div className="bg-white border border-line rounded-xl p-4">
       <div

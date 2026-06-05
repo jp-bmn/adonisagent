@@ -25,6 +25,7 @@ Week-by-week plan from kickoff to Demo Day. Updated when scope changes.
 **Goal:** Live demo of Phase 1; align on Phase 2 scope; confirm full hospital list; co-pilot feasibility decision.
 
 Bring:
+
 - Working dashboard URL
 - Real Monday digest example (from the prior week's data)
 - 1-page status doc with what's open
@@ -66,6 +67,7 @@ Bring:
 ## After Demo Day
 
 If Adonis wants to keep using it:
+
 - Discuss handoff with Reed
 - Document deployment + operating runbook
 - Plan transition to their security review for any future internal integration
@@ -79,10 +81,10 @@ If Adonis wants to keep using it:
 
 ## Risks
 
-| Risk | Mitigation |
-|---|---|
+| Risk                                          | Mitigation                                                          |
+| --------------------------------------------- | ------------------------------------------------------------------- |
 | Source scraping breaks (sites change layouts) | Multiple source paths per hospital; LLM tolerant of input variation |
-| LLM cost overrun | Cheap-first filtering before LLM call; cap at ~75 calls/week |
-| Signal quality too low | Mid-build Danielle review week 2; tune scoring before midpoint |
-| AE territory data slips | Build with placeholder territories; swap when delivered |
-| One teammate blocked / unavailable | Pair on critical-path items; document everything; keep PRs small |
+| LLM cost overrun                              | Cheap-first filtering before LLM call; cap at ~75 calls/week        |
+| Signal quality too low                        | Mid-build Danielle review week 2; tune scoring before midpoint      |
+| AE territory data slips                       | Build with placeholder territories; swap when delivered             |
+| One teammate blocked / unavailable            | Pair on critical-path items; document everything; keep PRs small    |

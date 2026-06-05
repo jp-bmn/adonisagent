@@ -10,10 +10,7 @@ interface PageProps {
 export default async function HospitalProfilePage({ params }: PageProps) {
   const { id } = await params;
 
-  const [hospitals, signals] = await Promise.all([
-    fetchHospitals(),
-    fetchHospitalSignals(id),
-  ]);
+  const [hospitals, signals] = await Promise.all([fetchHospitals(), fetchHospitalSignals(id)]);
 
   const hospital = hospitals.find((h) => h.id === id);
   if (!hospital) return notFound();

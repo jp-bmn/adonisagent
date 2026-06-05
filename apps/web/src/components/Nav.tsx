@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 const items = [
   { href: '/', label: 'Signal feed', glyph: '▦' },
   { href: '/hospitals', label: 'Hospitals', glyph: '▢' },
+  { href: '/review', label: 'Review queue', glyph: '◈' },
   { href: '/alerts', label: 'Alerts', glyph: '◷' },
   { href: '/export', label: 'Export (CSV)', glyph: '↧' },
 ];
@@ -16,8 +17,7 @@ export default function Nav() {
   return (
     <nav className="space-y-0.5">
       {items.map((item) => {
-        const isActive =
-          item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+        const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
         return (
           <Link
             key={item.href}

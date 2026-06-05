@@ -80,10 +80,7 @@ export async function scoreAndPersist(
       });
       createdCount += 1;
 
-      if (
-        classification.priority === 'urgent' &&
-        classification.score >= ALERT_SCORE_THRESHOLD
-      ) {
+      if (classification.priority === 'urgent' && classification.score >= ALERT_SCORE_THRESHOLD) {
         // TODO (week 4-5): trigger instant alert email here
         log.info('urgent signal — alert TODO', {
           hospital: hospital.id,
