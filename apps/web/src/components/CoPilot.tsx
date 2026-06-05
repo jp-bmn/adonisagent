@@ -7,7 +7,18 @@ interface Message {
   text: string;
 }
 
+type ClaudeModel = 'claude-haiku-4-5-20251001' | 'claude-sonnet-4-6' | 'claude-opus-4-7';
+
+const MODELS: { id: ClaudeModel; label: string; note: string }[] = [
+  { id: 'claude-haiku-4-5-20251001', label: 'Haiku', note: 'Fast · low cost' },
+  { id: 'claude-sonnet-4-6', label: 'Sonnet', note: 'Balanced' },
+  { id: 'claude-opus-4-7', label: 'Opus', note: 'Most capable' },
+];
+
 const STORAGE_KEY = 'adonis-copilot-history';
+const MODEL_KEY = 'adonis-copilot-model';
+const MAX_STORED = 200; // messages kept in localStorage (full scrollable history)
+const MAX_CONTEXT = 40; // messages sent to Claude per request (working memory)
 
 const STUB_REPLY =
   "I can answer questions about your accounts and recent signals. Try asking: 'What happened with NYP this week?' or 'Summarize urgent signals.'";
@@ -23,25 +34,35 @@ function loadMessages(): Message[] {
 
 function saveMessages(msgs: Message[]) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs.slice(-MAX_STORED)));
   } catch {
     // storage full or unavailable — fail silently
+  }
+}
+
+function loadModel(): ClaudeModel {
+  try {
+    const saved = localStorage.getItem(MODEL_KEY) as ClaudeModel | null;
+    return MODELS.find((m) => m.id === saved)?.id ?? 'claude-sonnet-4-6';
+  } catch {
+    return 'claude-sonnet-4-6';
   }
 }
 
 export default function CoPilot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [model, setModel] = useState<ClaudeModel>('claude-sonnet-4-6');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showModelPicker, setShowModelPicker] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Load persisted history on mount
   useEffect(() => {
     setMessages(loadMessages());
+    setModel(loadModel());
   }, []);
 
-  // Persist whenever messages change
   useEffect(() => {
     if (messages.length > 0) saveMessages(messages);
   }, [messages]);
@@ -49,6 +70,16 @@ export default function CoPilot() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  function handleModelChange(m: ClaudeModel) {
+    setModel(m);
+    setShowModelPicker(false);
+    try {
+      localStorage.setItem(MODEL_KEY, m);
+    } catch {
+      // ignore
+    }
+  }
 
   function clearHistory() {
     setMessages([]);
@@ -62,8 +93,20 @@ export default function CoPilot() {
     const updated = [...messages, { role: 'user' as const, text }];
     setMessages(updated);
     setLoading(true);
-    // Stub response — Joel wires POST /api/v1/copilot in T-13.
-    // When live, send `updated` as the conversation history for context.
+    // TODO T-13: replace stub with real API call.
+    // Send only the last MAX_CONTEXT messages so API calls stay fast and cheap.
+    // The user sees the full history in the UI; Claude reasons on recent context only.
+    //
+    // const res = await fetch('/api/copilot', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({
+    //     message: text,
+    //     model,
+    //     history: updated.slice(-MAX_CONTEXT),
+    //   }),
+    // });
+    // const { reply } = await res.json();
     await new Promise((r) => setTimeout(r, 800));
     setMessages((prev) => [...prev, { role: 'assistant' as const, text: STUB_REPLY }]);
     setLoading(false);
@@ -76,10 +119,13 @@ export default function CoPilot() {
     }
   }
 
+  const currentModel = MODELS.find((m) => m.id === model)!;
+
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
       {open && (
         <div className="w-80 bg-white border border-line rounded-xl shadow-xl flex flex-col overflow-hidden">
+          {/* Header */}
           <div className="bg-navy-900 px-4 py-3 flex items-center justify-between">
             <div>
               <div className="text-white text-sm font-semibold">Adonis Intel</div>
@@ -104,6 +150,34 @@ export default function CoPilot() {
             </div>
           </div>
 
+          {/* Model picker */}
+          <div className="bg-navy-900 border-t border-white/10 px-4 pb-2 relative">
+            <button
+              onClick={() => setShowModelPicker((v) => !v)}
+              className="text-[10px] font-mono text-slate-400 hover:text-white transition flex items-center gap-1"
+            >
+              <span className="text-slate-500">model:</span> {currentModel.label} ·{' '}
+              {currentModel.note} ▾
+            </button>
+            {showModelPicker && (
+              <div className="absolute left-4 top-6 bg-white border border-line rounded-lg shadow-lg z-10 overflow-hidden">
+                {MODELS.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => handleModelChange(m.id)}
+                    className={`w-full text-left px-4 py-2.5 text-xs flex items-center justify-between gap-6 hover:bg-paper transition ${
+                      m.id === model ? 'font-semibold text-ink' : 'text-slate-600'
+                    }`}
+                  >
+                    <span>{m.label}</span>
+                    <span className="text-slate-400 font-normal">{m.note}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-72 min-h-[8rem]">
             {messages.length === 0 && (
               <p className="text-xs text-slate-400 text-center">
@@ -136,6 +210,7 @@ export default function CoPilot() {
             <div ref={bottomRef} />
           </div>
 
+          {/* Input */}
           <div className="border-t border-line p-3 flex gap-2">
             <input
               value={input}
