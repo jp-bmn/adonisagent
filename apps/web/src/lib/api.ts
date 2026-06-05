@@ -157,3 +157,7 @@ export async function fetchMe(userId: string): Promise<ApiMe> {
 export async function fetchStatus(userId?: string): Promise<ApiStatus> {
   return apiFetch<ApiStatus>('/status', userId);
 }
+
+export async function fetchPendingReview(userId?: string): Promise<ApiSignal[]> {
+  return apiFetch<ApiSignal[]>('/signals/pending-review', userId);
+}
