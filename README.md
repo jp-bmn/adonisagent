@@ -15,12 +15,12 @@ The tool replaces **Glean** (the internal AI tool the team uses reactively, only
 
 ## Users
 
-| User | Role |
-|---|---|
+| User                | Role                                                                    |
+| ------------------- | ----------------------------------------------------------------------- |
 | **Danielle Ferdon** | Admin view across all accounts; compiles and forwards the Monday digest |
-| **Michael** | AE — territory-filtered dashboard, his accounts only |
-| **Jeff** | AE — territory-filtered dashboard, his accounts only |
-| **David** | AE — territory-filtered dashboard, his accounts only |
+| **Michael**         | AE — territory-filtered dashboard, his accounts only                    |
+| **Jeff**            | AE — territory-filtered dashboard, his accounts only                    |
+| **David**           | AE — territory-filtered dashboard, his accounts only                    |
 
 ## Seed hospitals (Phase 1)
 
@@ -28,7 +28,7 @@ The tool replaces **Glean** (the internal AI tool the team uses reactively, only
 2. UMass Memorial
 3. Ascension
 4. University of Arkansas (UAMS)
-5. CommonSpirit Health *(added by Danielle, May 19)*
+5. CommonSpirit Health _(added by Danielle, May 19)_
 
 ## Team
 
@@ -106,6 +106,7 @@ pnpm --filter @adonis/agents digest:preview      # render digest to stdout
 ## Hard constraints (from the partner)
 
 These do not move:
+
 - **No HubSpot connection.** Hospital list comes in manually; output is a CSV they upload.
 - **Public sources only.** No PHI, HIPAA-protected, or paywalled data.
 - **No LinkedIn scraping.** Sales Navigator complements this tool; it does not replace it.
@@ -113,14 +114,14 @@ These do not move:
 
 ## Timeline
 
-| Date | Milestone |
-|---|---|
-| May 19 | ✅ Danielle workflow walkthrough |
-| Weeks 1–2 | Digest + dashboard live for 5 seed hospitals |
-| **Tue Jun 2, 3:00 PM ET** | **Midpoint review with Reed** |
-| Weeks 3–4 | Full dashboard, per-AE territory views |
-| Week 5 | Refinement + co-pilot prototype if ahead |
-| **Wed Jun 24, 6 PM** | **Demo Day at Blackstone** |
+| Date                      | Milestone                                    |
+| ------------------------- | -------------------------------------------- |
+| May 19                    | ✅ Danielle workflow walkthrough             |
+| Weeks 1–2                 | Digest + dashboard live for 5 seed hospitals |
+| **Tue Jun 2, 3:00 PM ET** | **Midpoint review with Reed**                |
+| Weeks 3–4                 | Full dashboard, per-AE territory views       |
+| Week 5                    | Refinement + co-pilot prototype if ahead     |
+| **Wed Jun 24, 6 PM**      | **Demo Day at Blackstone**                   |
 
 ## Communication
 

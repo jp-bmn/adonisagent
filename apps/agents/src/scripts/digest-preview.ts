@@ -27,7 +27,9 @@ const groups = Array.from(map.entries())
     const hospital = byId.get(hid);
     return hospital ? { hospital, signals: list } : null;
   })
-  .filter((g): g is { hospital: (typeof hospitals)[number]; signals: typeof signals } => g !== null);
+  .filter(
+    (g): g is { hospital: (typeof hospitals)[number]; signals: typeof signals } => g !== null
+  );
 
 const mode = process.argv[2] ?? 'html';
 if (mode === 'text') {

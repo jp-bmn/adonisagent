@@ -13,7 +13,8 @@ export default function HomePage() {
           </p>
         </div>
         <div className="bg-white border border-line rounded-lg px-3 py-1.5 text-xs font-mono text-slate-600">
-          Territory: <strong className="text-ink">Admin (Danielle)</strong> · {SEED_HOSPITALS.length} accounts
+          Territory: <strong className="text-ink">Admin (Danielle)</strong> ·{' '}
+          {SEED_HOSPITALS.length} accounts
         </div>
       </header>
 
@@ -29,11 +30,13 @@ export default function HomePage() {
       </div>
 
       <div className="bg-white border border-line rounded-lg p-6 text-center text-slate-500">
-        <p className="mb-2 text-sm">
-          No signals yet — the agent worker has not run.
-        </p>
+        <p className="mb-2 text-sm">No signals yet — the agent worker has not run.</p>
         <p className="text-xs">
-          Run <code className="px-1.5 py-0.5 bg-paper rounded text-ink font-mono">pnpm --filter @adonis/agents scrape:once</code> to pull from sources, or wait for the next scheduled Mon/Wed/Fri run.
+          Run{' '}
+          <code className="px-1.5 py-0.5 bg-paper rounded text-ink font-mono">
+            pnpm --filter @adonis/agents scrape:once
+          </code>{' '}
+          to pull from sources, or wait for the next scheduled Mon/Wed/Fri run.
         </p>
       </div>
 
@@ -46,15 +49,7 @@ export default function HomePage() {
   );
 }
 
-function Kpi({
-  value,
-  label,
-  tone,
-}: {
-  value: string | number;
-  label: string;
-  tone?: 'urgent';
-}) {
+function Kpi({ value, label, tone }: { value: string | number; label: string; tone?: 'urgent' }) {
   return (
     <div className="bg-white border border-line rounded-xl p-4">
       <div

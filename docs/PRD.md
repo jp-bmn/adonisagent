@@ -4,12 +4,12 @@
 > **Source:** Reflects everything learned across two partner meetings and Danielle Ferdon's workflow walkthrough on May 19, 2026.
 > **Date:** May 2026
 
-| Field | Details |
-|---|---|
-| Prepared for | Reed Kalash, Director of Growth & Revenue Operations · Danielle Ferdon, Partnerships |
-| Prepared by | Juan Franco, Joel Philip & Michael Chabler · Pursuit L3 |
-| Midpoint review | Tuesday, June 2, 2026 · 3:00 PM ET |
-| Demo Day | Wednesday, June 24, 2026 at Blackstone |
+| Field           | Details                                                                              |
+| --------------- | ------------------------------------------------------------------------------------ |
+| Prepared for    | Reed Kalash, Director of Growth & Revenue Operations · Danielle Ferdon, Partnerships |
+| Prepared by     | Juan Franco, Joel Philip & Michael Chabler · Pursuit L3                              |
+| Midpoint review | Tuesday, June 2, 2026 · 3:00 PM ET                                                   |
+| Demo Day        | Wednesday, June 24, 2026 at Blackstone                                               |
 
 Our ask: confirm this is the right direction, or tell us what to change. A full technical specification follows the midpoint review.
 
@@ -33,12 +33,12 @@ She often has to dig through extraneous information before getting to the core i
 
 Four Adonis team members will use this tool directly.
 
-| User | Role |
-|---|---|
+| User                | Role                                                                                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Danielle Ferdon** | Partnerships / senior BDR. Admin view across all accounts. Compiles the weekly digest and sends it to the relevant AE each Monday. SME on current research workflow. |
-| **Michael** (AE) | Territory-filtered dashboard, his hospital accounts only. Receives Danielle's Monday digest. Can check the dashboard independently throughout the week. |
-| **Jeff** (AE) | Same as above, separate territory. |
-| **David** (AE) | Same as above, separate territory. |
+| **Michael** (AE)    | Territory-filtered dashboard, his hospital accounts only. Receives Danielle's Monday digest. Can check the dashboard independently throughout the week.              |
+| **Jeff** (AE)       | Same as above, separate territory.                                                                                                                                   |
+| **David** (AE)      | Same as above, separate territory.                                                                                                                                   |
 
 **People first, organization second.** The most valuable intelligence is about people — who leads revenue and finance, who just arrived, who just left. Hospital profiles center on those decision-makers, with org-level events as context.
 
@@ -68,11 +68,11 @@ A chat interface layered on top of the dashboard. Danielle or an AE can ask on-d
 
 ## 4 · What the Tool Monitors
 
-| Tier | Coverage |
-|---|---|
-| **Urgent** (instant alert) | New revenue or finance leader hired or departed (CRO, CFO, VP Revenue Cycle, Director RCM) · Merger, acquisition, or system expansion · Revenue-cycle vendor or outsourcing change · Epic or EHR go-live, migration, or expansion · Financial-review or regulatory event · Significant hiring of billing or RCM operations staff |
-| **Worth knowing** (weekly digest) | Revenue-cycle strategy or performance changes · RCM automation or AI initiatives · Partnerships and joint ventures · Financial performance and margin pressure · Leadership changes outside revenue · Meeting-prep reference items (interviews, podcasts, trade coverage) |
-| **Filtered out** | Equipment and facility purchases · Clinical or research program news · Community events, philanthropy, and awards · General AI news not specific to revenue cycle |
+| Tier                              | Coverage                                                                                                                                                                                                                                                                                                                         |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Urgent** (instant alert)        | New revenue or finance leader hired or departed (CRO, CFO, VP Revenue Cycle, Director RCM) · Merger, acquisition, or system expansion · Revenue-cycle vendor or outsourcing change · Epic or EHR go-live, migration, or expansion · Financial-review or regulatory event · Significant hiring of billing or RCM operations staff |
+| **Worth knowing** (weekly digest) | Revenue-cycle strategy or performance changes · RCM automation or AI initiatives · Partnerships and joint ventures · Financial performance and margin pressure · Leadership changes outside revenue · Meeting-prep reference items (interviews, podcasts, trade coverage)                                                        |
+| **Filtered out**                  | Equipment and facility purchases · Clinical or research program news · Community events, philanthropy, and awards · General AI news not specific to revenue cycle                                                                                                                                                                |
 
 ---
 
@@ -80,25 +80,25 @@ A chat interface layered on top of the dashboard. Danielle or an AE can ask on-d
 
 Public sources only — no private records, PHI, or HIPAA-protected data. Every signal links to its original source so AEs can verify before acting.
 
-| Source | Examples |
-|---|---|
-| Health system official | Hospital newsrooms, press releases, leadership and about pages — highest reliability for verified personnel changes |
+| Source                 | Examples                                                                                                                               |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Health system official | Hospital newsrooms, press releases, leadership and about pages — highest reliability for verified personnel changes                    |
 | Healthcare trade press | Becker's Hospital Review / Health IT · Modern Healthcare · Fierce Healthcare · Healthcare Dive · RevCycleIntelligence · Health Affairs |
-| Financial & regulatory | SEC filings, bond disclosures, IRS Form 990, official financial statements |
-| News aggregation APIs | **serper.dev** (pennies per search) · NewsAPI · GDELT · RSS feeds from all sources above |
-| Major business press | Bloomberg Health, Reuters Health, WSJ Health — subject to paywall access |
+| Financial & regulatory | SEC filings, bond disclosures, IRS Form 990, official financial statements                                                             |
+| News aggregation APIs  | **serper.dev** (pennies per search) · NewsAPI · GDELT · RSS feeds from all sources above                                               |
+| Major business press   | Bloomberg Health, Reuters Health, WSJ Health — subject to paywall access                                                               |
 
 ---
 
 ## 6 · Scope
 
-| The tool will | The tool will not |
-|---|---|
-| Monitor the agreed hospital list — agents run 2–3x weekly | Connect to or write to HubSpot (list is provided; output is CSV for manual upload) |
-| Send a Monday morning email digest to Danielle for distribution | Access any private, patient, or PHI / HIPAA-protected data |
-| Provide a web dashboard with territory-filtered views | Scrape LinkedIn or replicate Sales Navigator |
-| Build hospital profiles: account name, signal bullets, source links | Send outreach emails on behalf of reps |
-| Export a HubSpot-ready CSV on demand | Monitor hospitals outside the agreed list |
+| The tool will                                                       | The tool will not                                                                  |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Monitor the agreed hospital list — agents run 2–3x weekly           | Connect to or write to HubSpot (list is provided; output is CSV for manual upload) |
+| Send a Monday morning email digest to Danielle for distribution     | Access any private, patient, or PHI / HIPAA-protected data                         |
+| Provide a web dashboard with territory-filtered views               | Scrape LinkedIn or replicate Sales Navigator                                       |
+| Build hospital profiles: account name, signal bullets, source links | Send outreach emails on behalf of reps                                             |
+| Export a HubSpot-ready CSV on demand                                | Monitor hospitals outside the agreed list                                          |
 
 **Stretch — Phase 3:** Co-pilot chat for on-demand queries, email drafting, historical signal search. Discussed positively with Danielle on May 19; delivery contingent on Phase 1 and 2 being stable.
 
@@ -106,13 +106,13 @@ Public sources only — no private records, PHI, or HIPAA-protected data. Every 
 
 ## 7 · Build Plan
 
-| Phase | Milestone | Delivered |
-|---|---|---|
-| Wk 1–2 | Digest + dashboard live | Working Monday email digest and dashboard for 5 seed hospitals. Color-coded urgency. Territory views. Signal quality validated with Danielle. |
-| **June 2** | Midpoint review | Live demo to Reed and Danielle. Align on Phase 2 scope, full hospital list, co-pilot feasibility. |
-| Wk 3–4 | Full dashboard | All confirmed accounts loaded. Persistent profiles. Per-AE territory views for Michael, Jeff, David. |
-| Wk 5 | Refinement + co-pilot start | Dashboard polish. Co-pilot prototype if Phase 1–2 are stable. |
-| **June 24** | Demo Day | Full product on live data. Monday digest running. Dashboard live for all four users. |
+| Phase       | Milestone                   | Delivered                                                                                                                                     |
+| ----------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Wk 1–2      | Digest + dashboard live     | Working Monday email digest and dashboard for 5 seed hospitals. Color-coded urgency. Territory views. Signal quality validated with Danielle. |
+| **June 2**  | Midpoint review             | Live demo to Reed and Danielle. Align on Phase 2 scope, full hospital list, co-pilot feasibility.                                             |
+| Wk 3–4      | Full dashboard              | All confirmed accounts loaded. Persistent profiles. Per-AE territory views for Michael, Jeff, David.                                          |
+| Wk 5        | Refinement + co-pilot start | Dashboard polish. Co-pilot prototype if Phase 1–2 are stable.                                                                                 |
+| **June 24** | Demo Day                    | Full product on live data. Monday digest running. Dashboard live for all four users.                                                          |
 
 ### Performance targets
 
