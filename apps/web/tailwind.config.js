@@ -17,6 +17,7 @@ export default {
         goodBg: '#E9F4ED',
         brand: '#0F3D3E',
         brandBg: '#DCEBE7',
+        cream: '#EFEFC8',
       },
       fontFamily: {
         sans: ['Manrope', 'system-ui', 'sans-serif'],

@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 function Sidebar() {
   return (
-    <aside className="w-56 bg-navy-900 text-slate-200 py-6 flex-none">
+    <aside className="w-56 bg-brand text-slate-200 py-6 flex-none">
       <div className="px-5 pb-5 mb-3 border-b border-white/10 flex items-center gap-3">
         {/* Adonis leaf mark — three leaf paths from adonis-logo.svg, leaf area only */}
         <svg
@@ -39,7 +39,7 @@ function Sidebar() {
           <path d="M22.0788 18.0658C18.6701 19.9884 17.6562 24.507 17.6562 24.507C17.6562 24.507 22.1687 25.9084 25.5774 23.9858C28.986 22.0632 30 17.5446 30 17.5446C30 17.5446 25.4874 16.1433 22.0788 18.0658Z" fill="currentColor" />
         </svg>
         <div>
-          <div className="font-serif font-semibold text-sm leading-tight" style={{ color: '#EFEFC8' }}>
+          <div className="font-serif font-bold text-sm leading-tight" style={{ color: '#EFEFC8' }}>
             Account Intel
           </div>
           <div className="text-[9px] font-mono tracking-widest uppercase" style={{ color: 'rgba(239,239,200,0.5)' }}>
