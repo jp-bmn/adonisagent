@@ -3,8 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
+from typing import Literal
 
 from adonis_data.models import RawSignal
+
+
+QualityMode = Literal["open", "balanced", "strict"]
 
 
 @dataclass(frozen=True)
@@ -83,15 +88,76 @@ def _apply_quality_penalty(signal: RawSignal, confidence: float, reason: str) ->
     return adjusted, "|".join(tags)
 
 
-def classify_signal(signal: RawSignal) -> ClassificationResult:
+def _normalize_sentence(text: str) -> str:
+    cleaned = re.sub(r"\s+", " ", (text or "").strip())
+    if cleaned and not cleaned.endswith("."):
+        cleaned = f"{cleaned}."
+    return cleaned
+
+
+def _is_informative_sentence(text: str, quality_mode: QualityMode) -> bool:
+    cleaned = re.sub(r"\s+", " ", (text or "").strip())
+    min_len = 24
+    min_alpha_tokens = 4
+    if quality_mode == "strict":
+        min_len = 32
+        min_alpha_tokens = 6
+
+    if len(cleaned) < min_len:
+        return False
+
+    alpha_tokens = re.findall(r"[A-Za-z]{2,}", cleaned)
+    if len(alpha_tokens) < min_alpha_tokens:
+        return False
+
+    # Avoid low-information fragments like "Dr." / "J." / "By A."
+    if re.fullmatch(r"(?i)(dr|mr|ms|mrs|prof|by)\.?", cleaned):
+        return False
+    if re.fullmatch(r"[A-Za-z][.]?", cleaned):
+        return False
+    if re.search(r"(?i)\b(dr|mr|ms|mrs|prof)\.$", cleaned):
+        return False
+
+    if quality_mode == "strict" and cleaned.endswith("..."):
+        return False
+
+    return True
+
+
+def _build_one_sentence_summary(signal: RawSignal, quality_mode: QualityMode) -> str:
+    excerpt = re.sub(r"\s+", " ", signal.excerpt.strip())
+    title = re.sub(r"\s+", " ", signal.title.strip())
+
+    if quality_mode == "open":
+        summary = excerpt or title
+        summary = summary.split(".")[0].strip() if summary else title
+        return _normalize_sentence(summary or "Signal identified")
+
+    # Prefer the first informative sentence from excerpt when available.
+    if excerpt:
+        candidates = [chunk.strip(" -") for chunk in re.split(r"(?<=[.!?])\s+", excerpt) if chunk.strip()]
+        for candidate in candidates:
+            if _is_informative_sentence(candidate, quality_mode=quality_mode):
+                return _normalize_sentence(candidate)
+
+    # Conservative fallback order: full excerpt, then title.
+    if _is_informative_sentence(excerpt, quality_mode=quality_mode):
+        return _normalize_sentence(excerpt)
+    if _is_informative_sentence(title, quality_mode=quality_mode):
+        return _normalize_sentence(title)
+
+    # Last resort keeps previous behavior but still normalizes punctuation.
+    raw = excerpt or title
+    first_chunk = raw.split(".")[0].strip() if raw else ""
+    return _normalize_sentence(first_chunk or title or "Signal identified")
+
+
+def classify_signal(signal: RawSignal, quality_mode: QualityMode = "balanced") -> ClassificationResult:
     signal_type = _infer_signal_type(signal)
     tier, confidence, rules_hit, reason = _apply_local_rules(signal, signal_type)
     confidence, reason = _apply_quality_penalty(signal, confidence, reason)
 
-    summary = signal.excerpt.strip() or signal.title.strip()
-    summary = summary.split(".")[0].strip() if summary else signal.title.strip()
-    if summary and not summary.endswith("."):
-        summary = f"{summary}."
+    summary = _build_one_sentence_summary(signal, quality_mode=quality_mode)
 
     why = (
         "Potential revenue cycle impact or buying-signal relevance for Adonis territory accounts."

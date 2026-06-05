@@ -59,6 +59,8 @@ Optional tuning values:
 20. `REPLAY_BACKOFF_SECONDS` (default `2`)
 21. `LINKEDIN_MIN_MATCH_SCORE` (default `0.20`)
 22. `LINKEDIN_RECOMMENDED_MATCH_SCORE` (default `0.75`)
+23. `HOSPITAL_ID_MAP` (JSON object mapping hospital name to backend hospital UUID)
+24. `QUALITY_MODE` (`open` | `balanced` | `strict`; default `balanced`)
 
 ## Run Day 1 Collection
 
@@ -66,6 +68,14 @@ From this directory (`data_pipeline`), run:
 
 ```bash
 python -m scripts.run_day1_collection
+```
+
+Optional per-run override for summary quality behavior:
+
+```bash
+python -m scripts.run_day1_collection --quality-mode open
+python -m scripts.run_day1_collection --quality-mode balanced
+python -m scripts.run_day1_collection --quality-mode strict
 ```
 
 Run contact and LinkedIn discovery from classified candidates:
@@ -78,6 +88,31 @@ Run a one-command refresh for all non-endpoint artifacts:
 
 ```bash
 python -m scripts.refresh_non_endpoint_artifacts
+```
+
+Build `HOSPITAL_ID_MAP` automatically from the live API (requires a valid
+`X-User-Id` UUID from Supabase `ae_users`):
+
+```bash
+python -m scripts.build_hospital_id_map --user-id <ae_user_uuid> --write-env
+```
+
+Run a live posting pass after IDs are set:
+
+```bash
+POST_SIGNALS_ENABLED=true OUTBOX_ENABLED=true python -m scripts.run_day1_collection
+```
+
+Run preflight checks before posting live batches:
+
+```bash
+python -m scripts.preflight_live_post
+```
+
+Opt-in env autofix mode (fills missing non-secret conservative defaults only; existing values are preserved):
+
+```bash
+python -m scripts.preflight_live_post --autofix-env
 ```
 
 Generate only the status snapshot and test page:
@@ -154,6 +189,7 @@ Output file:
 17. Urgent signals can be force-included in the brief even below threshold when override is enabled.
 18. Serper PDF results are parsed with pdfplumber and routed as filing-derived signals.
 19. Handoff summary now includes a lead QA snapshot (review counts and top rejected examples) when `outputs/day2_contact_leads.json` is present.
+20. Conservative summary quality gate prefers informative one-sentence summaries and avoids ultra-short fragments.
 
 ## Replay Outbox Later
 

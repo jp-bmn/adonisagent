@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass
 
@@ -34,6 +35,8 @@ class Settings:
     replay_backoff_seconds: int = 2
     linkedin_min_match_score: float = 0.20
     linkedin_recommended_match_score: float = 0.75
+    hospital_id_map: dict[str, str] | None = None
+    quality_mode: str = "balanced"
 
 
 def load_settings() -> Settings:
@@ -119,6 +122,22 @@ def load_settings() -> Settings:
     linkedin_recommended_match_score = float(
         os.getenv("LINKEDIN_RECOMMENDED_MATCH_SCORE", "0.75").strip() or "0.75"
     )
+    quality_mode = os.getenv("QUALITY_MODE", "balanced").strip().lower() or "balanced"
+    if quality_mode not in {"open", "balanced", "strict"}:
+        quality_mode = "balanced"
+    hospital_id_map: dict[str, str] = {}
+    raw_hospital_id_map = os.getenv("HOSPITAL_ID_MAP", "").strip()
+    if raw_hospital_id_map:
+        try:
+            parsed = json.loads(raw_hospital_id_map)
+            if isinstance(parsed, dict):
+                hospital_id_map = {
+                    str(name).strip(): str(hospital_id).strip()
+                    for name, hospital_id in parsed.items()
+                    if str(name).strip() and str(hospital_id).strip()
+                }
+        except json.JSONDecodeError:
+            hospital_id_map = {}
 
     if not serper_api_key:
         raise ValueError("Missing SERPER_API_KEY. Add it to data_pipeline/.env.")
@@ -150,4 +169,6 @@ def load_settings() -> Settings:
         replay_backoff_seconds=replay_backoff_seconds,
         linkedin_min_match_score=linkedin_min_match_score,
         linkedin_recommended_match_score=linkedin_recommended_match_score,
+        hospital_id_map=hospital_id_map,
+        quality_mode=quality_mode,
     )

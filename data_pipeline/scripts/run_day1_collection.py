@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from collections import Counter
@@ -283,22 +284,52 @@ def _write_signal_csv(path: Path, signals: list[RawSignal]) -> None:
 
 
 def _build_signal_batch_payload(
-    final_signals: list[RawSignal],
+    classified_signals: list[dict[str, object]],
     now_utc: datetime,
     recency_days: int,
     dedup_days: int,
+    hospital_id_map: dict[str, str] | None,
 ) -> dict[str, object]:
+    resolved_hospital_ids = hospital_id_map or {}
+
+    def _normalize_published_date(value: object) -> str:
+        parsed = _parse_published_at(str(value or ""), now_utc)
+        if parsed is None:
+            return now_utc.date().isoformat()
+        return parsed.date().isoformat()
+
+    def _truncate_title_words(title: str, max_words: int = 10) -> str:
+        words = [word for word in title.split() if word]
+        if len(words) <= max_words:
+            return title
+        return " ".join(words[:max_words])
+
     signal_rows: list[dict[str, object]] = []
-    for signal in final_signals:
+    for signal in classified_signals:
+        hospital_name = str(signal.get("hospital", "")).strip()
+        source_name = str(signal.get("source", "")).strip()
+        source_url = str(signal.get("url", "")).strip()
+        summary = str(signal.get("one_sentence_summary", "")).strip() or str(signal.get("excerpt", "")).strip()
+        title = str(signal.get("title", "")).strip()
+        published_raw = str(signal.get("published_at", "")).strip()
+        hospital_id = resolved_hospital_ids.get(hospital_name, "")
+
         signal_rows.append(
             {
-                "hospital_name": signal.hospital,
-                "title": signal.title,
-                "source_name": signal.source,
-                "source_url": signal.url,
-                "published_at_raw": signal.published_at,
-                "excerpt": signal.excerpt,
-                "matched_topics": signal.matched_topics,
+                "hospital_id": hospital_id,
+                "hospital_name": hospital_name,
+                "signal_type": str(signal.get("signal_type", "financial_event")).strip(),
+                "tier": str(signal.get("tier", "worth_knowing")).strip(),
+                "confidence_score": float(signal.get("confidence_score", 0.0) or 0.0),
+                "title": _truncate_title_words(title),
+                "summary": summary,
+                "source_url": source_url,
+                "source_name": source_name,
+                "published_date": _normalize_published_date(published_raw),
+                # Keep legacy keys to avoid breaking Joel's current batch parser.
+                "published_at_raw": published_raw,
+                "excerpt": str(signal.get("excerpt", "")).strip(),
+                "matched_topics": list(signal.get("matched_topics", [])),
                 "extraction_stage": "raw_candidate",
                 "dedup_applied": True,
                 "recency_applied": True,
@@ -593,6 +624,23 @@ def _hospital_aliases(hospital: str) -> tuple[str, ...]:
             "umass",
             "u mass memorial",
         ),
+        "ascension": (
+            "ascension",
+            "ascension health",
+        ),
+        "university of arkansas": (
+            "university of arkansas",
+            "uams",
+            "uams health",
+            "university of arkansas for medical sciences",
+        ),
+        "commonspirit": (
+            "commonspirit",
+            "commonspirit health",
+            "chi",
+            "catholic health initiatives",
+            "dignity health",
+        ),
     }
     key = hospital.lower().strip()
     return mapping.get(key, (key,))
@@ -624,9 +672,12 @@ def _is_allowlisted(
     return False
 
 
-def run() -> Path:
+def run(quality_mode_override: str | None = None) -> Path:
     started = perf_counter()
     settings = load_settings()
+    quality_mode = (quality_mode_override or settings.quality_mode).strip().lower()
+    if quality_mode not in {"open", "balanced", "strict"}:
+        quality_mode = settings.quality_mode
     serper = SerperClient(api_key=settings.serper_api_key)
     newsapi = NewsApiClient(api_key=settings.newsapi_api_key)
     now_utc = datetime.now(timezone.utc)
@@ -781,7 +832,7 @@ def run() -> Path:
     tier_counter: Counter[str] = Counter()
     rules_engine_hits = 0
     for signal in final_signals:
-        classification = classify_signal(signal)
+        classification = classify_signal(signal, quality_mode=quality_mode)
         if classification.rules_engine_hit:
             rules_engine_hits += 1
         tier_counter[classification.tier] += 1
@@ -815,6 +866,7 @@ def run() -> Path:
         "allowlist_domains": list(settings.allowlist_domains),
         "allowlist_sources": list(settings.allowlist_sources),
         "rules_engine_hits": rules_engine_hits,
+        "quality_mode_used": quality_mode,
         "tier_counts": dict(tier_counter),
     }
 
@@ -956,10 +1008,11 @@ def run() -> Path:
     _write_signal_csv(handoff_csv_path, final_signals)
 
     batch_payload = _build_signal_batch_payload(
-        final_signals=final_signals,
+        classified_signals=classified_signals,
         now_utc=now_utc,
         recency_days=settings.recency_days,
         dedup_days=settings.dedup_days,
+        hospital_id_map=settings.hospital_id_map,
     )
     batch_payload_path.write_text(json.dumps(batch_payload, indent=2), encoding="utf-8")
 
@@ -1014,6 +1067,7 @@ def run() -> Path:
                 "signals_new": len(final_signals),
                 "signals_skipped": len(skipped_signals),
                 "rules_engine_hits": rules_engine_hits,
+                "quality_mode_used": quality_mode,
                 "skip_reasons": dict(skip_counter),
                 "daily_diff": {
                     "new_count": len(new_keys),
@@ -1045,5 +1099,13 @@ def run() -> Path:
 
 
 if __name__ == "__main__":
-    path = run()
+    parser = argparse.ArgumentParser(description="Run Day 1/Day 2 collection pipeline.")
+    parser.add_argument(
+        "--quality-mode",
+        choices=["open", "balanced", "strict"],
+        help="Override summary quality behavior for this run only.",
+    )
+    args = parser.parse_args()
+
+    path = run(quality_mode_override=args.quality_mode)
     print(f"Wrote raw signals to {path}")

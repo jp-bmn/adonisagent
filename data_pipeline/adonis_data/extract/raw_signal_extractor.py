@@ -2,10 +2,22 @@
 
 from __future__ import annotations
 
+import html
+import re
 from typing import Any
 
 from adonis_data.constants import TOPIC_KEYWORDS
 from adonis_data.models import RawSignal
+
+
+_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def _clean_text(value: str) -> str:
+    text = html.unescape(str(value or ""))
+    text = _TAG_RE.sub(" ", text)
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
 
 
 def _match_topics(text: str) -> list[str]:
@@ -20,11 +32,11 @@ def _match_topics(text: str) -> list[str]:
 
 
 def from_serper_item(hospital: str, item: dict[str, Any]) -> RawSignal:
-    title = str(item.get("title", "")).strip()
-    snippet = str(item.get("snippet", "")).strip()
+    title = _clean_text(str(item.get("title", "")))
+    snippet = _clean_text(str(item.get("snippet", "")))
     link = str(item.get("link", "")).strip()
     published = str(item.get("date", "")).strip()
-    source = str(item.get("source", "serper")).strip() or "serper"
+    source = _clean_text(str(item.get("source", "serper"))) or "serper"
 
     text = f"{title} {snippet}"
     return RawSignal(
@@ -39,11 +51,11 @@ def from_serper_item(hospital: str, item: dict[str, Any]) -> RawSignal:
 
 
 def from_newsapi_item(hospital: str, item: dict[str, Any]) -> RawSignal:
-    title = str(item.get("title", "")).strip()
-    description = str(item.get("description", "")).strip()
+    title = _clean_text(str(item.get("title", "")))
+    description = _clean_text(str(item.get("description", "")))
     link = str(item.get("url", "")).strip()
     published = str(item.get("publishedAt", "")).strip()
-    source = str(item.get("source", {}).get("name", "NewsAPI")).strip() or "NewsAPI"
+    source = _clean_text(str(item.get("source", {}).get("name", "NewsAPI"))) or "NewsAPI"
 
     text = f"{title} {description}"
     return RawSignal(
@@ -58,8 +70,8 @@ def from_newsapi_item(hospital: str, item: dict[str, Any]) -> RawSignal:
 
 
 def from_rss_item(hospital: str, source_name: str, item: dict[str, Any]) -> RawSignal:
-    title = str(item.get("title", "")).strip()
-    description = str(item.get("summary", "")).strip()
+    title = _clean_text(str(item.get("title", "")))
+    description = _clean_text(str(item.get("summary", "")))
     link = str(item.get("link", "")).strip()
     published = str(item.get("published", "")).strip()
 
@@ -81,10 +93,10 @@ def from_serper_pdf_item(
     pdf_text: str,
     source_name: str,
 ) -> RawSignal:
-    title = str(item.get("title", "")).strip() or "PDF filing"
+    title = _clean_text(str(item.get("title", ""))) or "PDF filing"
     link = str(item.get("link", "")).strip()
     published = str(item.get("date", "")).strip()
-    excerpt = " ".join(pdf_text.split()[:90]).strip()
+    excerpt = _clean_text(" ".join(pdf_text.split()[:90]).strip())
 
     text = f"{title} {pdf_text}"
     return RawSignal(

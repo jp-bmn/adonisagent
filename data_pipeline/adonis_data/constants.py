@@ -7,6 +7,15 @@ HOSPITAL_QUERIES = {
     "UMass Memorial": (
         "UMass Memorial revenue cycle OR leadership OR Epic OR acquisition"
     ),
+    "Ascension": (
+        "Ascension revenue cycle OR leadership OR Epic OR acquisition OR vendor dispute"
+    ),
+    "University of Arkansas": (
+        "University of Arkansas medical center revenue cycle OR leadership OR Epic OR acquisition"
+    ),
+    "CommonSpirit": (
+        "CommonSpirit revenue cycle OR leadership OR Epic OR acquisition OR restructuring"
+    ),
 }
 
 RSS_FEEDS = {
