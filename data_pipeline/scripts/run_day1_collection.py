@@ -1174,17 +1174,22 @@ def run(quality_mode_override: str | None = None) -> Path:
         ),
         encoding="utf-8",
     )
+    if settings.post_signals_enabled and settings.signals_endpoint_url:
+        post_result = post_signal_batch(
+            endpoint_url=settings.signals_endpoint_url,
+            payload=batch_payload,
+            timeout_seconds=settings.request_timeout_seconds,
+            bearer_token=settings.signals_endpoint_token,
+        )
+        delivery_status_path.write_text(json.dumps(post_result, indent=2), encoding="utf-8")
+
     return output_path
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run Day 1/Day 2 collection pipeline.")
-    parser.add_argument(
-        "--quality-mode",
-        choices=["open", "balanced", "strict"],
-        help="Override summary quality behavior for this run only.",
-    )
+    parser = argparse.ArgumentParser(description="Run day 1 raw signal collection.")
+    parser.add_argument("--quality-mode", choices=["open", "balanced", "strict"], default=None, help="Override quality mode for this run")
     args = parser.parse_args()
-
+    
     path = run(quality_mode_override=args.quality_mode)
     print(f"Wrote raw signals to {path}")
