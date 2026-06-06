@@ -576,6 +576,23 @@ def _reason_for_skip(signal: RawSignal) -> str | None:
     return None
 
 
+def _word_count(text: str) -> int:
+    return len(re.findall(r"[a-zA-Z0-9]+", text or ""))
+
+
+def _low_information_reason(signal: RawSignal) -> str | None:
+    title_words = _word_count(signal.title)
+    excerpt_words = _word_count(signal.excerpt)
+
+    if title_words <= 4 and excerpt_words <= 12:
+        return "low_information_signal"
+
+    if excerpt_words < 8 and len(signal.matched_topics) <= 1:
+        return "low_information_signal"
+
+    return None
+
+
 def _noise_reason(signal: RawSignal, noise_guard_enabled: bool, noise_keywords: tuple[str, ...]) -> str | None:
     if not noise_guard_enabled:
         return None
@@ -730,11 +747,20 @@ def run(quality_mode_override: str | None = None) -> Path:
     delivery_status_path = output_dir / "day2_delivery_status.json"
     classified_path = output_dir / "day2_classified_candidates.json"
     run_log_path = output_dir / "day2_run_log.json"
+    quality_upgrade_metrics_path = output_dir / "day2_quality_upgrade_metrics.json"
     daily_diff_json_path = output_dir / "day2_daily_diff.json"
     daily_diff_md_path = output_dir / "day2_daily_diff.md"
     executive_brief_path = output_dir / "day2_executive_brief.md"
     executive_brief_audit_path = output_dir / "day2_executive_brief_audit.json"
     contact_leads_path = output_dir / "day2_contact_leads.json"
+    previous_run_log: dict[str, object] = {}
+    if run_log_path.exists():
+        try:
+            loaded = json.loads(run_log_path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                previous_run_log = loaded
+        except (OSError, json.JSONDecodeError):
+            previous_run_log = {}
 
     previous_classified = _load_previous_classified(classified_path)
 
@@ -749,9 +775,25 @@ def run(quality_mode_override: str | None = None) -> Path:
         seen_title_dates[(previous.hospital, _normalize_title(previous.title))] = prev_dt
 
     final_signals: list[RawSignal] = []
+    quality_upgrade_before_count = len(included_signals)
+    low_information_skipped = 0
 
     recency_cutoff = now_utc - timedelta(days=settings.recency_days)
     for signal in included_signals:
+        low_information_reason = _low_information_reason(signal)
+        if low_information_reason is not None:
+            low_information_skipped += 1
+            skip_counter[low_information_reason] += 1
+            skipped_signals.append(
+                {
+                    "hospital": signal.hospital,
+                    "title": signal.title,
+                    "url": signal.url,
+                    "reason": low_information_reason,
+                }
+            )
+            continue
+
         allowlisted = _is_allowlisted(
             signal=signal,
             allowlist_enabled=settings.allowlist_enabled,
@@ -868,10 +910,46 @@ def run(quality_mode_override: str | None = None) -> Path:
         "rules_engine_hits": rules_engine_hits,
         "quality_mode_used": quality_mode,
         "tier_counts": dict(tier_counter),
+        "quality_upgrade": {
+            "before_upgrade_candidate_count": quality_upgrade_before_count,
+            "after_upgrade_candidate_count": quality_upgrade_before_count - low_information_skipped,
+            "after_all_filters_candidate_count": len(final_signals),
+            "low_information_skipped": low_information_skipped,
+        },
+    }
+
+    previous_signals_new = int(previous_run_log.get("signals_new", 0) or 0)
+    previous_signals_skipped = int(previous_run_log.get("signals_skipped", 0) or 0)
+    previous_skip_reasons = previous_run_log.get("skip_reasons", {})
+    if not isinstance(previous_skip_reasons, dict):
+        previous_skip_reasons = {}
+    previous_low_information_skipped = int(previous_skip_reasons.get("low_information_signal", 0) or 0)
+
+    quality_upgrade_metrics_payload = {
+        "generated_at_utc": now_utc.isoformat(),
+        "before_upgrade_candidate_count": quality_upgrade_before_count,
+        "after_upgrade_candidate_count": quality_upgrade_before_count - low_information_skipped,
+        "after_all_filters_candidate_count": len(final_signals),
+        "low_information_skipped": low_information_skipped,
+        "before_after_vs_previous_run": {
+            "previous_signals_new": previous_signals_new,
+            "current_signals_new": len(final_signals),
+            "delta_signals_new": len(final_signals) - previous_signals_new,
+            "previous_signals_skipped": previous_signals_skipped,
+            "current_signals_skipped": len(skipped_signals),
+            "delta_signals_skipped": len(skipped_signals) - previous_signals_skipped,
+            "previous_low_information_skipped": previous_low_information_skipped,
+            "current_low_information_skipped": low_information_skipped,
+            "delta_low_information_skipped": low_information_skipped - previous_low_information_skipped,
+        },
     }
 
     output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     quality_log_path.write_text(json.dumps(quality_payload, indent=2), encoding="utf-8")
+    quality_upgrade_metrics_path.write_text(
+        json.dumps(quality_upgrade_metrics_payload, indent=2),
+        encoding="utf-8",
+    )
     classified_path.write_text(
         json.dumps(
             {
@@ -1069,6 +1147,7 @@ def run(quality_mode_override: str | None = None) -> Path:
                 "rules_engine_hits": rules_engine_hits,
                 "quality_mode_used": quality_mode,
                 "skip_reasons": dict(skip_counter),
+                "quality_upgrade": quality_upgrade_metrics_payload,
                 "daily_diff": {
                     "new_count": len(new_keys),
                     "removed_count": len(removed_keys),
