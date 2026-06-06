@@ -9,6 +9,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from app.core.auth import get_required_user, get_admin_user
 from app.core.database import get_supabase
+from app.models.schemas import SignalReviewRequest
 import logging
 
 router = APIRouter(prefix="/signals", tags=["signals"])
@@ -184,7 +185,7 @@ async def create_signal(
 @router.post("/{signal_id}/review")
 async def review_signal(
     signal_id: str,
-    review_data: dict,
+    review_data: SignalReviewRequest,
     user: dict = Depends(get_admin_user),
 ):
     """
@@ -192,5 +193,32 @@ async def review_signal(
     Task 9 full implementation — approve or dismiss a pending signal.
     Requires admin auth.
     """
-    # TODO (Task 9): implement approve/dismiss logic
-    raise HTTPException(status_code=501, detail="Signal review — implementation in Task 9")
+    supabase = get_supabase()
+
+    # 1. Fetch signal to check if it exists
+    signal_check = (
+        supabase.table("signals")
+        .select("*")
+        .eq("id", signal_id)
+        .execute()
+    )
+    if not signal_check.data:
+        raise HTTPException(status_code=404, detail=f"Signal {signal_id} not found")
+
+    # 2. Update review_status in database
+    update_res = (
+        supabase.table("signals")
+        .update({"review_status": review_data.action})
+        .eq("id", signal_id)
+        .execute()
+    )
+    if not update_res.data:
+        raise HTTPException(status_code=500, detail="Failed to update signal review status")
+
+    updated_signal = update_res.data[0]
+    logger.info(
+        f"Signal {signal_id} reviewed by {review_data.reviewer_id} (admin={user.get('id')}) | "
+        f"action={review_data.action}"
+    )
+
+    return updated_signal
