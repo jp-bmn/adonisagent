@@ -1,6 +1,6 @@
 import './globals.css';
-import Link from 'next/link';
 import type { Metadata } from 'next';
+import Nav from '@/components/Nav';
 
 export const metadata: Metadata = {
   title: 'Adonis Account Intelligence',
@@ -34,28 +34,5 @@ function Sidebar() {
       </div>
       <Nav />
     </aside>
-  );
-}
-
-function Nav() {
-  const items = [
-    { href: '/', label: 'Signal feed', glyph: '▦' },
-    { href: '/hospitals', label: 'Hospitals', glyph: '▢' },
-    { href: '/alerts', label: 'Alerts', glyph: '◷' },
-    { href: '/export', label: 'Export (CSV)', glyph: '↧' },
-  ];
-  return (
-    <nav className="space-y-0.5">
-      {items.map((i) => (
-        <Link
-          key={i.href}
-          href={i.href}
-          className="flex items-center gap-3 px-5 py-2.5 text-sm hover:bg-white/5 hover:text-white transition"
-        >
-          <span className="w-4 text-center opacity-80">{i.glyph}</span>
-          {i.label}
-        </Link>
-      ))}
-    </nav>
   );
 }
