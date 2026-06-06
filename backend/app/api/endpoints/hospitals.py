@@ -45,8 +45,13 @@ async def list_hospitals(user: dict = Depends(get_required_user)):
         if ae:
             ae_map.setdefault(hid, []).append(ae)
 
-    # TODO (Task 10): if not user["is_admin"], filter hospitals to only those in ae_map
-    # where user["id"] appears in the AE list.
+    # Filter hospitals to only those where user is assigned if not admin
+    if not user.get("is_admin", False):
+        user_id = str(user["id"])
+        hospitals = [
+            h for h in hospitals
+            if any(str(ae["id"]) == user_id for ae in ae_map.get(h["id"], []))
+        ]
 
     return [
         {
@@ -78,6 +83,18 @@ async def get_hospital_signals(
     hospital_res = supabase.table("hospitals").select("id, name").eq("id", hospital_id).single().execute()
     if not hospital_res.data:
         raise HTTPException(status_code=404, detail=f"Hospital {hospital_id} not found")
+
+    # Territory check for non-admin AEs
+    if not user.get("is_admin", False):
+        assignment_check = (
+            supabase.table("hospital_ae_assignments")
+            .select("*")
+            .eq("hospital_id", hospital_id)
+            .eq("ae_id", str(user["id"]))
+            .execute()
+        )
+        if not assignment_check.data:
+            raise HTTPException(status_code=403, detail="Access denied to this hospital's signals")
 
     query = (
         supabase.table("signals")

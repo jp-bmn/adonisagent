@@ -48,7 +48,18 @@ async def get_pending_review(
         .limit(limit)
     )
 
-    # TODO (Task 10): if not admin, also filter to user's territory hospitals
+    # Filter to user's territory hospitals if not admin
+    if not user.get("is_admin", False):
+        assignments_res = (
+            supabase.table("hospital_ae_assignments")
+            .select("hospital_id")
+            .eq("ae_id", str(user["id"]))
+            .execute()
+        )
+        hospital_ids = [a["hospital_id"] for a in (assignments_res.data or [])]
+        if not hospital_ids:
+            return []
+        query = query.in_("hospital_id", hospital_ids)
 
     result = query.execute()
     rows = result.data or []
@@ -87,6 +98,15 @@ async def list_signals(
     if not include_dismissed:
         query = query.neq("review_status", "dismissed")
 
+    # Territory filtering logic
+    if not user.get("is_admin", False):
+        if ae_id and ae_id != str(user["id"]):
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: cannot view another AE's territory signals"
+            )
+        ae_id = str(user["id"])
+
     # Territory filter by AE
     if ae_id:
         # Get hospital IDs for this AE
@@ -100,8 +120,6 @@ async def list_signals(
         if not hospital_ids:
             return []
         query = query.in_("hospital_id", hospital_ids)
-
-    # TODO (Task 10): if not admin and no ae_id param, auto-filter to user's own territory
 
     result = query.execute()
     return result.data or []
