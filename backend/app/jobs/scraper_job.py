@@ -22,6 +22,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from app.core.database import get_supabase
+from app.services.run_logger import start_run, update_run, complete_run
 
 logger = logging.getLogger(__name__)
 
@@ -102,12 +103,7 @@ async def run_scraper_job() -> dict:
 
     # ── Log run start ────────────────────────────────────────────────────────
     try:
-        supabase.table("agent_runs").insert({
-            "id":         run_id,
-            "run_type":   "scraper",
-            "status":     "running",
-            "started_at": started_at,
-        }).execute()
+        start_run(run_id)
     except Exception as e:
         logger.warning(f"Could not log run start: {e}")
 
@@ -139,10 +135,25 @@ async def run_scraper_job() -> dict:
                 f"Scraped {hospital['name']}: "
                 f"found={result['signals_found']} new={result['signals_new']}"
             )
+            update_run(
+                run_id=run_id,
+                hospitals_checked=totals["hospitals_checked"],
+                signals_found=totals["signals_found"],
+                signals_new=totals["signals_new"],
+                rules_engine_hits=totals["rules_engine_hits"],
+            )
         except Exception as e:
             err = f"Hospital {hospital['name']}: {e}"
             errors.append(err)
             logger.error(f"Scrape failed — {err}")
+            update_run(
+                run_id=run_id,
+                hospitals_checked=totals["hospitals_checked"],
+                signals_found=totals["signals_found"],
+                signals_new=totals["signals_new"],
+                rules_engine_hits=totals["rules_engine_hits"],
+                errors=errors,
+            )
 
     await asyncio.gather(*[_scrape_one(h) for h in hospitals])
 
@@ -159,11 +170,15 @@ async def run_scraper_job() -> dict:
 
     # ── Update run record ────────────────────────────────────────────────────
     try:
-        supabase.table("agent_runs").update({
-            "status":       summary["status"],
-            "completed_at": datetime.now(timezone.utc).isoformat(),
-            "summary":      summary,
-        }).eq("id", run_id).execute()
+        complete_run(
+            run_id=run_id,
+            hospitals_checked=totals["hospitals_checked"],
+            signals_found=totals["signals_found"],
+            signals_new=totals["signals_new"],
+            rules_engine_hits=totals["rules_engine_hits"],
+            duration_ms=duration_ms,
+            errors=errors if errors else None,
+        )
     except Exception as e:
         logger.warning(f"Could not update run record: {e}")
 
