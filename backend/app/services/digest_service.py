@@ -159,11 +159,15 @@ async def send_weekly_digest_to_all_aes() -> dict:
             logger.info(f"No digest-ready signals for {ae_name} (AE ID: {ae_id})")
             continue
 
+        # Generate digest_id upfront to include in the UTM tracking URL
+        digest_id = str(uuid.uuid4())
+
         # 3. Format and send
         fallback_text, blocks = format_weekly_digest(
             ae_user=ae,
             signals=signals,
-            week_label=week_label
+            week_label=week_label,
+            digest_id=digest_id
         )
 
         slack_user_id = resolve_slack_user_id(ae)
@@ -192,6 +196,7 @@ async def send_weekly_digest_to_all_aes() -> dict:
 
         # 4. Save digest log record in the database
         digest_record = {
+            "id":               digest_id,
             "ae_id":            ae_id,
             "sent_at":          datetime.now(timezone.utc).isoformat(),
             "slack_message_ts": slack_message_ts,

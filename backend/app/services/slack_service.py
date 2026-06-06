@@ -149,6 +149,7 @@ def format_weekly_digest(
     signals: list[dict],
     week_label: str = "",
     dashboard_url: Optional[str] = None,
+    digest_id: Optional[str] = None,
 ) -> tuple[str, list]:
     """
     Formats a weekly digest as Slack Block Kit.
@@ -158,12 +159,18 @@ def format_weekly_digest(
         signals:       List of signal dicts from Supabase
         week_label:    Human-readable week label e.g. "June 2–6"
         dashboard_url: Link to the dashboard (falls back to settings)
+        digest_id:     Optional UUID of the digest for tracking
 
     Returns:
         Tuple of (fallback_text, blocks) for use with send_dm()
     """
     settings = get_settings()
     url = dashboard_url or settings.dashboard_url
+
+    ae_id = ae_user.get("id")
+    if digest_id and ae_id:
+        separator = "&" if "?" in url else "?"
+        url = f"{url}{separator}digest_id={digest_id}&ae_id={ae_id}&utm_source=slack&utm_medium=digest"
 
     # Separate by tier
     urgent     = [s for s in signals if s.get("tier") == "urgent"]

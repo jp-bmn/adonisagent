@@ -50,6 +50,19 @@ async def get_me(user: dict = Depends(get_required_user)):
         )
         signals_count = signals_res.count or 0
 
+    # 3. Find the last viewed digest timestamp for this AE
+    last_view = None
+    views_res = (
+        supabase.table("digest_views")
+        .select("viewed_at")
+        .eq("ae_id", user["id"])
+        .order("viewed_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+    if views_res.data:
+        last_view = datetime.fromisoformat(views_res.data[0]["viewed_at"].replace("Z", "+00:00"))
+
     return AEUserWithStats(
         id=user["id"],
         name=user["name"],
@@ -58,7 +71,7 @@ async def get_me(user: dict = Depends(get_required_user)):
         created_at=user["created_at"],
         hospitals=hospitals,
         new_signals_this_week=signals_count,
-        last_viewed_digest=None,
+        last_viewed_digest=last_view,
     )
 
 
@@ -105,11 +118,25 @@ async def list_ae_users(user: dict = Depends(get_admin_user)):
     for s in signals_res.data:
         hosp_signals[s["hospital_id"]] += 1
 
-    # 4. Construct list of AEUserWithStats
+    # 4. Fetch last viewed digest for each AE
+    views_res = (
+        supabase.table("digest_views")
+        .select("ae_id, viewed_at")
+        .order("viewed_at", desc=True)
+        .execute()
+    )
+    ae_last_view = {}
+    for v in views_res.data or []:
+        ae_uuid = v["ae_id"]
+        if ae_uuid not in ae_last_view:
+            ae_last_view[ae_uuid] = datetime.fromisoformat(v["viewed_at"].replace("Z", "+00:00"))
+
+    # 5. Construct list of AEUserWithStats
     results = []
     for ae in aes:
         hlist = ae_hospitals[ae["id"]]
         sig_count = sum(hosp_signals[h["id"]] for h in hlist)
+        last_view = ae_last_view.get(ae["id"])
         results.append(
             AEUserWithStats(
                 id=ae["id"],
@@ -119,7 +146,7 @@ async def list_ae_users(user: dict = Depends(get_admin_user)):
                 created_at=ae["created_at"],
                 hospitals=hlist,
                 new_signals_this_week=sig_count,
-                last_viewed_digest=None,
+                last_viewed_digest=last_view,
             )
         )
     return results
@@ -181,7 +208,82 @@ async def digest_analytics(user: dict = Depends(get_admin_user)):
     """
     GET /api/v1/digest-analytics (admin only)
     Returns per-digest engagement for the last 30 days.
-    Full implementation in Task 15.
     """
-    # TODO (Task 15): query digests + digest_views, compute time_to_open_minutes
-    return {"message": "digest analytics — implementation pending Task 15"}
+    supabase = get_supabase()
+    from collections import defaultdict
+
+    thirty_days_ago = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+    try:
+        # Fetch all digests sent in the last 30 days
+        digests_res = (
+            supabase.table("digests")
+            .select("*, ae_users(name)")
+            .gte("sent_at", thirty_days_ago)
+            .order("sent_at", desc=True)
+            .execute()
+        )
+        digests_data = digests_res.data or []
+    except Exception as e:
+        logger.error(f"Error fetching digests for analytics: {e}")
+        return []
+
+    digest_ids = [d["id"] for d in digests_data]
+    views_by_digest = defaultdict(list)
+
+    if digest_ids:
+        try:
+            # Fetch all views for these digests
+            views_res = (
+                supabase.table("digest_views")
+                .select("*")
+                .in_("digest_id", digest_ids)
+                .execute()
+            )
+            for v in views_res.data or []:
+                views_by_digest[v["digest_id"]].append(v)
+        except Exception as e:
+            logger.error(f"Error fetching views for analytics: {e}")
+
+    analytics = []
+    for d in digests_data:
+        d_id = d["id"]
+        d_views = views_by_digest.get(d_id, [])
+        
+        opened = len(d_views) > 0
+        view_count = len(d_views)
+        
+        first_viewed_at = None
+        time_to_open_minutes = None
+        
+        if opened:
+            # Sort views by viewed_at ascending to find the first view
+            sorted_views = sorted(d_views, key=lambda x: x["viewed_at"])
+            first_viewed_at = sorted_views[0]["viewed_at"]
+            
+            # Compute time to open in minutes
+            if d.get("sent_at") and first_viewed_at:
+                sent_dt = datetime.fromisoformat(d["sent_at"].replace("Z", "+00:00"))
+                view_dt = datetime.fromisoformat(first_viewed_at.replace("Z", "+00:00"))
+                time_to_open_minutes = (view_dt - sent_dt).total_seconds() / 60.0
+
+        ae_relation = d.get("ae_users")
+        ae_name = "Unknown AE"
+        if isinstance(ae_relation, dict):
+            ae_name = ae_relation.get("name", "Unknown AE")
+        elif isinstance(ae_relation, list) and ae_relation:
+            ae_name = ae_relation[0].get("name", "Unknown AE")
+
+        analytics.append({
+            "digest_id": d_id,
+            "ae_id": d.get("ae_id"),
+            "ae_name": ae_name,
+            "sent_at": d.get("sent_at"),
+            "week_start": d.get("week_start"),
+            "week_end": d.get("week_end"),
+            "opened": opened,
+            "view_count": view_count,
+            "first_viewed_at": first_viewed_at,
+            "time_to_open_minutes": time_to_open_minutes
+        })
+
+    return analytics
