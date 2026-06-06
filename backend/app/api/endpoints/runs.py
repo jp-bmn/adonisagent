@@ -6,10 +6,11 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone, timedelta
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, Response
 
 from app.core.auth import get_admin_user
 from app.core.database import get_supabase
+from app.core.cache import ttl_cache
 from app.models.schemas import AgentRun
 
 router = APIRouter(tags=["runs"])
@@ -38,6 +39,7 @@ def get_next_scraper_run(now: datetime) -> datetime:
 
 @router.get("/runs", response_model=list[AgentRun])
 async def list_runs(
+    response: Response,
     limit: int = Query(default=20, le=100),
     offset: int = Query(default=0),
     user: dict = Depends(get_admin_user),
@@ -48,6 +50,11 @@ async def list_runs(
     """
     supabase = get_supabase()
     try:
+        # Get exact count for pagination header
+        count_res = supabase.table("agent_runs").select("id", count="exact").execute()
+        total_count = count_res.count or 0
+        response.headers["X-Total-Count"] = str(total_count)
+
         res = (
             supabase.table("agent_runs")
             .select("*")
@@ -62,6 +69,7 @@ async def list_runs(
 
 
 @router.get("/runs/latest", response_model=Optional[AgentRun])
+@ttl_cache(60.0)
 async def latest_run():
     """
     GET /api/v1/runs/latest (public)
@@ -85,6 +93,7 @@ async def latest_run():
 
 
 @router.get("/status")
+@ttl_cache(60.0)
 async def system_status():
     """
     GET /api/v1/status (public)

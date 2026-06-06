@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import logging
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 
 from app.core.auth import get_required_user, get_admin_user
 from app.core.database import get_supabase
@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 @router.get("", response_model=List[Contact])
 async def list_contacts(
+    response: Response,
     hospital_id: str = Query(...),
     is_active: bool = Query(default=True),
     user: dict = Depends(get_required_user),
@@ -54,6 +55,7 @@ async def list_contacts(
         .order("full_name")
         .execute()
     )
+    response.headers["X-Total-Count"] = str(len(res.data or []))
     return res.data
 
 

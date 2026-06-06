@@ -4,7 +4,7 @@ Task 10 adds territory filtering (admin vs AE views).
 """
 from __future__ import annotations
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from app.core.auth import get_required_user
 from app.core.database import get_supabase
 import logging
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("")
-async def list_hospitals(user: dict = Depends(get_required_user)):
+async def list_hospitals(response: Response, user: dict = Depends(get_required_user)):
     """
     GET /api/v1/hospitals
     Returns all hospitals with their assigned AEs, joined from hospital_ae_assignments.
@@ -52,6 +52,8 @@ async def list_hospitals(user: dict = Depends(get_required_user)):
             h for h in hospitals
             if any(str(ae["id"]) == user_id for ae in ae_map.get(h["id"], []))
         ]
+
+    response.headers["X-Total-Count"] = str(len(hospitals))
 
     return [
         {

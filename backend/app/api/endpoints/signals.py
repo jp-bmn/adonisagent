@@ -6,7 +6,7 @@ Task 14 adds: BackgroundTasks urgent alert hook on POST /signals
 """
 from __future__ import annotations
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Response
 from app.core.auth import get_required_user, get_admin_user
 from app.core.database import get_supabase
 from app.models.schemas import SignalReviewRequest
@@ -28,6 +28,7 @@ VALID_TIERS = {"urgent", "worth_knowing", "filtered_out"}
 # NOTE: /pending-review must be declared BEFORE /{signal_id} to avoid routing conflict
 @router.get("/pending-review")
 async def get_pending_review(
+    response: Response,
     limit: int = Query(default=50, le=200),
     user: dict = Depends(get_required_user),
 ):
@@ -42,7 +43,7 @@ async def get_pending_review(
     # Build query — join hospital name
     query = (
         supabase.table("signals")
-        .select("*, hospitals(name)")
+        .select("*, hospitals(name)", count="exact")
         .eq("review_status", "pending")
         .order("confidence_score", desc=False)
         .limit(limit)
@@ -62,6 +63,7 @@ async def get_pending_review(
         query = query.in_("hospital_id", hospital_ids)
 
     result = query.execute()
+    response.headers["X-Total-Count"] = str(result.count or 0)
     rows = result.data or []
 
     # Flatten hospital name into top-level field
@@ -73,6 +75,7 @@ async def get_pending_review(
 
 @router.get("")
 async def list_signals(
+    response: Response,
     ae_id: Optional[str] = Query(default=None, description="Filter to one AE's territory"),
     tier: Optional[str] = Query(default=None),
     limit: int = Query(default=100, le=200),
@@ -86,7 +89,7 @@ async def list_signals(
     """
     supabase = get_supabase()
 
-    query = supabase.table("signals").select("*").order("created_at", desc=True).limit(limit)
+    query = supabase.table("signals").select("*", count="exact").order("created_at", desc=True).limit(limit)
 
     # Tier filter
     if tier:
@@ -122,6 +125,7 @@ async def list_signals(
         query = query.in_("hospital_id", hospital_ids)
 
     result = query.execute()
+    response.headers["X-Total-Count"] = str(result.count or 0)
     return result.data or []
 
 

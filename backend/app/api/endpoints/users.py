@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 
 from app.core.auth import get_required_user, get_admin_user
 from app.core.database import get_supabase
@@ -76,7 +76,7 @@ async def get_me(user: dict = Depends(get_required_user)):
 
 
 @router.get("/ae-users", response_model=List[AEUserWithStats])
-async def list_ae_users(user: dict = Depends(get_admin_user)):
+async def list_ae_users(response: Response, user: dict = Depends(get_admin_user)):
     """
     GET /api/v1/ae-users (admin only)
     Returns all AEs (is_admin=False) with assigned hospitals and stats.
@@ -149,6 +149,7 @@ async def list_ae_users(user: dict = Depends(get_admin_user)):
                 last_viewed_digest=last_view,
             )
         )
+    response.headers["X-Total-Count"] = str(len(results))
     return results
 
 
@@ -204,7 +205,7 @@ async def create_assignment(
 
 
 @router.get("/digest-analytics")
-async def digest_analytics(user: dict = Depends(get_admin_user)):
+async def digest_analytics(response: Response, user: dict = Depends(get_admin_user)):
     """
     GET /api/v1/digest-analytics (admin only)
     Returns per-digest engagement for the last 30 days.
@@ -286,4 +287,5 @@ async def digest_analytics(user: dict = Depends(get_admin_user)):
             "time_to_open_minutes": time_to_open_minutes
         })
 
+    response.headers["X-Total-Count"] = str(len(analytics))
     return analytics
