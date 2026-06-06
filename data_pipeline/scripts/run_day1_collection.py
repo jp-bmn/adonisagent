@@ -605,6 +605,10 @@ def _noise_reason(signal: RawSignal, noise_guard_enabled: bool, noise_keywords: 
     for keyword in noise_keywords:
         if keyword and keyword in blob:
             return "noise_generic_headline"
+            
+    broad_markers = ["stock roundup", "industry trends", "market report", "stocks to watch", "daily briefing"]
+    if any(marker in title for marker in broad_markers):
+        return "noise_broad_industry_report"
 
     # Common broad update pages that often drown account-specific signals.
     if source in {"modern healthcare", "fierce healthcare"} and any(
@@ -624,6 +628,10 @@ def _is_broad_update_page(signal: RawSignal) -> bool:
         "dealmakers",
         "layoff",
         "roundup",
+        "stock roundup",
+        "market report",
+        "industry trends",
+        "daily briefing"
     ]
     return source in {"modern healthcare", "fierce healthcare"} and any(marker in title for marker in markers)
 
