@@ -82,10 +82,10 @@ For each raw news item:
 
 ## Cadence
 
-| Job | Cron | Action |
-|---|---|---|
+| Job    | Cron            | Action                                           |
+| ------ | --------------- | ------------------------------------------------ |
 | Scrape | `0 7 * * 1,3,5` | Mon/Wed/Fri 7 AM — full pass through all sources |
-| Digest | `0 8 * * 1` | Mondays 8 AM — build and email weekly digest |
+| Digest | `0 8 * * 1`     | Mondays 8 AM — build and email weekly digest     |
 
 Both configurable via env (`SCRAPE_CRON`, `DIGEST_CRON`). `TZ=America/New_York` by default.
 
@@ -98,16 +98,16 @@ Both configurable via env (`SCRAPE_CRON`, `DIGEST_CRON`). `TZ=America/New_York` 
 
 ## Tech choices and trade-offs
 
-| Choice | Why |
-|---|---|
-| TypeScript monorepo | One language across frontend and agents; cheaper context switching for a 3-person team |
-| Supabase | Free tier covers our scale; Postgres is the right tool; built-in auth is there if we need it for Phase 2 |
-| Next.js App Router | Server components fit dashboard read patterns; one deploy target on Vercel |
-| Tailwind + bespoke design | Matches the visual mockup; no design-system import overhead |
-| Claude (Anthropic SDK) | Pursuit provides API access; strong at structured-output classification |
-| serper.dev | Named in the PRD as the primary news aggregator |
-| Resend | Modern, low-friction transactional email; HTML templates render reliably |
-| node-cron | In-process scheduling is enough for our cadence; no need for external orchestrators yet |
+| Choice                    | Why                                                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------------------------------- |
+| TypeScript monorepo       | One language across frontend and agents; cheaper context switching for a 3-person team                   |
+| Supabase                  | Free tier covers our scale; Postgres is the right tool; built-in auth is there if we need it for Phase 2 |
+| Next.js App Router        | Server components fit dashboard read patterns; one deploy target on Vercel                               |
+| Tailwind + bespoke design | Matches the visual mockup; no design-system import overhead                                              |
+| Claude (Anthropic SDK)    | Pursuit provides API access; strong at structured-output classification                                  |
+| serper.dev                | Named in the PRD as the primary news aggregator                                                          |
+| Resend                    | Modern, low-friction transactional email; HTML templates render reliably                                 |
+| node-cron                 | In-process scheduling is enough for our cadence; no need for external orchestrators yet                  |
 
 ## Observability
 

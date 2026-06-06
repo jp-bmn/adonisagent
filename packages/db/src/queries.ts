@@ -66,11 +66,7 @@ export async function listHospitalsForUser(
   userId: string
 ): Promise<Hospital[]> {
   // Admin sees everything; AEs see only their assigned hospitals.
-  const { data: user, error: ue } = await db
-    .from('users')
-    .select('role')
-    .eq('id', userId)
-    .single();
+  const { data: user, error: ue } = await db.from('users').select('role').eq('id', userId).single();
   if (ue) throw ue;
 
   if (user.role === 'admin') {

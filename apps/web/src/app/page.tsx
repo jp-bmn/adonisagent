@@ -14,7 +14,8 @@ export default function HomePage() {
           </p>
         </div>
         <div className="bg-white border border-line rounded-lg px-3 py-1.5 text-xs font-mono text-slate-600">
-          Territory: <strong className="text-ink">Admin (Danielle)</strong> · {SEED_HOSPITALS.length} accounts
+          Territory: <strong className="text-ink">Admin (Danielle)</strong> ·{' '}
+          {SEED_HOSPITALS.length} accounts
         </div>
       </header>
 
@@ -51,15 +52,7 @@ export default function HomePage() {
   );
 }
 
-function Kpi({
-  value,
-  label,
-  tone,
-}: {
-  value: string | number;
-  label: string;
-  tone?: 'urgent';
-}) {
+function Kpi({ value, label, tone }: { value: string | number; label: string; tone?: 'urgent' }) {
   return (
     <div className="bg-white border border-line rounded-xl p-4">
       <div
