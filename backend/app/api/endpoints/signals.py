@@ -193,9 +193,9 @@ async def create_signal(
     )
 
     # --- Task 14: BackgroundTasks urgent alert ---
-    # TODO (Task 14): if tier == "urgent":
-    #     from app.services.alert_service import send_urgent_alert_for_signal
-    #     background_tasks.add_task(send_urgent_alert_for_signal, new_signal["id"])
+    if tier == "urgent":
+        from app.services.alert_service import send_urgent_alert_for_signal
+        background_tasks.add_task(send_urgent_alert_for_signal, new_signal["id"])
 
     return new_signal
 
