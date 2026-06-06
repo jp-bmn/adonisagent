@@ -29,6 +29,7 @@ from typing import Literal, Optional
 import anthropic
 
 from app.core.config import get_settings
+from app.core.retry import with_retry
 from app.services.rules_engine import classify_with_rules
 
 logger = logging.getLogger(__name__)
@@ -189,14 +190,22 @@ async def classify_signal(
 
     # ── Stage 2: Claude ──────────────────────────────────────────────────────
     logger.info(f"Rules engine: no match — escalating to Claude for '{hospital_name}'")
-    return await _classify_with_claude(
-        article_text    = article_text,
-        hospital_name   = hospital_name,
-        source_name     = source_name,
-        signal_type_hint= signal_type_hint,
-    )
+    try:
+        return await _classify_with_claude(
+            article_text    = article_text,
+            hospital_name   = hospital_name,
+            source_name     = source_name,
+            signal_type_hint= signal_type_hint,
+        )
+    except anthropic.APIStatusError as e:
+        return _error_result(f"Claude API error: {e.status_code}")
+    except anthropic.APIConnectionError:
+        return _error_result("Claude connection error")
+    except Exception as e:
+        return _error_result(str(e))
 
 
+@with_retry(max_attempts=3, base_delay=2.0)
 async def _classify_with_claude(
     article_text: str,
     hospital_name: str,
@@ -268,16 +277,16 @@ async def _classify_with_claude(
 
     except anthropic.APIStatusError as e:
         logger.error(f"Claude API error: {e.status_code} — {e.message}")
-        return _error_result(f"Claude API error: {e.status_code}")
+        raise
     except anthropic.APIConnectionError as e:
         logger.error(f"Claude connection error: {e}")
-        return _error_result("Claude connection error")
+        raise
     except (KeyError, ValueError, json.JSONDecodeError) as e:
         logger.error(f"Claude response parse error: {e}")
         return _error_result("Claude response parse error")
     except Exception as e:
         logger.error(f"Unexpected classifier error: {e}")
-        return _error_result(str(e))
+        raise
 
 
 def _parse_claude_response(raw_text: str) -> dict:

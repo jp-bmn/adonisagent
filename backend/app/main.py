@@ -97,7 +97,21 @@ async def log_requests(request: Request, call_next):
 async def global_exception_handler(request: Request, exc: Exception):
     import traceback
     logger.error(f"Unhandled exception on {request.method} {request.url.path}: {exc}\n{traceback.format_exc()}")
-    # TODO (Task 16): notify Danielle via Slack in production
+    
+    # Notify Danielle via Slack in production (Task 16)
+    try:
+        from app.services.slack_service import send_dm
+        from app.core.config import get_settings
+        settings = get_settings()
+        danielle_id = settings.slack_user_id_danielle
+        if danielle_id and not danielle_id.startswith("PLACEHOLDER"):
+            send_dm(
+                slack_user_id=danielle_id,
+                text=f"🚨 *Internal Server Error (500)* on `{request.method} {request.url.path}`\nError: `{str(exc)}`"
+            )
+    except Exception as slack_err:
+        logger.error(f"Failed to notify Danielle via Slack: {slack_err}")
+
     return JSONResponse(
         status_code=500,
         content={"error": "Internal server error", "detail": str(exc)},
