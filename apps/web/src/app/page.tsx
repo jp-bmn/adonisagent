@@ -34,11 +34,7 @@ export default function HomePage() {
         {PREVIEW_SIGNALS.map((signal) => {
           const hospital = SEED_HOSPITALS.find((h) => h.id === signal.hospital_id);
           return (
-            <SignalCard
-              key={signal.id}
-              signal={signal}
-              hospitalName={hospital?.display_name}
-            />
+            <SignalCard key={signal.id} signal={signal} hospitalName={hospital?.display_name} />
           );
         })}
       </div>
