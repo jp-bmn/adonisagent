@@ -8,6 +8,7 @@ from pathlib import Path
 
 from scripts.generate_client_feed_preview import run as run_client_feed_preview
 from scripts.generate_status_snapshot import run as run_status_snapshot
+from scripts.generate_team_update import run as run_team_update
 from scripts.run_contact_linkedin_discovery import run as run_contact_discovery
 from scripts.run_day1_collection import run as run_day1_collection
 
@@ -31,6 +32,7 @@ def run() -> None:
     contact_path = run_contact_discovery()
     snapshot_md_path, snapshot_html_path = run_status_snapshot()
     client_preview_paths = run_client_feed_preview()
+    team_update_path = run_team_update()
 
     outputs_dir = Path("outputs")
     run_log = _read_json(outputs_dir / "day2_run_log.json")
@@ -44,6 +46,7 @@ def run() -> None:
     print(f"- client feed preview (light): {client_preview_paths['light']}")
     print(f"- client feed preview (dark): {client_preview_paths['dark']}")
     print(f"- preserved client preview (light v1): {client_preview_paths['light_v1']}")
+    print(f"- teammate update (plain english): {team_update_path}")
     print("")
     print("Readiness snapshot:")
     print(f"- signals_new: {run_log.get('signals_new', 0)}")

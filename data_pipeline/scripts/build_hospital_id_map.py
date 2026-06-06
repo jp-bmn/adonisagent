@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -13,8 +14,39 @@ import requests
 from adonis_data.constants import HOSPITAL_QUERIES
 
 
+HOSPITAL_NAME_ALIASES: dict[str, tuple[str, ...]] = {
+    "NewYork-Presbyterian": (
+        "new york presbyterian",
+        "new york-presbyterian",
+        "nyp",
+    ),
+    "UMass Memorial": (
+        "umass memorial health",
+        "umass",
+    ),
+    "Ascension": (
+        "ascension health",
+    ),
+    "University of Arkansas": (
+        "uams",
+        "uams medical center",
+        "university of arkansas medical sciences",
+        "university of arkansas for medical sciences",
+        "university of arkansas medical center",
+    ),
+    "CommonSpirit": (
+        "commonspirit health",
+        "common spirit",
+        "common spirit health",
+    ),
+}
+
+
 def _normalize_name(name: str) -> str:
-    return " ".join(name.strip().lower().split())
+    lowered = name.strip().lower()
+    # Fold punctuation and extra separators so naming variants map consistently.
+    cleaned = re.sub(r"[^a-z0-9]+", " ", lowered)
+    return " ".join(cleaned.split())
 
 
 def _extract_rows(payload: Any) -> list[dict[str, Any]]:
@@ -32,7 +64,11 @@ def _extract_rows(payload: Any) -> list[dict[str, Any]]:
 
 def _build_id_map(rows: list[dict[str, Any]]) -> dict[str, str]:
     targets = list(HOSPITAL_QUERIES.keys())
-    target_lookup = {_normalize_name(name): name for name in targets}
+    target_lookup: dict[str, str] = {_normalize_name(name): name for name in targets}
+
+    for canonical_name, aliases in HOSPITAL_NAME_ALIASES.items():
+        for alias in aliases:
+            target_lookup[_normalize_name(alias)] = canonical_name
 
     discovered: dict[str, str] = {}
     for row in rows:
@@ -46,6 +82,24 @@ def _build_id_map(rows: list[dict[str, Any]]) -> dict[str, str]:
             discovered[canonical] = hospital_id
 
     return discovered
+
+
+def _collect_unmatched_names(rows: list[dict[str, Any]]) -> list[str]:
+    targets = list(HOSPITAL_QUERIES.keys())
+    target_lookup: dict[str, str] = {_normalize_name(name): name for name in targets}
+    for canonical_name, aliases in HOSPITAL_NAME_ALIASES.items():
+        for alias in aliases:
+            target_lookup[_normalize_name(alias)] = canonical_name
+
+    unmatched: set[str] = set()
+    for row in rows:
+        name = str(row.get("name") or row.get("hospital_name") or "").strip()
+        if not name:
+            continue
+        if _normalize_name(name) not in target_lookup:
+            unmatched.add(name)
+
+    return sorted(unmatched)
 
 
 def _upsert_env_map(env_path: Path, hospital_id_map: dict[str, str]) -> None:
@@ -85,6 +139,11 @@ def main() -> int:
         help="AE user UUID used for X-User-Id header.",
     )
     parser.add_argument(
+        "--bearer-token",
+        default=os.getenv("SIGNALS_ENDPOINT_TOKEN", "").strip(),
+        help="Optional bearer token for Authorization header.",
+    )
+    parser.add_argument(
         "--write-env",
         action="store_true",
         help="Write HOSPITAL_ID_MAP into .env.",
@@ -103,12 +162,33 @@ def main() -> int:
 
     base = args.api_base_url.rstrip("/")
     url = f"{base}/hospitals"
+    headers = {"X-User-Id": args.user_id}
+    if args.bearer_token:
+        headers["Authorization"] = f"Bearer {args.bearer_token}"
+
     response = requests.get(
         url,
-        headers={"X-User-Id": args.user_id},
+        headers=headers,
+        params={"ae_id": args.user_id},
         timeout=30,
     )
-    response.raise_for_status()
+
+    try:
+        response.raise_for_status()
+    except requests.HTTPError as exc:
+        detail = response.text.strip()
+        if len(detail) > 400:
+            detail = detail[:400] + "..."
+
+        if response.status_code == 401:
+            hint = (
+                "Unauthorized (401). The endpoint likely requires a bearer token. "
+                "Set SIGNALS_ENDPOINT_TOKEN in .env or pass --bearer-token <token>."
+            )
+        else:
+            hint = f"Request failed with status {response.status_code}."
+
+        raise SystemExit(f"{hint}\nURL: {response.url}\nResponse: {detail}") from exc
 
     payload = response.json()
     rows = _extract_rows(payload)
@@ -116,6 +196,7 @@ def main() -> int:
         raise SystemExit("Could not parse hospital rows from API response.")
 
     hospital_id_map = _build_id_map(rows)
+    unmatched_names = _collect_unmatched_names(rows)
     missing = [name for name in HOSPITAL_QUERIES if name not in hospital_id_map]
 
     print("Discovered HOSPITAL_ID_MAP:")
@@ -124,6 +205,11 @@ def main() -> int:
     if missing:
         print("\nMissing expected hospitals:")
         for name in missing:
+            print(f"- {name}")
+
+    if unmatched_names:
+        print("\nUnmatched API hospital names (for backend mapping review):")
+        for name in unmatched_names:
             print(f"- {name}")
 
     if args.write_env:
