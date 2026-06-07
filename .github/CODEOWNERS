@@ -1,0 +1,18 @@
+# CODEOWNERS — automatic review requests
+
+# Default reviewers for everything
+*       @jp-bmn
+
+# Frontend areas → Juan
+apps/web/                @juanfranco
+packages/shared/src/     @juanfranco
+
+# Agent / backend areas → Joel + Michael
+apps/agents/             @jp-bmn @michaelchabler
+
+# Database schema → all three review (changes affect everyone)
+packages/db/             @jp-bmn @juanfranco @michaelchabler
+
+# Docs and PRD changes → all three review
+docs/                    @jp-bmn @juanfranco @michaelchabler
+*.md                     @jp-bmn @juanfranco @michaelchabler
