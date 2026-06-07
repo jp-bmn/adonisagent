@@ -110,3 +110,47 @@ Note:
 12. outputs/day2_client_feed_preview.html
 13. outputs/day2_client_feed_preview_dark.html
 14. outputs/day2_client_feed_preview_light_v1.html
+
+## Immediate Unblocker (June 6)
+
+Current preflight status: blocked because `GET /api/v1/hospitals` returns 3/5 hospitals.
+
+Missing from API response:
+
+1. University of Arkansas
+2. CommonSpirit
+
+Michael AE user ID used in tests:
+
+1. 102fc76e-bc46-43f5-9898-19999c81ae3d
+
+Observed behavior:
+
+1. `scripts.build_hospital_id_map` succeeds with valid AE ID and writes `HOSPITAL_ID_MAP`.
+2. Coverage check fails because two hospitals above are not in `/api/v1/hospitals` response.
+
+What needs to be updated on backend:
+
+1. Add/enable University of Arkansas and CommonSpirit rows in `public.hospitals`.
+2. Ensure both are assigned to Michael's AE in the assignment mapping table.
+3. Confirm `GET /api/v1/hospitals` with header `X-User-Id: 102fc76e-bc46-43f5-9898-19999c81ae3d` returns all 5 expected hospitals.
+
+Quick SQL check Joel can run:
+
+1. `select id, name from public.hospitals order by name;`
+
+Copy/paste Slack message to Joel:
+
+```text
+Hey Joel, quick unblocker on my side:
+
+My live preflight is still blocked because /api/v1/hospitals is returning only 3 hospitals for my AE scope.
+Missing right now: University of Arkansas and CommonSpirit.
+
+Can you please:
+1) add/enable those 2 in public.hospitals
+2) ensure both are assigned to my AE user (102fc76e-bc46-43f5-9898-19999c81ae3d)
+3) confirm GET /api/v1/hospitals with X-User-Id header for my AE returns all 5
+
+Once that's done, I'll rerun build_hospital_id_map + preflight immediately and proceed with live posting.
+```

@@ -90,6 +90,12 @@ Run a one-command refresh for all non-endpoint artifacts:
 python -m scripts.refresh_non_endpoint_artifacts
 ```
 
+Generate a plain-English teammate update from the latest artifacts:
+
+```bash
+python -m scripts.generate_team_update
+```
+
 Build `HOSPITAL_ID_MAP` automatically from the live API (requires a valid
 `X-User-Id` UUID from Supabase `ae_users`):
 
@@ -107,6 +113,18 @@ Run preflight checks before posting live batches:
 
 ```bash
 python -m scripts.preflight_live_post
+```
+
+Run the pipeline with scheduler/retry/lock guardrails (single safe cycle by default):
+
+```bash
+python -m scripts.run_scheduled_pipeline --max-runs 1
+```
+
+Continuous mode example (every 60 minutes, keep going on transient failures):
+
+```bash
+python -m scripts.run_scheduled_pipeline --max-runs 0 --interval-minutes 60 --continue-on-failure
 ```
 
 Opt-in env autofix mode (fills missing non-secret conservative defaults only; existing values are preserved):
@@ -131,18 +149,18 @@ View the test page locally:
 
 1. Open `outputs/day2_test_page.html` in your browser, or
 2. Run `python -m http.server 8000` from `data_pipeline` and open:
-	- `http://localhost:8000/outputs/day2_test_page.html`
+   - `http://localhost:8000/outputs/day2_test_page.html`
 3. Run `python -m scripts.open_test_page` to open it directly (auto-generates the page if missing).
 
 Client preview page:
 
 1. Open `outputs/day2_client_feed_preview.html` in your browser.
 2. With local server on port 8000, use:
-	- `http://localhost:8000/outputs/day2_client_feed_preview.html`
+   - `http://localhost:8000/outputs/day2_client_feed_preview.html`
 3. Dark variant:
-	- `outputs/day2_client_feed_preview_dark.html`
+   - `outputs/day2_client_feed_preview_dark.html`
 4. Preserved original light version:
-	- `outputs/day2_client_feed_preview_light_v1.html`
+   - `outputs/day2_client_feed_preview_light_v1.html`
 
 Output file:
 
@@ -167,6 +185,9 @@ Output file:
 19. `outputs/day2_client_feed_preview.html`
 20. `outputs/day2_client_feed_preview_dark.html`
 21. `outputs/day2_client_feed_preview_light_v1.html`
+22. `outputs/day2_team_update_plain_english.md`
+23. `outputs/day2_quality_upgrade_metrics.json`
+24. `outputs/day2_scheduler_log.jsonl`
 
 ## Notes
 

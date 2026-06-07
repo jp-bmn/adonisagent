@@ -16,9 +16,11 @@ Define the payload Michael sends to Joel for signal storage and run logging.
 ## Endpoint Recommendations
 
 1. POST /signals/batch
+
 - Description: ingest multiple signal candidates from one run.
 
 2. POST /agent-runs
+
 - Description: persist run-level quality and skip metrics.
 
 ## POST /signals/batch Request
