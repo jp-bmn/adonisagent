@@ -7,7 +7,7 @@ export default async function HospitalsPage() {
   return (
     <div className="px-8 py-7">
       <header className="mb-6">
-        <h1 className="font-serif text-2xl font-semibold text-ink">Hospitals</h1>
+        <h1 className="font-serif text-2xl font-semibold text-brand">Hospitals</h1>
         <p className="text-sm text-slate-500 mt-1">{hospitals.length} accounts monitored</p>
       </header>
 
@@ -38,7 +38,10 @@ export default async function HospitalsPage() {
                   </Link>
                 </td>
                 <td className="px-5 py-4 text-sm text-slate-600">
-                  {h.ae_users.filter((u) => !u.is_admin).map((u) => u.name).join(', ') || '—'}
+                  {h.ae_users
+                    .filter((u) => !u.is_admin)
+                    .map((u) => u.name)
+                    .join(', ') || '—'}
                 </td>
                 <td className="px-5 py-4 text-sm text-slate-500">{h.division_note ?? '—'}</td>
               </tr>

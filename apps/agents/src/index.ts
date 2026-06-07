@@ -14,7 +14,7 @@ import { buildAndSendDigests } from './pipeline/digest.js';
 import { log } from './lib/log.js';
 
 const SCRAPE_CRON = process.env.SCRAPE_CRON ?? '0 7 * * 1,3,5'; // Mon/Wed/Fri 7:00 AM
-const DIGEST_CRON = process.env.DIGEST_CRON ?? '0 8 * * 1';     // Mondays 8:00 AM
+const DIGEST_CRON = process.env.DIGEST_CRON ?? '0 8 * * 1'; // Mondays 8:00 AM
 const TZ = process.env.TZ ?? 'America/New_York';
 
 async function main() {
