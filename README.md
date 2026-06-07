@@ -35,13 +35,13 @@ The tool replaces **Glean** (the internal AI tool the team uses reactively, only
 2. UMass Memorial
 3. Ascension
 4. University of Arkansas (UAMS)
-5. CommonSpirit Health _(added by Danielle, May 19)_
+5. CommonSpirit Health 
 
 ## Team
 
 - **Juan Franco** — frontend, design system, dashboard UX
-- **Joel Philip** — partner communications, scoping
-- **Michael Chabler** — backend, agent pipeline
+- **Joel Philip** — , backend, agent pipeline,scoping, project management
+- **Michael Chabler** — partner communications
 
 Partner: Adonis Technology, Inc. · Primary contact: Reed Kalash · SME: Danielle Ferdon
 
