@@ -12,6 +12,21 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from app.core.auth import get_required_user, get_admin_user
 from app.core.database import get_supabase
 from app.models.schemas import AEUserWithStats, HospitalAEAssignment
+import re
+
+def safe_parse_datetime(val: str) -> datetime:
+    if not val:
+        raise ValueError("Empty datetime string")
+    s = val.replace("Z", "+00:00")
+    if "." in s:
+        base, rest = s.split(".", 1)
+        match = re.match(r"^(\d+)(.*)$", rest)
+        if match:
+            frac, tz = match.groups()
+            frac = (frac + "000000")[:6]
+            s = f"{base}.{frac}{tz}"
+    return datetime.fromisoformat(s)
+
 
 router = APIRouter(tags=["users"])
 logger = logging.getLogger(__name__)
@@ -61,7 +76,7 @@ async def get_me(user: dict = Depends(get_required_user)):
         .execute()
     )
     if views_res.data:
-        last_view = datetime.fromisoformat(views_res.data[0]["viewed_at"].replace("Z", "+00:00"))
+        last_view = safe_parse_datetime(views_res.data[0]["viewed_at"])
 
     return AEUserWithStats(
         id=user["id"],
@@ -129,7 +144,7 @@ async def list_ae_users(response: Response, user: dict = Depends(get_admin_user)
     for v in views_res.data or []:
         ae_uuid = v["ae_id"]
         if ae_uuid not in ae_last_view:
-            ae_last_view[ae_uuid] = datetime.fromisoformat(v["viewed_at"].replace("Z", "+00:00"))
+            ae_last_view[ae_uuid] = safe_parse_datetime(v["viewed_at"])
 
     # 5. Construct list of AEUserWithStats
     results = []
@@ -263,8 +278,8 @@ async def digest_analytics(response: Response, user: dict = Depends(get_admin_us
             
             # Compute time to open in minutes
             if d.get("sent_at") and first_viewed_at:
-                sent_dt = datetime.fromisoformat(d["sent_at"].replace("Z", "+00:00"))
-                view_dt = datetime.fromisoformat(first_viewed_at.replace("Z", "+00:00"))
+                sent_dt = safe_parse_datetime(d["sent_at"])
+                view_dt = safe_parse_datetime(first_viewed_at)
                 time_to_open_minutes = (view_dt - sent_dt).total_seconds() / 60.0
 
         ae_relation = d.get("ae_users")
