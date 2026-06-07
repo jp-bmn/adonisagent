@@ -88,21 +88,21 @@ export interface ApiStatus {
 // ---------------------------------------------------------------------------
 
 export const SIGNAL_TYPE_LABELS: Record<SignalType, string> = {
-  leadership_change:        'Leadership change',
-  epic_go_live:             'Epic go-live',
-  vendor_change:            'Vendor change',
-  vendor_dispute:           'Vendor dispute',
-  ma_acquisition:           'M&A activity',
-  financial_event:          'Financial event',
-  rcm_hiring_spike:         'RCM hiring',
-  restructuring:            'Restructuring',
-  automation_proof:         'Automation',
-  ai_adoption_outside_rcm:  'AI adoption',
-  named_automation_owner:   'Automation owner',
-  new_hospital_launch:      'New launch',
-  post_golive_friction:     'Post go-live',
-  thought_leadership:       'Thought leadership',
-  filtered_out:             'Filtered out',
+  leadership_change: 'Leadership change',
+  epic_go_live: 'Epic go-live',
+  vendor_change: 'Vendor change',
+  vendor_dispute: 'Vendor dispute',
+  ma_acquisition: 'M&A activity',
+  financial_event: 'Financial event',
+  rcm_hiring_spike: 'RCM hiring',
+  restructuring: 'Restructuring',
+  automation_proof: 'Automation',
+  ai_adoption_outside_rcm: 'AI adoption',
+  named_automation_owner: 'Automation owner',
+  new_hospital_launch: 'New launch',
+  post_golive_friction: 'Post go-live',
+  thought_leadership: 'Thought leadership',
+  filtered_out: 'Filtered out',
 };
 
 // ---------------------------------------------------------------------------
@@ -136,9 +136,9 @@ export async function fetchSignals(
   opts: { tier?: SignalTier; ae_id?: string; limit?: number } = {}
 ): Promise<ApiSignal[]> {
   const params = new URLSearchParams();
-  if (opts.tier)   params.set('tier', opts.tier);
-  if (opts.ae_id)  params.set('ae_id', opts.ae_id);
-  if (opts.limit)  params.set('limit', String(opts.limit));
+  if (opts.tier) params.set('tier', opts.tier);
+  if (opts.ae_id) params.set('ae_id', opts.ae_id);
+  if (opts.limit) params.set('limit', String(opts.limit));
   const qs = params.size > 0 ? `?${params}` : '';
   return apiFetch<ApiSignal[]>(`/signals${qs}`, userId);
 }
@@ -156,4 +156,27 @@ export async function fetchMe(userId: string): Promise<ApiMe> {
 
 export async function fetchStatus(userId?: string): Promise<ApiStatus> {
   return apiFetch<ApiStatus>('/status', userId);
+}
+
+export async function fetchPendingReview(userId?: string): Promise<ApiSignal[]> {
+  return apiFetch<ApiSignal[]>('/signals/pending-review', userId);
+}
+
+export async function reviewSignal(
+  id: string,
+  status: 'approved' | 'dismissed',
+  userId?: string
+): Promise<ApiSignal> {
+  return apiFetch<ApiSignal>(`/signals/${id}/review`, userId, {
+    method: 'POST',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function exportCsv(userId?: string): Promise<Blob> {
+  const res = await fetch(`${BASE_URL}/export/csv`, {
+    headers: { 'X-User-Id': userId ?? DEFAULT_USER_ID },
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: /export/csv`);
+  return res.blob();
 }
