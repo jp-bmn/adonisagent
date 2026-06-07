@@ -37,3 +37,6 @@ coverage/
 # Misc
 .cache/
 *.local
+
+# TypeScript incremental build cache
+*.tsbuildinfo

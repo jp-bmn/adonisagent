@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { SEED_HOSPITALS } from '@adonis/shared';
+import { SignalCard, PREVIEW_SIGNALS } from '@/components';
 
 export default function HomePage() {
   // TODO: when DB is wired, replace with: const signals = await listSignals(db, { limit: 20 });
@@ -29,15 +30,13 @@ export default function HomePage() {
         Recent signals · newest first
       </div>
 
-      <div className="bg-white border border-line rounded-lg p-6 text-center text-slate-500">
-        <p className="mb-2 text-sm">No signals yet — the agent worker has not run.</p>
-        <p className="text-xs">
-          Run{' '}
-          <code className="px-1.5 py-0.5 bg-paper rounded text-ink font-mono">
-            pnpm --filter @adonis/agents scrape:once
-          </code>{' '}
-          to pull from sources, or wait for the next scheduled Mon/Wed/Fri run.
-        </p>
+      <div className="space-y-3">
+        {PREVIEW_SIGNALS.map((signal) => {
+          const hospital = SEED_HOSPITALS.find((h) => h.id === signal.hospital_id);
+          return (
+            <SignalCard key={signal.id} signal={signal} hospitalName={hospital?.display_name} />
+          );
+        })}
       </div>
 
       <div className="mt-8 text-xs text-slate-500">
