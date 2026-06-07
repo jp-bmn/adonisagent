@@ -10,11 +10,7 @@
  */
 
 import { Resend } from 'resend';
-import {
-  createServerClient,
-  listSignals,
-  listHospitals,
-} from '@adonis/db';
+import { createServerClient, listSignals, listHospitals } from '@adonis/db';
 import type { Signal, Hospital } from '@adonis/shared';
 import { log } from '../lib/log.js';
 import { renderDigestHtml, renderDigestText } from './render.js';

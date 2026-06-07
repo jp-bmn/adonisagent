@@ -18,9 +18,11 @@ Settings → Branches → Add rule for `main`:
 Settings → Secrets and variables → Actions → Repository secrets
 
 For CI:
+
 - Nothing required initially. The CI runs lint + typecheck only.
 
 For future deploy (when ready):
+
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ANTHROPIC_API_KEY`
@@ -65,6 +67,7 @@ Settings → Labels — add or rename to:
 ## Milestones
 
 Create three milestones matching the roadmap:
+
 - **Phase 1 — Digest + dashboard** (due June 2)
 - **Phase 2 — Full dashboard** (due June 16)
 - **Phase 3 — Co-pilot stretch** (due June 23)
