@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adonis — Antigravity Task Board (Joel)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0D1117;color:#E6EDF3;min-height:100vh;padding:24px}
+h1{font-size:22px;font-weight:800;color:#F0F6FC;margin-bottom:4px}
+.subtitle{font-size:13px;color:#656D76;margin-bottom:28px}
+.tag{display:inline-block;background:#1D4ED8;color:#BFDBFE;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
+.week-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#1D4ED8;margin:28px 0 10px;padding-left:2px;display:flex;align-items:center;gap:10px}
+.week-header::after{content:"";flex:1;height:1px;background:#21262D}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin-bottom:4px}
+.card{background:#161B22;border:1px solid #30363D;border-radius:10px;overflow:hidden;transition:border-color .15s}
+.card:hover{border-color:#1D4ED8}
+.card-hdr{padding:14px 16px 10px;cursor:pointer;user-select:none;display:flex;align-items:flex-start;gap:10px}
+.card-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#1D4ED8;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.card-meta{flex:1;min-width:0}
+.card-title{font-size:13px;font-weight:700;color:#F0F6FC;line-height:1.4;margin-bottom:3px}
+.card-sub{font-size:11px;color:#656D76}
+.expand-btn{flex-shrink:0;color:#656D76;font-size:11px;padding:2px 6px;border:1px solid #30363D;border-radius:5px;background:transparent;cursor:pointer;transition:all .1s;white-space:nowrap;margin-top:1px}
+.expand-btn:hover{border-color:#1D4ED8;color:#93C5FD}
+.prompt-area{display:none;padding:0 16px 14px}
+.prompt-area.open{display:block}
+.prompt-box{background:#0D1117;border:1px solid #21262D;border-radius:7px;padding:12px;font-size:11.5px;line-height:1.75;color:#C9D1D9;font-family:"SF Mono",Consolas,"Courier New",monospace;white-space:pre-wrap;word-break:break-word;max-height:320px;overflow-y:auto}
+.copy-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.copy-hint{font-size:11px;color:#484F58}
+.copy-btn{background:#1D4ED8;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:background .12s;display:flex;align-items:center;gap:5px}
+.copy-btn:hover{background:#2563EB}
+.copy-btn.copied{background:#15803D}
+.milestone-card{background:#161B22;border:1px solid #1D4ED8;border-radius:10px;padding:14px 18px;margin-bottom:4px}
+.milestone-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#1D4ED8;margin-bottom:4px}
+.milestone-title{font-size:14px;font-weight:700;color:#93C5FD;margin-bottom:3px}
+.milestone-desc{font-size:12px;color:#656D76}
+.legend{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#656D76}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+.footer{margin-top:32px;padding-top:16px;border-top:1px solid #21262D;font-size:11px;color:#484F58;text-align:center}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#0D1117}
+::-webkit-scrollbar-thumb{background:#30363D;border-radius:3px}
+</style>
+</head>
+<body>
+
+<h1>Adonis Account Intelligence Tool <span class="tag">Joel · Backend</span></h1>
+<p class="subtitle">19 Antigravity tasks · Copy any prompt directly into the Agent Manager · Organized by sprint week</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#1D4ED8"></div>Core build</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#0F766E"></div>Luminai enhancement</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#C2410C"></div>Milestone / checkpoint</div>
+</div>
+
+<div id="board"></div>
+
+<div class="footer">Adonis Account Intelligence Tool · Internal · Not for client distribution · Pursuit L3 AI Native Demo Day · May 2026</div>
+
+<script>
+const WEEKS = [
+  {
+    label: "Week 1  ·  May 19–23",
+    tasks: [
+      {
+        id: 1,
+        title: "Initialize repository and backend project structure",
+        sub: "Monorepo, FastAPI skeleton, Dockerfile, Railway config",
+        prompt: `You are setting up the Adonis Account Intelligence Tool — a sales intelligence system for a healthcare company called Adonis. The tool monitors hospital news and delivers weekly Slack digests to sales reps.
+
+PROJECT CONTEXT:
+- Stack: Python FastAPI backend + Next.js frontend (in a monorepo)
+- Database: Supabase (PostgreSQL)
+- Deployment: Vercel (frontend) + Railway (backend)
+- The backend serves REST endpoints consumed by the Next.js dashboard and called by a weekly scraper scheduler
+
+TASK: Initialize the monorepo and Python FastAPI backend with this exact structure:
+
+/backend
+  /app
+    __init__.py
+    main.py            # FastAPI app init, CORS config, router registration
+    /api
+      __init__.py
+      /endpoints
+        hospitals.py   # GET /hospitals, GET /hospitals/{id}
+        signals.py     # GET /signals, POST /signals, POST /signals/{id}/review, GET /signals/pending-review
+        contacts.py    # GET /contacts, POST /contacts, PATCH /contacts/{id}
+        digests.py     # POST /digest/send, GET /digests
+        views.py       # POST /digest-view
+        export.py      # GET /export/csv
+        runs.py        # GET /runs, GET /runs/latest, GET /status
+    /core
+      config.py        # pydantic-settings env var loader
+      database.py      # Supabase client singleton
+      auth.py          # placeholder for auth middleware
+      retry.py         # placeholder for retry decorator
+    /models
+      schemas.py       # Pydantic models for all entities
+    /services
+      __init__.py      # empty
+  requirements.txt
+  .env.example
+  Dockerfile
+  railway.toml
+
+requirements.txt must include: fastapi, uvicorn[standard], supabase, anthropic, slack-bolt, python-dotenv, pydantic-settings, pdfplumber, httpx, pytest, pytest-asyncio
+
+.env.example placeholders: SUPABASE_URL, SUPABASE_KEY, SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET, ANTHROPIC_API_KEY, SERPER_API_KEY, NEWS_API_KEY, DASHBOARD_URL, INTERNAL_API_KEY
+
+In main.py: configure CORS to allow all origins (dev mode). Register all endpoint routers under /api/v1. Add GET / health check returning {"status": "ok", "service": "adonis-intelligence-api"}.
+
+Dockerfile:
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+railway.toml:
+[build]
+builder = "dockerfile"
+[deploy]
+startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/"
+
+Start the server and confirm GET / returns 200 with the health check JSON. Provide a screenshot of the running terminal.`
+      },
+      {
+        id: 2,
+        title: "Supabase database schema and seed data",
+        sub: "All 8 tables, constraints, seed hospitals and users",
+        prompt: `You are building the Adonis Account Intelligence Tool. Backend: Python FastAPI + Supabase (PostgreSQL).
+
+TASK: Create the complete database schema in Supabase and seed it with initial data.
+
+Connect using supabase-py. Run SQL migrations to create these tables:
+
+hospitals:
+  id uuid PK default gen_random_uuid()
+  name text NOT NULL
+  website_url text
+  division_note text
+  created_at timestamptz default now()
+
+ae_users:
+  id uuid PK default gen_random_uuid()
+  name text NOT NULL
+  slack_user_id text
+  is_admin boolean default false
+  created_at timestamptz default now()
+
+hospital_ae_assignments:
+  hospital_id uuid FK hospitals ON DELETE CASCADE
+  ae_id uuid FK ae_users ON DELETE CASCADE
+  assigned_at timestamptz default now()
+  PRIMARY KEY (hospital_id, ae_id)
+
+contacts:
+  id uuid PK default gen_random_uuid()
+  hospital_id uuid FK hospitals NOT NULL
+  full_name text NOT NULL
+  role text
+  prior_employer text
+  linkedin_url text
+  linkedin_verified boolean default false
+  is_active boolean default true
+  created_at timestamptz default now()
+  updated_at timestamptz default now()
+
+signals:
+  id uuid PK default gen_random_uuid()
+  hospital_id uuid FK hospitals NOT NULL
+  signal_type text NOT NULL
+  tier text CHECK (tier IN ('urgent','worth_knowing','filtered_out')) NOT NULL
+  confidence_score float default 0.0
+  review_status text CHECK (review_status IN ('pending','approved','dismissed'))
+  title text
+  summary text
+  source_url text
+  source_name text
+  published_date date
+  created_at timestamptz default now()
+  included_in_digest boolean default false
+  urgent_sent boolean default false
+
+digests:
+  id uuid PK default gen_random_uuid()
+  ae_id uuid FK ae_users
+  sent_at timestamptz
+  slack_message_ts text
+  week_start date
+  week_end date
+
+digest_views:
+  id uuid PK default gen_random_uuid()
+  digest_id uuid FK digests
+  ae_id uuid FK ae_users
+  viewed_at timestamptz default now()
+  utm_source text
+
+agent_runs:
+  id uuid PK default gen_random_uuid()
+  run_at timestamptz default now()
+  hospitals_checked int default 0
+  signals_found int default 0
+  signals_new int default 0
+  rules_engine_hits int default 0
+  errors jsonb
+  duration_ms int
+
+After creating tables, insert seed data:
+
+Hospitals:
+- NewYork-Presbyterian (website_url: https://nyp.org)
+- UMass Memorial (website_url: https://umassmemorial.org)
+- Ascension (website_url: https://ascension.org)
+- University of Arkansas Medical Sciences (website_url: https://uams.edu)
+- CommonSpirit Health (website_url: https://commonspirit.org, division_note: 'Specific division TBD — confirm with Danielle before expanding scraper scope')
+
+Users:
+- Danielle Ferdon (is_admin=true, slack_user_id='PLACEHOLDER_DANIELLE')
+- Michael (is_admin=false, slack_user_id='PLACEHOLDER_MICHAEL')
+- David (is_admin=false, slack_user_id='PLACEHOLDER_DAVID')
+- Jeff (is_admin=false, slack_user_id='PLACEHOLDER_JEFF — not yet confirmed')
+
+Assignments:
+- NewYork-Presbyterian → Michael
+- UMass Memorial → Michael
+- Ascension → David
+- University of Arkansas → David
+- CommonSpirit → David
+
+Write a verification script that queries all tables and confirms: 5 hospitals, 4 users, 5 assignments. Run it and show the output.`
+      },
+      {
+        id: 3,
+        title: "Core hospital and signal API endpoints",
+        sub: "GET /hospitals, GET /signals, POST /signals with confidence logic",
+        prompt: `You are building the Adonis Account Intelligence Tool. Python FastAPI backend connected to Supabase.
+
+TASK: Build the first set of core REST API endpoints. All responses are JSON. Use supabase-py for all database operations.
+
+GET /api/v1/hospitals
+Returns all hospitals with their assigned AEs. Join hospitals with hospital_ae_assignments and ae_users.
+Response format: [{"id":"...", "name":"...", "website_url":"...", "ae_users":[{"id":"...", "name":"..."}]}]
+
+GET /api/v1/hospitals/{hospital_id}/signals
+Returns signals for one hospital ordered by created_at DESC.
+Query params: tier (optional, one of urgent/worth_knowing/filtered_out), limit (default 50, max 200)
+
+GET /api/v1/signals
+Returns signals with filtering. Query params:
+- ae_id: if provided, only return signals from hospitals assigned to that AE (join with hospital_ae_assignments)
+- tier: optional filter
+- limit: default 100, max 200
+- include_pending: if false (default), exclude review_status='dismissed'. If true, include all.
+
+POST /api/v1/signals
+Accepts: {hospital_id, signal_type, tier, confidence_score, title, summary, source_url, source_name, published_date}
+Business logic:
+  - Validate signal_type is one of: leadership_change, rcm_hiring_spike, epic_go_live, post_golive_friction, ma_acquisition, vendor_change, vendor_dispute, restructuring, new_hospital_launch, financial_event, ai_adoption_outside_rcm, automation_proof, named_automation_owner, thought_leadership, filtered_out
+  - If confidence_score < 0.70: set review_status = 'pending'
+  - If confidence_score >= 0.70: leave review_status as null (auto-approved)
+Returns the created signal with 201 status.
+
+GET /api/v1/signals/pending-review
+Returns signals where review_status = 'pending', ordered by confidence_score ASC (lowest confidence first — needs most review).
+Include hospital_name in each result via a join.
+
+Write pytest tests for all 5 endpoints using httpx AsyncClient with mocked Supabase responses. Confirm all tests pass. Provide test output.`
+      },
+      {
+        id: 4,
+        title: "Slack bot setup and test DM",
+        sub: "WebClient, send_dm(), format_weekly_digest(), send_urgent_alert()",
+        prompt: `You are building the Adonis Account Intelligence Tool. Set up the Slack integration using Slack Bolt for Python.
+
+TASK: Create /backend/app/services/slack_service.py with these four functions.
+
+1. Initialize Slack WebClient:
+from slack_sdk import WebClient
+client = WebClient(token=os.environ["SLACK_BOT_TOKEN"])
+
+2. send_dm(slack_user_id: str, message: str) -> str | None
+Sends a Slack DM. Use client.chat_postMessage(channel=slack_user_id, text=message).
+Returns the message timestamp (ts) from the response, or None on failure. Log errors but do not raise.
+
+3. format_weekly_digest(ae_name: str, signals_by_hospital: dict, week_start: str, dashboard_url: str, digest_id: str) -> str
+signals_by_hospital format: {"Hospital Name": [signal_dict, ...], ...}
+Build this exact message format:
+"Hi {ae_name} 👋 Here is your weekly territory update for the week of {week_start}.
+
+──────────────────────
+*{hospital_name}*
+• [URGENT] {signal_title} — {signal_summary} [{source_name}]
+• [WATCH] {signal_title} — {signal_summary} [{source_name}]
+
+*{next_hospital_name}*
+• [WATCH] {signal_title} — {signal_summary} [{source_name}]
+──────────────────────
+→ View full dashboard: {dashboard_url}?utm_source=slack&utm_medium=digest&utm_campaign=weekly&utm_content=ae_{ae_name_slug}&digest_id={digest_id}"
+
+Rules: Use URGENT badge for tier='urgent', WATCH for tier='worth_knowing'. ae_name_slug is ae_name.lower().replace(" ", "_"). Omit hospitals with no signals. Omit signals where source_url is None. Omit source_name if it's None.
+
+4. send_urgent_alert(slack_user_id: str, hospital_name: str, hospital_id: str, signal: dict, ae_name: str, dashboard_url: str) -> str | None
+Format:
+"🚨 URGENT — {hospital_name}
+*{signal['title']}*
+{signal['summary']}
+Source: {signal['source_name']} · {signal['published_date']}
+→ View full profile: {dashboard_url}/hospitals/{hospital_id}?utm_source=slack&utm_medium=alert&utm_campaign=urgent&utm_content=ae_{ae_name_slug}"
+
+Returns the message ts or None on failure.
+
+After building these functions, write a test_slack_integration.py script that:
+1. Calls send_dm() to Danielle's placeholder Slack user ID with message "Adonis Intel Bot is online. Slack integration test confirmed."
+2. Prints "✓ DM sent successfully" if ts is returned, or "✗ DM failed" if None.
+Run it and confirm the integration works. Provide a screenshot of the Slack DM received.`
+      },
+      {
+        id: 5,
+        title: "Deterministic rules_engine() function",
+        sub: "Pre-AI tier assignment · Luminai Enforce pattern",
+        color: "teal",
+        prompt: `You are building the Adonis Account Intelligence Tool. Build the signal classification rules engine.
+
+CONTEXT: This function implements the "Enforce" pattern from the Luminai platform architecture review. It runs BEFORE calling the Claude AI API. It checks if a signal matches known high-priority patterns and forces the tier and confidence, skipping the expensive and slower Claude call entirely for cases we already know the answer to.
+
+TASK: Create /backend/app/services/rules_engine.py
+
+Build:
+def rules_engine(signal_type: str, article_text: str, metadata: dict = {}) -> dict | None:
+    """
+    Returns {"tier": str, "confidence": float} if a rule matches.
+    Returns None if no rule matches — caller should then call Claude API.
+    """
+
+Implement these rules (first match wins):
+
+RULE 1 — Revenue leadership hire/departure (always Urgent):
+If signal_type == "leadership_change" AND any of these strings appear in article_text.lower():
+["chief revenue officer", " cro ", "chief financial officer", " cfo ", "vp revenue cycle",
+ "vp of revenue cycle", "vice president revenue cycle", "director revenue cycle",
+ "vice president of revenue", "crco", "chief revenue cycle officer"]
+→ return {"tier": "urgent", "confidence": 1.0}
+
+RULE 2 — Vendor dispute (always Urgent):
+If signal_type == "vendor_dispute"
+→ return {"tier": "urgent", "confidence": 1.0}
+
+RULE 3 — M&A (always Urgent):
+If signal_type == "ma_acquisition"
+→ return {"tier": "urgent", "confidence": 1.0}
+
+RULE 4 — Epic / EHR go-live or friction (always Urgent):
+If signal_type in ["epic_go_live", "post_golive_friction"]
+→ return {"tier": "urgent", "confidence": 1.0}
+
+RULE 5 — Restructuring with RCM context (Urgent):
+If signal_type == "restructuring" AND any of ["revenue cycle", " rcm ", "billing", "claims"] in article_text.lower()
+→ return {"tier": "urgent", "confidence": 1.0}
+
+RULE 6 — Hiring spike with enough postings (Urgent):
+If signal_type == "rcm_hiring_spike" AND metadata.get("posting_count", 0) >= 3
+→ return {"tier": "urgent", "confidence": 0.95}
+
+RULE 7 — AI adoption outside RCM (always Worth Knowing):
+If signal_type == "ai_adoption_outside_rcm"
+→ return {"tier": "worth_knowing", "confidence": 0.90}
+
+RULE 8 — Thought leadership (always Worth Knowing):
+If signal_type == "thought_leadership"
+→ return {"tier": "worth_knowing", "confidence": 0.85}
+
+DEFAULT: return None
+
+Also build:
+def get_rules_engine_stats(total_signals: int, rules_hits: int) -> dict:
+    return {
+        "total_signals": total_signals,
+        "rules_engine_hits": rules_hits,
+        "claude_api_calls": total_signals - rules_hits,
+        "pct_bypassed_claude": round((rules_hits / total_signals * 100), 1) if total_signals > 0 else 0.0
+    }
+
+Write comprehensive pytest tests:
+- Rule 1 fires for "Chief Revenue Officer joins from..." → urgent 1.0
+- Rule 1 does NOT fire for "Chief Nursing Officer joins..." (non-revenue role) → returns None
+- Rule 2 fires for signal_type="vendor_dispute" regardless of text → urgent 1.0
+- Rule 6 fires for posting_count=5, does NOT fire for posting_count=2
+- Default case returns None when no rules match
+
+Confirm all tests pass and provide test output.`
+      },
+    ]
+  },
+  {
+    label: "Week 2  ·  May 26–30",
+    tasks: [
+      {
+        id: 6,
+        title: "Trigger.dev weekly scheduler",
+        sub: "3x weekly cron jobs, manual trigger endpoint, run_scraper_job()",
+        prompt: `You are building the Adonis Account Intelligence Tool. Set up the Trigger.dev job scheduler.
+
+SCHEDULE: Three weekly scraper runs — Monday 6:00 AM ET, Wednesday 6:00 AM ET, Friday 6:00 AM ET (= 11:00 AM UTC for each). Monday run also triggers the digest send.
+
+TASK: Create /backend/app/jobs/scraper_job.py
+
+1. async def run_scraper_job() -> dict
+   a. Record start time: start_time = time.time()
+   b. Call start_run() from run_logger.py (you'll build this in Task 12 — stub it as run_id = "stub" for now)
+   c. Fetch all hospitals from Supabase
+   d. For each hospital, call await run_hospital_scrape(hospital_id) — STUB this as an async function that sleeps 0.1s and returns {"signals_found": 0, "rules_engine_hits": 0} for now. Michael's scrapers will replace this stub.
+   e. Aggregate totals: hospitals_checked, signals_found, signals_new, rules_engine_hits
+   f. Call complete_run(run_id, start_time) — stub as a no-op for now
+   g. Return summary dict
+
+2. async def run_monday_digest() -> dict
+   a. Call run_scraper_job() first
+   b. Query signals table: count WHERE review_status = 'pending'
+   c. If pending_count > 0:
+      - Fetch Danielle (ae_users WHERE is_admin = true, first result)
+      - Send DM to Danielle.slack_user_id: "⏰ Your Monday digest is ready but {pending_count} signal(s) need review first. Check the dashboard: {DASHBOARD_URL}/review — I'll send the digests once the queue is clear."
+      - Return {"status": "blocked_by_review_queue", "pending_count": pending_count}
+   d. If pending_count == 0:
+      - Call await send_weekly_digest_to_all_aes() — STUB as async no-op for now
+      - Return {"status": "digest_sent"}
+
+3. Create trigger configuration. If using Trigger.dev v3, create /backend/trigger.config.ts:
+export default defineConfig({
+  project: "adonis-intelligence",
+  schedules: [
+    { id: "weekly-mon", cron: "0 11 * * 1", task: "run-monday-digest" },
+    { id: "weekly-wed", cron: "0 11 * * 3", task: "run-scraper" },
+    { id: "weekly-fri", cron: "0 11 * * 5", task: "run-scraper" },
+  ]
+})
+
+4. Add POST /api/v1/admin/run-scraper endpoint (requires INTERNAL_API_KEY in X-API-Key header):
+   Calls run_scraper_job() and returns the summary dict.
+   
+5. Add POST /api/v1/admin/send-digest (requires INTERNAL_API_KEY):
+   Calls run_monday_digest() and returns the result.
+
+Test by hitting POST /admin/run-scraper and confirming it returns a valid summary. Show the response JSON.`
+      },
+      {
+        id: 7,
+        title: "Claude API signal classification with confidence scoring",
+        sub: "classify_signal(), rules engine integration, POST /classify test endpoint",
+        prompt: `You are building the Adonis Account Intelligence Tool. Build the Claude AI signal classification pipeline.
+
+TASK: Create /backend/app/services/classifier.py
+
+1. async def classify_signal(article_text: str, hospital_name: str, source_name: str, signal_type_hint: str = None) -> dict
+
+   STEP 1 — Try the rules engine first:
+   If signal_type_hint is provided, call rules_engine(signal_type_hint, article_text).
+   If rules_engine returns a result dict: use that tier and confidence. Skip to step 3.
+   Track that this was a rules_engine hit (for run logging).
+
+   STEP 2 — Call Claude API (only if rules engine returned None):
+   Use anthropic.Anthropic() with ANTHROPIC_API_KEY.
+   Model: claude-sonnet-4-20250514
+   Max tokens: 350
+   
+   System prompt:
+   "You are a healthcare sales intelligence classifier for Adonis, an AI-powered revenue cycle management (RCM) software company. Adonis sells automation tools to hospital systems to help them reduce claim denials and improve revenue collection. Classify news articles about hospital systems for sales relevance. Return ONLY a valid JSON object with no preamble, no markdown, no explanation."
+   
+   User prompt includes article text, hospital name, source name, and required JSON format with fields: signal_type, tier, confidence_score, title, summary, why_relevant.
+
+   STEP 3 — Build and return result dict with classification_source field ("rules_engine" | "claude_api").
+
+2. Build POST /api/v1/classify (no auth, for testing only).
+
+TEST: Classify three articles — CRO hire (rules engine), financial results (Claude), cafeteria renovation (Claude filtered_out).`
+      },
+      {
+        id: 8,
+        title: "Weekly Slack digest formatter and send logic",
+        sub: "digest_service.py, send_weekly_digest_to_all_aes(), digest send guard",
+        prompt: `You are building the Adonis Account Intelligence Tool. Build the complete weekly digest compilation and send system.
+
+TASK: Create /backend/app/services/digest_service.py
+
+1. get_digest_signals_for_ae() — filtered by confidence >= 0.70 or approved, grouped by hospital, urgent first.
+2. send_weekly_digest_to_all_aes() — creates digest records, sends DMs, marks signals as included_in_digest.
+3. Admin summary DM to Danielle after all digests sent.
+4. Update run_monday_digest() to use real digest_service import.
+
+TEST: Seed 3 signals for Michael's territory. Call POST /admin/send-digest. Verify DMs and DB state.`
+      },
+    ]
+  },
+  {
+    label: "Midpoint Review  ·  June 2",
+    milestone: true,
+    desc: "Live demo to Reed and Danielle. Goal: working Slack digest for all 5 hospitals, dashboard rendering live data, signal quality review with Danielle."
+  },
+  {
+    label: "Week 3  ·  June 2–6",
+    tasks: [
+      {
+        id: 9,
+        title: "Signal review and approval endpoints",
+        sub: "POST /signals/{id}/review · Digest send guard · Luminai Escalate pattern",
+        color: "teal",
+        prompt: `You are building the Adonis Account Intelligence Tool. Build the signal review approval flow (Luminai "Escalate exceptions to humans" pattern).
+
+TASK:
+1. POST /api/v1/signals/{signal_id}/review — admin only. action: approved | dismissed. Sets review_status and bumps confidence to >= 0.70 on approve.
+2. GET /api/v1/signals/pending-review — territory-filtered, ordered confidence ASC.
+3. check_review_queue_and_notify() — notifies Danielle of pending count, blocks digest if > 0.
+4. Properly implement admin key middleware in auth.py.
+
+Tests: approve/dismiss flows, non-admin 403, correct ordering, digest guard.`
+      },
+      {
+        id: 10,
+        title: "Territory-filtered API and auth middleware",
+        sub: "Admin vs AE views, GET /me, hospital assignment endpoint",
+        prompt: `You are building the Adonis Account Intelligence Tool. Build territory filtering and user auth.
+
+TASK:
+1. get_current_user / get_required_user / get_admin_user FastAPI dependencies.
+2. GET /hospitals — admin sees all 5, AE sees only own hospitals.
+3. GET /signals — territory-filtered for AEs.
+4. GET /me — profile + hospitals + new_signals_this_week count.
+5. GET /ae-users (admin only) — with last_viewed_digest.
+6. POST /hospital-ae-assignments (admin only) — with duplicate check.`
+      },
+      {
+        id: 11,
+        title: "Contact storage endpoints",
+        sub: "POST /contacts, PATCH /contacts, verify-linkedin, duplicate detection",
+        prompt: `You are building the Adonis Account Intelligence Tool. Build the contacts management API.
+
+TASK:
+1. GET /contacts — by hospital_id, role-priority ordered, territory-gated.
+2. POST /contacts — case-insensitive duplicate check by full_name + hospital_id → 409.
+3. PATCH /contacts/{id} — partial update, always updates updated_at.
+4. POST /contacts/{id}/verify-linkedin — validates linkedin.com domain, sets verified=true.
+5. DELETE /contacts/{id} — soft delete (admin only), sets is_active=false.`
+      },
+      {
+        id: 12,
+        title: "Run logging and agent run tracking",
+        sub: "agent_runs table writes, GET /runs, GET /runs/latest, GET /status",
+        prompt: `You are building the Adonis Account Intelligence Tool. Build the agent run logging system.
+
+TASK:
+1. run_logger.py: start_run(), update_run(), complete_run() — writes to agent_runs table.
+2. Wire run_logger into run_scraper_job() — track hospitals_checked, signals_found, rules_engine_hits, errors, duration_ms.
+3. GET /runs (admin) — paginated.
+4. GET /runs/latest (public) — for dashboard "Last updated" header.
+5. GET /status (public) — api_version, last_scraper_run, next_scraper_run (next Mon/Wed/Fri 11:00 UTC), total_signals_stored, pending_review_count.`
+      },
+    ]
+  },
+  {
+    label: "Week 4  ·  June 9–13",
+    tasks: [
+      {
+        id: 13,
+        title: "CSV export endpoint",
+        sub: "HubSpot-formatted contact export, StreamingResponse, territory-gated",
+        prompt: `You are building the Adonis Account Intelligence Tool. Build the HubSpot-compatible CSV export.
+
+TASK:
+GET /api/v1/export/csv — StreamingResponse, text/csv, Content-Disposition attachment.
+HubSpot columns: First Name, Last Name, Job Title, Company Name, Website URL, LinkedIn Biodata URL (verified only), Notes.
+Notes = "Prior employer: {x}. | Recent signals: {last 2 signal summaries}".
+Territory-gated: AEs export own territory, admin exports all or filtered.
+GET /api/v1/export/contacts-count — count of exportable contacts.`
+      },
+      {
+        id: 14,
+        title: "Immediate urgent alert Slack DM",
+        sub: "send_urgent_alert_for_signal(), deduplication, BackgroundTasks hook",
+        prompt: `You are building the Adonis Account Intelligence Tool. Build immediate urgent alert system.
+
+TASK:
+1. alert_service.py: send_urgent_alert_for_signal(signal_id) — fetch AE for hospital, same-day dedup check (urgent_sent=true for same hospital today), send DM, update urgent_sent=true, notify Danielle.
+2. POST /signals: use FastAPI BackgroundTasks to trigger send_urgent_alert_for_signal() for tier='urgent' signals (non-blocking).
+
+Tests: urgent signal triggers alert, same-day dedup blocks second alert, non-urgent skips.`
+      },
+      {
+        id: 15,
+        title: "UTM digest tracking and closed-loop visibility",
+        sub: "digest_views table writes · GET /ae-users last_viewed · Luminai closed-loop",
+        color: "teal",
+        prompt: `You are building the Adonis Account Intelligence Tool. Build closed-loop digest visibility (Luminai "Closed-Loop" pattern).
+
+TASK:
+1. Update format_weekly_digest() UTM link to include digest_id.
+2. POST /digest-view — upsert digest_views (no auth). Invalid digest_id → {"recorded": false}, not 404.
+3. Update GET /ae-users — add last_viewed_digest (MAX viewed_at per ae_id).
+4. GET /digest-analytics (admin) — per-digest engagement: viewed_at, time_to_open_minutes.`
+      },
+      {
+        id: 16,
+        title: "Error handling, retry logic, and rate limiting",
+        sub: "Global exception handler, with_retry() decorator, Slack rate limiter",
+        prompt: `You are building the Adonis Account Intelligence Tool. Add production-grade error handling.
+
+TASK:
+1. Global exception handler — no raw stack traces in responses, 500 JSON.
+2. with_retry(max_attempts=3, base_delay=2.0) decorator — exponential backoff. Apply to classify_signal() and send_dm().
+3. Slack rate limiter — deque(maxlen=10), sleep if 10 messages in < 60s.
+4. Request logging middleware — method, path, status, duration_ms.
+5. Pydantic validation — signal title max 200, summary max 1000, source_url HttpUrl, contact full_name max 200.`
+      },
+      {
+        id: 17,
+        title: "Dashboard polish and performance tuning",
+        sub: "Response caching, pagination, Next.js dashboard final pass",
+        prompt: `You are building the Adonis Account Intelligence Tool. Polish performance and dashboard.
+
+TASK:
+1. Add response caching to GET /status and GET /runs/latest — 60s TTL using functools.lru_cache or redis (prefer simple lru_cache for now).
+2. Confirm all list endpoints return total_count in response for pagination.
+3. Next.js dashboard final pass — confirm all API calls use correct base URL from env, loading states, error boundaries.
+4. Add CORS preflight caching (max_age=3600) to reduce OPTIONS requests.
+5. Run full pytest suite, confirm all green. Note any flaky tests and fix.`
+      },
+    ]
+  },
+  {
+    label: "Week 5  ·  June 16–20",
+    tasks: [
+      {
+        id: 18,
+        title: "End-to-end integration test suite",
+        sub: "Full pipeline smoke test, Slack DM verified, seed → classify → digest → view",
+        prompt: `You are building the Adonis Account Intelligence Tool. Build the end-to-end integration test suite.
+
+TASK: Create /backend/tests/test_e2e.py
+
+Full pipeline test (mark as @pytest.mark.integration — skip in CI if no real API keys):
+
+test_full_pipeline():
+1. POST /signals with an article about NYP CRO departure → confirm tier=urgent, classification_source=rules_engine
+2. Confirm urgent_sent becomes true after BackgroundTasks fires (poll with 2s delay)
+3. POST /signals with financial event → confirm goes to Claude (classification_source=claude_api, tier=worth_knowing)
+4. POST /signals with low confidence (mock confidence=0.60) → confirm review_status=pending
+5. POST /signals/{id}/review with action=approved → confirm review_status=approved
+6. POST /admin/send-digest → confirm {"aes_messaged": >=1, "signals_included": >=1}
+7. GET /runs/latest → confirm hospitals_checked=5, duration_ms > 0
+8. POST /digest-view with digest_id from step 6 → confirm {"recorded": true}
+9. GET /ae-users → confirm last_viewed_digest is not null for the AE who opened the digest
+
+Also write test_rules_engine_coverage() to test all 8 rules with representative inputs.
+Run full suite. Provide complete test output.`
+      },
+      {
+        id: 19,
+        title: "Demo Day prep and final system rehearsal",
+        sub: "Slide deck, live system walkthrough, backup recording",
+        prompt: `You are building the Adonis Account Intelligence Tool. Prepare for the L3 AI Native Demo Day.
+
+TASK: Prepare the live demo and supporting materials.
+
+1. Verify live system is fully deployed:
+   - Railway: GET {RAILWAY_URL}/ returns 200
+   - Vercel: Dashboard loads, shows live data from Supabase
+   - All 5 hospitals visible in dashboard
+   - Supabase: signals table has >= 10 real signals (run manual scraper if needed)
+
+2. Run the demo flow manually end-to-end:
+   a. Open dashboard → show signals feed for Michael's territory
+   b. Show pending signal in Danielle's review queue → approve it live
+   c. Trigger POST /admin/run-scraper → show summary JSON
+   d. Show rules engine stats (% bypassed Claude) in dashboard
+   e. Show GET /ae-users → demonstrate last_viewed_digest column
+
+3. Prepare demo talking points doc at /docs/demo-script.md:
+   - What problem does Adonis solve? (RCM opportunity identification)
+   - The AI architecture: rules engine + Claude hybrid
+   - Luminai patterns demonstrated: Enforce, Escalate, Closed-Loop
+   - Live metrics: hospitals monitored, signals classified, digests sent
+   - What's next: Michael's real scrapers replacing stubs
+
+4. Confirm backup: record a 3-minute Loom walkthrough as failsafe.
+
+5. Final checklist:
+   [ ] Health check passes
+   [ ] At least one digest sent and viewed in digest_views
+   [ ] All pytest tests green
+   [ ] .env.example is up to date (no real keys committed)
+   [ ] README.md documents setup steps`
+      },
+    ]
+  },
+];
+
+function toggleCard(id) {
+  const area = document.getElementById('prompt-' + id);
+  const btn = document.getElementById('btn-' + id);
+  const open = area.classList.toggle('open');
+  btn.textContent = open ? '▲ Hide' : '▼ Prompt';
+}
+
+function copyPrompt(id) {
+  const box = document.getElementById('text-' + id);
+  navigator.clipboard.writeText(box.textContent).then(() => {
+    const btn = document.getElementById('copy-' + id);
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⧉ Copy prompt'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function buildBoard() {
+  const board = document.getElementById('board');
+  WEEKS.forEach(week => {
+    const hdr = document.createElement('div');
+    hdr.className = 'week-header';
+    hdr.textContent = week.label;
+    board.appendChild(hdr);
+
+    if (week.milestone) {
+      const mc = document.createElement('div');
+      mc.className = 'milestone-card';
+      mc.innerHTML = '<div class="milestone-label">Midpoint Milestone</div>' +
+        '<div class="milestone-title">Live Demo — Reed & Danielle</div>' +
+        '<div class="milestone-desc">' + week.desc + '</div>';
+      board.appendChild(mc);
+      return;
+    }
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    week.tasks.forEach(task => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="card-hdr" onclick="toggleCard(${task.id})">
+          <div class="card-num">${task.id}</div>
+          <div class="card-meta">
+            <div class="card-title">${task.title}</div>
+            <div class="card-sub">${task.sub}</div>
+          </div>
+          <button class="expand-btn" id="btn-${task.id}" onclick="event.stopPropagation();toggleCard(${task.id})">▼ Prompt</button>
+        </div>
+        <div class="prompt-area" id="prompt-${task.id}">
+          <div class="prompt-box" id="text-${task.id}">${task.prompt.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+          <div class="copy-row">
+            <span class="copy-hint">Paste directly into Antigravity Agent Manager</span>
+            <button class="copy-btn" id="copy-${task.id}" onclick="copyPrompt(${task.id})">⧉ Copy prompt</button>
+          </div>
+        </div>`;
+      grid.appendChild(card);
+    });
+    board.appendChild(grid);
+  });
+}
+
+buildBoard();
+</script>
+</body>
+</html>

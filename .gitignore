@@ -14,6 +14,41 @@ env/
 .env
 .env.local
 .env.*.local
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# ngrok binary (downloaded to tmp, but just in case)
+ngrok
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+.next/
+.turbo/
+dist/
+build/
+out/
+
+# Env files - NEVER commit these
+.env
+.env.local
+.env.*.local
 data_pipeline/.env
 
 # Data Pipeline Outputs
