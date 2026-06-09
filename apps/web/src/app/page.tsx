@@ -14,7 +14,7 @@ export default function HomePage() {
   // TODO T-04: replace PREVIEW_SIGNALS with fetchSignals() from @/lib/api
   const signals = PREVIEW_SIGNALS;
   const urgentCount = signals.filter((s) => s.tier === 'urgent').length;
-  const standardCount = signals.filter((s) => s.tier === 'standard').length;
+  const standardCount = signals.filter((s) => s.tier === 'worth_knowing').length;
 
   return (
     <div className="px-8 py-7">
