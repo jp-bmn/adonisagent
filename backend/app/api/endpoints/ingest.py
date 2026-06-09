@@ -107,11 +107,12 @@ def _infer_tier(signal_type: str, matched_topics: list[str]) -> str:
     urgent_types = {
         "leadership_change", "vendor_dispute", "ma_acquisition",
         "epic_go_live", "post_golive_friction", "restructuring",
+        "rcm_hiring_spike", "vendor_change",
     }
     worth_knowing_types = {
-        "rcm_hiring_spike", "financial_event", "ai_adoption_outside_rcm",
+        "financial_event", "ai_adoption_outside_rcm",
         "automation_proof", "named_automation_owner", "thought_leadership",
-        "vendor_change", "new_hospital_launch",
+        "new_hospital_launch",
     }
     if signal_type in urgent_types:
         return "urgent"
@@ -300,6 +301,7 @@ async def ingest_signal_batch(
             "review_status":    review_status,
             "title":            title,
             "summary":          summary or None,
+            "why_it_matters":   sig.get("why_it_matters"),
             "source_url":       source_url or None,
             "source_name":      source_name or None,
             "published_date":   published_date,

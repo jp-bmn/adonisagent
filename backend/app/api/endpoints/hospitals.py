@@ -117,3 +117,44 @@ async def get_hospital_signals(
 
     result = query.execute()
     return result.data or []
+
+
+@router.get("/{hospital_id}/contacts")
+async def get_hospital_contacts(
+    hospital_id: str,
+    is_active: bool = Query(default=True),
+    user: dict = Depends(get_required_user),
+):
+    """
+    GET /api/v1/hospitals/{hospital_id}/contacts
+    Returns contacts for a specific hospital.
+    """
+    supabase = get_supabase()
+
+    # Verify hospital exists
+    hospital_res = supabase.table("hospitals").select("id, name").eq("id", hospital_id).single().execute()
+    if not hospital_res.data:
+        raise HTTPException(status_code=404, detail=f"Hospital {hospital_id} not found")
+
+    # Territory check for non-admin AEs
+    if not user.get("is_admin", False):
+        assignment_check = (
+            supabase.table("hospital_ae_assignments")
+            .select("*")
+            .eq("hospital_id", hospital_id)
+            .eq("ae_id", str(user["id"]))
+            .execute()
+        )
+        if not assignment_check.data:
+            raise HTTPException(status_code=403, detail="Access denied to this hospital's contacts")
+
+    # Fetch contacts
+    res = (
+        supabase.table("contacts")
+        .select("*")
+        .eq("hospital_id", hospital_id)
+        .eq("is_active", is_active)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return res.data or []

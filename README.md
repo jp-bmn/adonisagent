@@ -41,8 +41,8 @@ The tool replaces **Glean** (the internal AI tool the team uses reactively, only
 ## Team
 
 - **Juan Franco** — frontend, design system, dashboard UX
-- **Joel Philip** — , backend, agent pipeline,scoping, project management
 - **Michael Chabler** — partner communications
+- **Joel Philip** — backend, agent pipeline, scoping, project management
 
 Partner: Adonis Technology, Inc. · Primary contact: Reed Kalash · SME: Danielle Ferdon
 

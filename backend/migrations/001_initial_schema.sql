@@ -27,8 +27,10 @@ CREATE TABLE hospitals (
     name        text NOT NULL,
     website_url text,
     division_note text,
+    account_type text NOT NULL DEFAULT 'hospital',
     created_at  timestamptz NOT NULL DEFAULT now()
 );
+
 
 -- =============================================================================
 -- AE USERS
@@ -92,6 +94,7 @@ CREATE TABLE signals (
     review_status        text CHECK (review_status IN ('pending', 'approved', 'dismissed')),
     title                text,
     summary              text,
+    why_it_matters       text,
     source_url           text,
     source_name          text,
     published_date       date,

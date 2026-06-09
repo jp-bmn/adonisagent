@@ -201,7 +201,7 @@ RULES: list[Rule] = [
     Rule(
         name        = "rcm_hiring_spike",
         signal_type = "rcm_hiring_spike",
-        tier        = "worth_knowing",
+        tier        = "urgent",
         confidence  = 0.85,
         patterns    = [
             r"rcm.{0,20}(hiring|recruit|open|position|role|job)",
@@ -219,7 +219,7 @@ RULES: list[Rule] = [
     Rule(
         name        = "vendor_change",
         signal_type = "vendor_change",
-        tier        = "worth_knowing",
+        tier        = "urgent",
         confidence  = 0.82,
         patterns    = [
             r"(switch|replac|chang|migrat).{0,30}(vendor|partner|platform|system|software|solution)",

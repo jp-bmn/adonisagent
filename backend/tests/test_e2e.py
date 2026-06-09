@@ -117,7 +117,7 @@ def test_rules_engine_coverage():
     )
     assert res6.matched is True
     assert res6.signal_type == "rcm_hiring_spike"
-    assert res6.tier == "worth_knowing"
+    assert res6.tier == "urgent"
     assert res6.rule_name == "rcm_hiring_spike"
 
     # 7. vendor_change
@@ -127,7 +127,7 @@ def test_rules_engine_coverage():
     )
     assert res7.matched is True
     assert res7.signal_type == "vendor_change"
-    assert res7.tier == "worth_knowing"
+    assert res7.tier == "urgent"
     assert res7.rule_name == "vendor_change"
 
     # 8. financial_event
