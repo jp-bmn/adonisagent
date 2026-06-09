@@ -37,9 +37,7 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
       <p className="font-serif text-base font-semibold text-ink leading-snug">{headline}</p>
 
       {/* Summary */}
-      {signal.summary && (
-        <p className="text-sm text-slate-600 leading-relaxed">{signal.summary}</p>
-      )}
+      {signal.summary && <p className="text-sm text-slate-600 leading-relaxed">{signal.summary}</p>}
 
       {/* Footer: source + date */}
       <div className="flex items-center justify-between gap-3 pt-1">
@@ -51,9 +49,7 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
         >
           {signal.source_name ?? sourceHostname(signal.source_url)}
         </a>
-        <span className="text-xs text-slate-400 flex-none">
-          {formatDate(date)}
-        </span>
+        <span className="text-xs text-slate-400 flex-none">{formatDate(date)}</span>
       </div>
     </div>
   );
