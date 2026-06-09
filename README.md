@@ -3,6 +3,7 @@
 Adonis agentic sales intelligence dashboard — L3 AI Native Project.
 
 ## Components
+
 - **[Backend Service](file:///Users/joel-bmn/adonisagent/backend/README.md)**: FastAPI service, hybrid rules-and-AI classification engine, Supabase database client, and Slack notification dispatches.
 
 # Adonis Account Intelligence
@@ -35,7 +36,7 @@ The tool replaces **Glean** (the internal AI tool the team uses reactively, only
 2. UMass Memorial
 3. Ascension
 4. University of Arkansas (UAMS)
-5. CommonSpirit Health 
+5. CommonSpirit Health
 
 ## Team
 
