@@ -140,6 +140,11 @@ export async function fetchSignals(
   if (opts.tier) params.set('tier', opts.tier);
   if (opts.ae_id) params.set('ae_id', opts.ae_id);
   if (opts.limit) params.set('limit', String(opts.limit));
+
+  // Temporary workaround: Always include dismissed to ensure we fetch new signals
+  // whose review_status is null (which the current production backend filters out by default).
+  params.set('include_dismissed', 'true');
+
   const qs = params.size > 0 ? `?${params}` : '';
   return apiFetch<ApiSignal[]>(`/signals${qs}`, userId);
 }
@@ -148,7 +153,7 @@ export async function fetchHospitalSignals(
   hospitalId: string,
   userId?: string
 ): Promise<ApiSignal[]> {
-  return apiFetch<ApiSignal[]>(`/hospitals/${hospitalId}/signals`, userId);
+  return apiFetch<ApiSignal[]>(`/hospitals/${hospitalId}/signals?include_dismissed=true`, userId);
 }
 
 export async function fetchMe(userId: string): Promise<ApiMe> {
