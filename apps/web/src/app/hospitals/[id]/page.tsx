@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { fetchHospitals, fetchHospitalSignals, fetchHospitalContacts } from '@/lib/api';
-import { SignalCard } from '@/components';
+import { SignalCard, HospitalLogo } from '@/components';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -31,9 +31,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
       <div className="bg-white border border-line rounded-xl overflow-hidden mt-3">
         {/* Header */}
         <div className="px-4 md:px-6 py-5 border-b border-line bg-gradient-to-b from-white to-paper flex flex-wrap gap-4">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-navy-900 to-navy-700 text-white flex items-center justify-center font-serif font-bold text-2xl flex-none">
-            {hospital.name[0]}
-          </div>
+          <HospitalLogo name={hospital.name} websiteUrl={hospital.website_url} size="lg" />
           <div className="flex-1 min-w-0">
             <h1 className="font-serif text-xl md:text-2xl font-semibold text-brand leading-tight">
               {hospital.name}
