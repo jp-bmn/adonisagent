@@ -13,7 +13,6 @@
   "dependencies": {
     "@adonis/db": "workspace:*",
     "@adonis/shared": "workspace:*",
-
     "@supabase/supabase-js": "^2.45.4",
     "next": "^15.0.0",
     "react": "^18.3.1",

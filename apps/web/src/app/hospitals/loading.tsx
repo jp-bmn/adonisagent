@@ -13,7 +13,10 @@ export default function HospitalsLoading() {
           <div className="h-3 w-16 bg-slate-200 rounded" />
         </div>
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="border-b border-line last:border-b-0 px-5 py-4 flex gap-8 items-center">
+          <div
+            key={i}
+            className="border-b border-line last:border-b-0 px-5 py-4 flex gap-8 items-center"
+          >
             <div className="h-4 w-48 bg-slate-200 rounded" />
             <div className="h-4 w-32 bg-slate-100 rounded" />
             <div className="h-4 w-40 bg-slate-100 rounded" />

@@ -23,7 +23,9 @@ export default function UserProvider({ children }: { children: React.ReactNode }
       headers: { 'X-User-Id': FALLBACK_USER_ID },
     })
       .then((r) => r.json())
-      .then((data) => { if (data?.id) setUserId(data.id); })
+      .then((data) => {
+        if (data?.id) setUserId(data.id);
+      })
       .catch(() => {});
   }, []);
 
