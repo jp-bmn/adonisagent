@@ -139,8 +139,14 @@ export async function fetchSignals(
   if (opts.tier) params.set('tier', opts.tier);
   if (opts.ae_id) params.set('ae_id', opts.ae_id);
   if (opts.limit) params.set('limit', String(opts.limit));
+  
+  // Temporary workaround: Always include dismissed to ensure we fetch new signals 
+  // whose review_status is null (which the current production backend filters out by default).
+  params.set('include_dismissed', 'true');
+
   const qs = params.size > 0 ? `?${params}` : '';
-  return apiFetch<ApiSignal[]>(`/signals${qs}`, userId);
+  // Force no-cache so we see the new signals immediately
+  return apiFetch<ApiSignal[]>(`/signals${qs}`, userId, { cache: 'no-store' });
 }
 
 export async function fetchHospitalSignals(
