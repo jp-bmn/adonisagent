@@ -40,7 +40,12 @@ export default async function HospitalsPage() {
                 <td className="px-5 py-4 text-sm text-slate-600">
                   {/* Location is not returned by fetchHospitals currently, but website is */}
                   {h.website_url ? (
-                    <a href={h.website_url} target="_blank" rel="noreferrer" className="text-accent hover:underline">
+                    <a
+                      href={h.website_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-accent hover:underline"
+                    >
                       {h.website_url.replace(/^https?:\/\//, '')}
                     </a>
                   ) : (
