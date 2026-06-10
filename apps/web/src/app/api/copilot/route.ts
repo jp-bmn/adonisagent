@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const SYSTEM_PROMPT = `You are an AI co-pilot for Adonis Account Intelligence, a sales intelligence tool for the Adonis healthcare RCM (Revenue Cycle Management) sales team.
+const SYSTEM_PROMPT = `You are Hermes, an AI signal co-pilot for Adonis Account Intelligence — a sales intelligence tool for the Adonis healthcare RCM (Revenue Cycle Management) sales team.
 
 Your job is to help account executives interpret signals and decide how to act. You do NOT need live database access — the rep will describe the signal or account situation, and you provide strategic guidance.
 

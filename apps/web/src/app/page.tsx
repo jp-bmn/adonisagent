@@ -1,23 +1,50 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { fetchSignals, fetchHospitals, fetchStatus } from '@/lib/api';
+import { fetchSignals, fetchHospitals, fetchStatus, SignalType } from '@/lib/api';
 import { SignalCard, TerritoryFilter } from '@/components';
+import SignalFilters from '@/components/SignalFilters';
 
 interface PageProps {
-  searchParams: Promise<{ ae_id?: string }>;
+  searchParams: Promise<{ ae_id?: string; category?: string; sort?: string }>;
 }
 
+const TIER_ORDER = { urgent: 0, worth_knowing: 1, filtered_out: 2 } as const;
+
 export default async function HomePage({ searchParams }: PageProps) {
-  const { ae_id } = await searchParams;
-  const [signals, hospitals, status] = await Promise.all([
+  const { ae_id, category, sort = 'urgent' } = await searchParams;
+
+  const [allSignals, hospitals, status] = await Promise.all([
     fetchSignals(undefined, { ae_id }),
     fetchHospitals(),
     fetchStatus(),
   ]);
 
   const hospitalMap = Object.fromEntries(hospitals.map((h) => [h.id, h.name]));
-  const urgentCount = signals.filter((s) => s.tier === 'urgent').length;
-  const worthKnowingCount = signals.filter((s) => s.tier === 'worth_knowing').length;
+
+  // Filter by category
+  let signals = category
+    ? allSignals.filter((s) => s.signal_type === (category as SignalType))
+    : allSignals;
+
+  // Sort
+  signals = [...signals].sort((a, b) => {
+    if (sort === 'recent') {
+      return (
+        new Date(b.published_date ?? b.created_at).getTime() -
+        new Date(a.published_date ?? a.created_at).getTime()
+      );
+    }
+    // Default: urgent first, then by date within each tier
+    const tierDiff = TIER_ORDER[a.tier] - TIER_ORDER[b.tier];
+    if (tierDiff !== 0) return tierDiff;
+    return (
+      new Date(b.published_date ?? b.created_at).getTime() -
+      new Date(a.published_date ?? a.created_at).getTime()
+    );
+  });
+
+  const urgentCount = allSignals.filter((s) => s.tier === 'urgent').length;
+  const worthKnowingCount = allSignals.filter((s) => s.tier === 'worth_knowing').length;
 
   const aeMap = new Map<string, string>();
   hospitals.forEach((h) =>
@@ -33,7 +60,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         <div>
           <h1 className="font-serif text-2xl font-semibold text-brand">Signal Feed</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Live · agents run Mon/Wed/Fri · {signals.length} signals
+            Live · agents run Mon/Wed/Fri · {allSignals.length} signals
           </p>
         </div>
         <Suspense>
@@ -45,16 +72,21 @@ export default async function HomePage({ searchParams }: PageProps) {
         <Kpi value={urgentCount} label="Urgent this week" tone="urgent" />
         <Kpi value={worthKnowingCount} label="Updates this week" />
         <Kpi value={hospitals.length} label="Accounts monitored" />
-        <Kpi value={signals.length} label="Signals total" />
+        <Kpi value={allSignals.length} label="Signals total" />
       </div>
 
+      <Suspense>
+        <SignalFilters />
+      </Suspense>
+
       <div className="text-xs font-mono uppercase tracking-widest text-slate-500 mb-3">
-        Recent signals · newest first
+        {category ? `${category.replace(/_/g, ' ')} signals` : 'Recent signals'} ·{' '}
+        {sort === 'recent' ? 'newest first' : 'most urgent first'}
       </div>
 
       {signals.length === 0 ? (
         <div className="bg-white border border-line rounded-xl p-10 text-center text-sm text-slate-500">
-          No signals yet — agents will populate this on the next scheduled run.
+          No signals match this filter.
         </div>
       ) : (
         <div className="space-y-5">
@@ -72,7 +104,6 @@ export default async function HomePage({ searchParams }: PageProps) {
         <Link href="/hospitals" className="text-xs text-accent hover:underline">
           View all hospitals →
         </Link>
-
         <div className="flex items-center gap-5 text-xs font-mono text-slate-400 flex-wrap">
           {status.pending_review_count > 0 && (
             <Link href="/review" className="text-urgent font-semibold hover:underline">
@@ -87,10 +118,6 @@ export default async function HomePage({ searchParams }: PageProps) {
             <span className="text-slate-500">next run:</span>{' '}
             {status.next_scraper_run ? formatDate(status.next_scraper_run) : 'scheduled'}
           </span>
-          <span>
-            <span className="text-slate-500">stored:</span> {status.total_signals_stored}
-          </span>
-          <span className="text-slate-300">v{status.api_version}</span>
         </div>
       </footer>
     </div>
@@ -106,22 +133,10 @@ function formatDate(iso: string): string {
   });
 }
 
-function Kpi({
-  value,
-  label,
-  tone,
-}: {
-  value: string | number;
-  label: string;
-  tone?: 'urgent';
-}) {
+function Kpi({ value, label, tone }: { value: string | number; label: string; tone?: 'urgent' }) {
   return (
     <div className="bg-white border border-line rounded-xl p-4">
-      <div
-        className={`font-serif text-2xl font-bold ${
-          tone === 'urgent' ? 'text-urgent' : 'text-brand'
-        }`}
-      >
+      <div className={`font-serif text-2xl font-bold ${tone === 'urgent' ? 'text-urgent' : 'text-brand'}`}>
         {value}
       </div>
       <div className="text-xs text-slate-500 mt-1">{label}</div>

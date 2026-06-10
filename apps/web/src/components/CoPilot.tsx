@@ -9,9 +9,9 @@ interface Message {
   text: string;
 }
 
-const STORAGE_KEY = 'adonis-copilot-history';
-const PILL_KEY = 'adonis-copilot-pill-shown';
-const OPENED_KEY = 'adonis-copilot-opened';
+const STORAGE_KEY = 'adonis-hermes-history';
+const PILL_KEY = 'adonis-hermes-pill-shown';
+const OPENED_KEY = 'adonis-hermes-opened';
 const MAX_STORED = 200;
 const MAX_CONTEXT = 40;
 const BUBBLE_SIZE = 56;
@@ -245,7 +245,7 @@ export default function CoPilot() {
               pointerEvents: 'none',
             }}
           >
-            Ask about any signal
+            Ask Hermes
           </div>
         )}
 
@@ -281,7 +281,7 @@ export default function CoPilot() {
               cursor: 'grab',
               transition: 'background 150ms',
             }}
-            title="Adonis Intel co-pilot (drag to move)"
+            title="Hermes — signal co-pilot (drag to move)"
           >
             {open ? (
               <span style={{ fontSize: 24, lineHeight: 1 }}>×</span>
@@ -309,8 +309,8 @@ export default function CoPilot() {
             }}
           >
             <div>
-              <div className="text-white text-sm font-semibold">Adonis Intel</div>
-              <div className="text-slate-400 text-[10px] font-mono">AI co-pilot · beta</div>
+              <div className="text-white text-sm font-semibold">Hermes</div>
+              <div className="text-slate-400 text-[10px] font-mono">for Adonis · beta</div>
             </div>
             <div className="flex items-center gap-3">
               {messages.length > 0 && (
@@ -335,7 +335,7 @@ export default function CoPilot() {
           <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-72 min-h-[8rem]">
             {messages.length === 0 && (
               <p className="text-xs text-slate-400 text-center">
-                Ask about your accounts, signals, or territory.
+                Ask Hermes about your accounts, signals, or territory.
               </p>
             )}
             {messages.map((m, i) => (
