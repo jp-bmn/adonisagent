@@ -50,6 +50,7 @@ export interface ApiSignal {
   created_at: string;
   included_in_digest: boolean;
   urgent_sent: boolean;
+  why_it_matters: string | null;
 }
 
 export interface ApiHospital {
@@ -171,6 +172,23 @@ export async function reviewSignal(
     method: 'POST',
     body: JSON.stringify({ status }),
   });
+}
+
+export interface ApiContact {
+  id: string;
+  name: string;
+  title: string | null;
+  email: string | null;
+  linkedin_url: string | null;
+  department: string | null;
+  created_at: string;
+}
+
+export async function fetchHospitalContacts(
+  hospitalId: string,
+  userId?: string
+): Promise<ApiContact[]> {
+  return apiFetch<ApiContact[]>(`/hospitals/${hospitalId}/contacts`, userId);
 }
 
 export async function exportCsv(userId?: string): Promise<Blob> {

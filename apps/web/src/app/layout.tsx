@@ -1,7 +1,11 @@
 import './globals.css';
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
 import CoPilot from '@/components/CoPilot';
+import MobileNav from '@/components/MobileNav';
+import DigestTracker from '@/components/DigestTracker';
+import UserProvider from '@/components/UserProvider';
 
 export const metadata: Metadata = {
   title: 'Adonis Account Intelligence',
@@ -12,11 +16,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-        <div className="min-h-screen flex">
-          <Sidebar />
-          <main className="flex-1">{children}</main>
-        </div>
-        <CoPilot />
+        {/* Mobile top bar */}
+        <UserProvider>
+          <MobileNav />
+          <div className="min-h-screen flex">
+            <Sidebar />
+            <main className="flex-1 min-w-0">{children}</main>
+          </div>
+          <CoPilot />
+          <Suspense>
+            <DigestTracker />
+          </Suspense>
+        </UserProvider>
       </body>
     </html>
   );
@@ -24,7 +35,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 function Sidebar() {
   return (
-    <aside className="w-56 bg-brand text-slate-200 py-6 flex-none">
+    <aside
+      className="hidden md:flex md:flex-col w-56 text-slate-200 py-6 flex-none"
+      style={{
+        background:
+          'radial-gradient(circle at 110% 120%, rgba(63, 215, 190, 0.55) 0%, transparent 55%), linear-gradient(135deg, #0A2A2B 0%, #0F3D3E 50%, #1A5E5C 100%)',
+      }}
+    >
       <div className="px-5 pb-5 mb-3 border-b border-white/10 flex items-center gap-3">
         {/* Adonis leaf mark — three leaf paths from adonis-logo.svg, leaf area only */}
         <svg

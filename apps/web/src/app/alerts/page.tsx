@@ -10,7 +10,7 @@ export default async function AlertsPage() {
   const hospitalMap = Object.fromEntries(hospitals.map((h) => [h.id, h.name]));
 
   return (
-    <div className="px-8 py-7">
+    <div className="px-4 py-5 md:px-8 md:py-7 pb-20 md:pb-7">
       <header className="mb-6">
         <h1 className="font-serif text-2xl font-semibold text-brand">Alerts</h1>
         <p className="text-sm text-slate-500 mt-1">

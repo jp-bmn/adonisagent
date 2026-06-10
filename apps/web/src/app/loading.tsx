@@ -9,7 +9,7 @@ export default function HomeLoading() {
         <div className="h-8 w-40 bg-slate-100 rounded-lg" />
       </div>
 
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="bg-white border border-line rounded-xl p-4 space-y-2">
             <div className="h-8 w-12 bg-slate-200 rounded" />

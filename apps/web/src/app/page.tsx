@@ -28,7 +28,7 @@ export default async function HomePage({ searchParams }: PageProps) {
   const aes = Array.from(aeMap.entries()).map(([id, name]) => ({ id, name }));
 
   return (
-    <div className="px-8 py-7">
+    <div className="px-4 py-5 md:px-8 md:py-7 pb-20 md:pb-7">
       <header className="flex items-end justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="font-serif text-2xl font-semibold text-brand">Signal Feed</h1>
@@ -41,7 +41,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         </Suspense>
       </header>
 
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <Kpi value={urgentCount} label="Urgent this week" tone="urgent" />
         <Kpi value={worthKnowingCount} label="Updates this week" />
         <Kpi value={hospitals.length} label="Accounts monitored" />
@@ -57,7 +57,7 @@ export default async function HomePage({ searchParams }: PageProps) {
           No signals yet — agents will populate this on the next scheduled run.
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-5">
           {signals.map((signal) => (
             <SignalCard
               key={signal.id}

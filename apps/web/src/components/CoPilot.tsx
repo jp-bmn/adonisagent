@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { fetchSignals } from '@/lib/api';
+import { useUser } from '@/components/UserProvider';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -13,6 +14,9 @@ const PILL_KEY = 'adonis-copilot-pill-shown';
 const OPENED_KEY = 'adonis-copilot-opened';
 const MAX_STORED = 200;
 const MAX_CONTEXT = 40;
+const BUBBLE_SIZE = 56;
+const PANEL_WIDTH = 320;
+const PANEL_HEIGHT = 420; // approximate — used for initial placement only
 
 const STUB_REPLY =
   "I can answer questions about your accounts and recent signals. Try asking: 'What happened with NYP this week?' or 'Summarize urgent signals.'";
@@ -34,6 +38,14 @@ function saveMessages(msgs: Message[]) {
   }
 }
 
+function defaultPos() {
+  const isMobile = window.innerWidth < 768;
+  return {
+    x: window.innerWidth - BUBBLE_SIZE - (isMobile ? 16 : 24),
+    y: window.innerHeight - BUBBLE_SIZE - (isMobile ? 88 : 24),
+  };
+}
+
 export default function CoPilot() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -43,8 +55,36 @@ export default function CoPilot() {
   const [pillSlideIn, setPillSlideIn] = useState(false);
   const [pulsing, setPulsing] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
+  // null = not yet mounted (SSR safe)
+  const { userId } = useUser();
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pillDismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const drag = useRef({ active: false, moved: false, startX: 0, startY: 0, startPosX: 0, startPosY: 0 });
+
+  // Set initial position after mount and attach global drag listeners
+  useEffect(() => {
+    setPos(defaultPos());
+
+    function onMove(e: PointerEvent) {
+      if (!drag.current.active) return;
+      const dx = e.clientX - drag.current.startX;
+      const dy = e.clientY - drag.current.startY;
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) drag.current.moved = true;
+      const newX = Math.max(0, Math.min(window.innerWidth - BUBBLE_SIZE, drag.current.startPosX + dx));
+      const newY = Math.max(0, Math.min(window.innerHeight - BUBBLE_SIZE, drag.current.startPosY + dy));
+      setPos({ x: newX, y: newY });
+    }
+    function onUp() {
+      drag.current.active = false;
+    }
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+  }, []);
 
   useEffect(() => {
     setMessages(loadMessages());
@@ -94,7 +134,18 @@ export default function CoPilot() {
     if (pillDismissTimer.current) clearTimeout(pillDismissTimer.current);
   }
 
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    drag.current.active = true;
+    drag.current.moved = false;
+    drag.current.startX = e.clientX;
+    drag.current.startY = e.clientY;
+    drag.current.startPosX = pos?.x ?? 0;
+    drag.current.startPosY = pos?.y ?? 0;
+  }
+
   function handleBubbleClick() {
+    // Suppress click if the pointer was dragged
+    if (drag.current.moved) return;
     if (showPill) dismissPill();
     setPulsing(false);
     setHasUnread(false);
@@ -114,20 +165,21 @@ export default function CoPilot() {
     const updated = [...messages, { role: 'user' as const, text }];
     setMessages(updated);
     setLoading(true);
-    // TODO T-13: replace stub with real API call.
-    // Send only the last MAX_CONTEXT messages so API calls stay fast and cheap.
-    //
-    // const res = await fetch('/api/copilot', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({
-    //     message: text,
-    //     history: updated.slice(-MAX_CONTEXT),
-    //   }),
-    // });
-    // const { reply } = await res.json();
-    await new Promise((r) => setTimeout(r, 800));
-    setMessages((prev) => [...prev, { role: 'assistant' as const, text: STUB_REPLY }]);
+    try {
+      const res = await fetch('/api/copilot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          history: updated.slice(-MAX_CONTEXT),
+        }),
+      });
+      const data = await res.json();
+      const reply = data.reply ?? data.error ?? STUB_REPLY;
+      setMessages((prev) => [...prev, { role: 'assistant' as const, text: reply }]);
+    } catch (err) {
+      setMessages((prev) => [...prev, { role: 'assistant' as const, text: `Error: ${String(err)}` }]);
+    }
     setLoading(false);
   }
 
@@ -138,26 +190,50 @@ export default function CoPilot() {
     }
   }
 
+  // Panel position: appear above/left of bubble, clamped to viewport
+  function panelStyle(): React.CSSProperties {
+    if (!pos) return { display: 'none' };
+    const gap = 8;
+    // Prefer opening upward
+    let top = pos.y - PANEL_HEIGHT - gap;
+    if (top < 8) top = pos.y + BUBBLE_SIZE + gap; // flip below if near top
+    // Align right edge of panel with right edge of bubble, clamp to viewport
+    let left = pos.x + BUBBLE_SIZE - PANEL_WIDTH;
+    left = Math.max(8, Math.min(window.innerWidth - PANEL_WIDTH - 8, left));
+    return { position: 'fixed', top, left, zIndex: 50, width: PANEL_WIDTH };
+  }
+
+  if (!pos) return null;
+
   return (
     <>
       {/* Keyframes for pulse ring */}
       <style>{`
         @keyframes copilot-ring {
-          0% { box-shadow: 0 0 0 0 rgba(239,239,200,0.5); }
-          70% { box-shadow: 0 0 0 14px rgba(239,239,200,0); }
-          100% { box-shadow: 0 0 0 0 rgba(239,239,200,0); }
+          0% { box-shadow: 0 0 0 0 rgba(15,61,62,0.35); }
+          70% { box-shadow: 0 0 0 14px rgba(15,61,62,0); }
+          100% { box-shadow: 0 0 0 0 rgba(15,61,62,0); }
         }
         .copilot-pulse { animation: copilot-ring 1.2s ease-out; }
+        .copilot-bubble-wrap { touch-action: none; }
       `}</style>
 
-      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
-        {/* Discoverability pill */}
+      {/* Bubble wrapper — draggable, sized to the bubble only so pos.x/pos.y track the bubble edge */}
+      <div
+        className="copilot-bubble-wrap"
+        style={{ position: 'fixed', left: pos.x, top: pos.y, zIndex: 50 }}
+        onPointerDown={handlePointerDown}
+      >
+        {/* Discoverability pill — absolutely positioned to the left of the bubble */}
         {showPill && (
           <div
             style={{
+              position: 'absolute',
+              right: 'calc(100% + 12px)',
+              top: '50%',
+              transform: pillSlideIn ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(12px)',
               transition: 'opacity 300ms, transform 300ms',
               opacity: pillSlideIn ? 1 : 0,
-              transform: pillSlideIn ? 'translateX(0)' : 'translateX(12px)',
               background: 'white',
               color: '#0F3D3E',
               fontSize: '13px',
@@ -166,6 +242,7 @@ export default function CoPilot() {
               boxShadow: '0 4px 14px rgba(15,61,62,0.18)',
               whiteSpace: 'nowrap',
               fontWeight: 500,
+              pointerEvents: 'none',
             }}
           >
             Ask about any signal
@@ -184,27 +261,27 @@ export default function CoPilot() {
 
           {/* Unread dot */}
           {hasUnread && !open && (
-            <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white z-10" />
+            <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-urgent z-10" style={{ outline: '2px solid #EFEFC8' }} />
           )}
 
           <button
             onClick={handleBubbleClick}
             style={{
-              width: 56,
-              height: 56,
+              width: BUBBLE_SIZE,
+              height: BUBBLE_SIZE,
               borderRadius: '50%',
-              background: '#0F3D3E',
-              color: '#EFEFC8',
-              boxShadow: '0 4px 14px rgba(15,61,62,0.25)',
+              background: '#EFEFC8',
+              color: '#0F3D3E',
+              boxShadow: '0 4px 14px rgba(15, 61, 62, 0.18)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '22px',
               border: 'none',
-              cursor: 'pointer',
+              cursor: 'grab',
               transition: 'background 150ms',
             }}
-            title="Adonis Intel co-pilot"
+            title="Adonis Intel co-pilot (drag to move)"
           >
             {open ? (
               <span style={{ fontSize: 24, lineHeight: 1 }}>×</span>
@@ -217,11 +294,20 @@ export default function CoPilot() {
         </div>
       </div>
 
-      {/* Chat panel — anchored above the bubble */}
+      {/* Chat panel — anchored relative to bubble position */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 bg-white border border-line rounded-xl shadow-xl flex flex-col overflow-hidden">
+        <div
+          className="bg-white border border-line rounded-xl shadow-xl flex flex-col overflow-hidden"
+          style={panelStyle()}
+        >
           {/* Header */}
-          <div className="bg-navy-900 px-4 py-3 flex items-center justify-between">
+          <div
+            className="px-4 py-3 flex items-center justify-between"
+            style={{
+              background:
+                'radial-gradient(circle at 110% 120%, rgba(63, 215, 190, 0.55) 0%, transparent 55%), linear-gradient(135deg, #0A2A2B 0%, #0F3D3E 50%, #1A5E5C 100%)',
+            }}
+          >
             <div>
               <div className="text-white text-sm font-semibold">Adonis Intel</div>
               <div className="text-slate-400 text-[10px] font-mono">AI co-pilot · beta</div>
@@ -287,7 +373,14 @@ export default function CoPilot() {
             <button
               onClick={handleSend}
               disabled={!input.trim() || loading}
-              className="text-xs px-3 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-40 transition"
+              className="px-3 py-2 rounded-lg transition hover:opacity-90 active:scale-95"
+              style={{
+                background: '#0F3D3E',
+                color: '#EFEFC8',
+                fontFamily: 'ui-monospace, monospace',
+                fontSize: '13px',
+                opacity: !input.trim() || loading ? 0.4 : 1,
+              }}
             >
               Send
             </button>

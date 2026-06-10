@@ -26,7 +26,7 @@ export default function ExportPage() {
   }
 
   return (
-    <div className="px-8 py-7">
+    <div className="px-4 py-5 md:px-8 md:py-7 pb-20 md:pb-7">
       <header className="mb-6">
         <h1 className="font-serif text-2xl font-semibold text-brand">Export</h1>
         <p className="text-sm text-slate-500 mt-1">
@@ -43,7 +43,8 @@ export default function ExportPage() {
         <button
           onClick={handleDownload}
           disabled={loading}
-          className="px-5 py-2.5 bg-navy-900 text-white text-sm font-mono rounded-lg hover:bg-navy-700 disabled:opacity-50 transition"
+          className="px-5 py-2.5 text-sm font-mono rounded-lg disabled:opacity-50 transition hover:opacity-90 active:scale-95"
+          style={{ background: '#0F3D3E', color: '#EFEFC8' }}
         >
           {loading ? 'Downloading…' : '↧ Download CSV'}
         </button>
