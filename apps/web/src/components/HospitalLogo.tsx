@@ -19,18 +19,19 @@ const KNOWN_DOMAINS: Record<string, string> = {
   'uams': 'uams.edu',
 };
 
-function clearbitUrl(name: string, websiteUrl: string | null): string {
+function logoUrl(name: string, websiteUrl: string | null): string {
+  const token = process.env.NEXT_PUBLIC_LOGODEV_TOKEN;
+  if (!token) return '';
   try {
+    let domain = '';
     if (websiteUrl) {
-      const hostname = new URL(websiteUrl).hostname.replace(/^www\./, '');
-      return `https://logo.clearbit.com/${hostname}`;
+      domain = new URL(websiteUrl).hostname.replace(/^www\./, '');
+    } else {
+      const key = Object.keys(KNOWN_DOMAINS).find((k) => name.toLowerCase().includes(k));
+      if (key) domain = KNOWN_DOMAINS[key];
     }
-    // Fall back to known domain map
-    const key = Object.keys(KNOWN_DOMAINS).find((k) =>
-      name.toLowerCase().includes(k)
-    );
-    if (key) return `https://logo.clearbit.com/${KNOWN_DOMAINS[key]}`;
-    return '';
+    if (!domain) return '';
+    return `https://img.logo.dev/${domain}?token=${token}&size=64`;
   } catch {
     return '';
   }
@@ -44,16 +45,16 @@ const sizes = {
 
 export default function HospitalLogo({ name, websiteUrl, size = 'lg' }: HospitalLogoProps) {
   const [failed, setFailed] = useState(false);
-  const logoUrl = clearbitUrl(name, websiteUrl);
+  const url = logoUrl(name, websiteUrl);
   const { container, img } = sizes[size];
 
-  if (logoUrl && !failed) {
+  if (url && !failed) {
     return (
       <div
         className={`${container} bg-white border border-line flex items-center justify-center overflow-hidden flex-none`}
       >
         <Image
-          src={logoUrl}
+          src={url}
           alt={`${name} logo`}
           width={img}
           height={img}

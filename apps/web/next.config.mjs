@@ -3,6 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@adonis/shared', '@adonis/db'],
   serverExternalPackages: [],
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'img.logo.dev' },
+    ],
+  },
 };
 
 export default nextConfig;
