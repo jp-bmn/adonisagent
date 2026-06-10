@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { SignalCard, PREVIEW_SIGNALS } from '@/components';
+import { SignalCard } from '@/components';
+import { fetchSignals } from '@/lib/api';
 
 // Hospital name lookup using real backend UUIDs
 const HOSPITAL_NAMES: Record<string, string> = {
@@ -10,9 +11,8 @@ const HOSPITAL_NAMES: Record<string, string> = {
   '7b836e62-3ee8-4d10-b30e-028734a5f812': 'CommonSpirit',
 };
 
-export default function HomePage() {
-  // TODO T-04: replace PREVIEW_SIGNALS with fetchSignals() from @/lib/api
-  const signals = PREVIEW_SIGNALS;
+export default async function HomePage() {
+  const signals = await fetchSignals();
   const urgentCount = signals.filter((s) => s.tier === 'urgent').length;
   const standardCount = signals.filter((s) => s.tier === 'worth_knowing').length;
 

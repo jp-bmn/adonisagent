@@ -4,7 +4,7 @@
  * Auth: X-User-Id header (Danielle's admin ID hardcoded until T-11 wires real auth)
  */
 
-const BASE_URL = 'https://adonisagents-production.up.railway.app/api/v1';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://adonisagents-production.up.railway.app/api/v1';
 
 // Danielle's admin ID — sees all hospitals and signals.
 // Swapped for the real session user in T-11.
