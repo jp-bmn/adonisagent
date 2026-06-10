@@ -13,7 +13,7 @@
   "dependencies": {
     "@adonis/db": "workspace:*",
     "@adonis/shared": "workspace:*",
-    "@anthropic-ai/sdk": "^0.30.1",
+
     "@supabase/supabase-js": "^2.45.4",
     "next": "^15.0.0",
     "react": "^18.3.1",
