@@ -66,6 +66,14 @@ export default function SignalFilters() {
         >
           Most recent
         </button>
+        <button
+          onClick={() => setParam('sort', 'hospital')}
+          className={`text-xs font-mono px-3 py-1.5 rounded-md transition ${
+            currentSort === 'hospital' ? 'bg-brand text-cream' : 'text-slate-500 hover:text-ink'
+          }`}
+        >
+          Hospital A–Z
+        </button>
       </div>
     </div>
   );

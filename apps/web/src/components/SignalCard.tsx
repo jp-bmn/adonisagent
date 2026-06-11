@@ -17,18 +17,37 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
   if (isUrgent) {
     return (
       <div className="bg-white border border-line rounded-xl p-5 space-y-3">
-        {/* Urgent header: —— URGENT BRIEF · DATE */}
-        <div
-          style={{
-            fontFamily: 'ui-monospace, monospace',
-            fontSize: '11px',
-            fontWeight: 700,
-            color: '#C44A2C',
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-          }}
-        >
-          —— URGENT BRIEF · {formatShortDate(date)}
+        {/* Urgent header row: pill + date */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              background: '#FBEDEB',
+              color: '#C44A2C',
+              fontFamily: 'ui-monospace, monospace',
+              fontSize: '10px',
+              fontWeight: 700,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {label}
+          </span>
+          <span
+            style={{
+              fontFamily: 'ui-monospace, monospace',
+              fontSize: '11px',
+              fontWeight: 700,
+              color: '#C44A2C',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+            }}
+          >
+            —— URGENT · {formatShortDate(date)}
+          </span>
         </div>
 
         {/* Headline */}
@@ -73,18 +92,37 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
 
   return (
     <div className="bg-white border border-line rounded-xl p-5 space-y-3">
-      {/* Header: UPDATE · CATEGORY · DATE — mirrors URGENT header pattern */}
-      <div
-        style={{
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: '11px',
-          fontWeight: 700,
-          color: 'rgba(15,61,62,0.45)',
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-        }}
-      >
-        Update · {label} · {formatShortDate(date)}
+      {/* Update header row: pill + date */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '2px 8px',
+            borderRadius: '9999px',
+            background: '#DCEBE7',
+            color: '#0F3D3E',
+            fontFamily: 'ui-monospace, monospace',
+            fontSize: '10px',
+            fontWeight: 700,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+          }}
+        >
+          {label}
+        </span>
+        <span
+          style={{
+            fontFamily: 'ui-monospace, monospace',
+            fontSize: '11px',
+            fontWeight: 700,
+            color: 'rgba(15,61,62,0.45)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Update · {formatShortDate(date)}
+        </span>
       </div>
 
       {/* Headline */}

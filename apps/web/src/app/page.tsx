@@ -34,6 +34,11 @@ export default async function HomePage({ searchParams }: PageProps) {
         new Date(a.published_date ?? a.created_at).getTime()
       );
     }
+    if (sort === 'hospital') {
+      const nameA = hospitalMap[a.hospital_id] ?? '';
+      const nameB = hospitalMap[b.hospital_id] ?? '';
+      return nameA.localeCompare(nameB);
+    }
     // Default: urgent first, then by date within each tier
     const tierDiff = TIER_ORDER[a.tier] - TIER_ORDER[b.tier];
     if (tierDiff !== 0) return tierDiff;
