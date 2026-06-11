@@ -9,6 +9,73 @@ interface Message {
   text: string;
 }
 
+function HermesMessage({ text }: { text: string }) {
+  const lines = text.split('\n');
+  const nodes: React.ReactNode[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i] ?? '';
+
+    // Blank line — spacing between blocks
+    if (line.trim() === '') {
+      i++;
+      continue;
+    }
+
+    // Bullet list block
+    if (/^[-•*]\s/.test(line.trim())) {
+      const items: string[] = [];
+      while (i < lines.length && /^[-•*]\s/.test((lines[i] ?? '').trim())) {
+        items.push((lines[i] ?? '').trim().replace(/^[-•*]\s/, ''));
+        i++;
+      }
+      nodes.push(
+        <ul key={i} className="list-disc list-outside pl-4 space-y-0.5 my-1">
+          {items.map((item, j) => (
+            <li key={j}>{renderInline(item)}</li>
+          ))}
+        </ul>
+      );
+      continue;
+    }
+
+    // Numbered list block
+    if (/^\d+\.\s/.test(line.trim())) {
+      const items: string[] = [];
+      while (i < lines.length && /^\d+\.\s/.test((lines[i] ?? '').trim())) {
+        items.push((lines[i] ?? '').trim().replace(/^\d+\.\s/, ''));
+        i++;
+      }
+      nodes.push(
+        <ol key={i} className="list-decimal list-outside pl-4 space-y-0.5 my-1">
+          {items.map((item, j) => (
+            <li key={j}>{renderInline(item)}</li>
+          ))}
+        </ol>
+      );
+      continue;
+    }
+
+    // Regular paragraph
+    nodes.push(<p key={i} className="my-0.5">{renderInline(line)}</p>);
+    i++;
+  }
+
+  return <div className="space-y-0.5">{nodes}</div>;
+}
+
+function renderInline(text: string): React.ReactNode {
+  // Split on **bold** patterns
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-semibold text-slate-800">{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
 const STORAGE_KEY = 'adonis-hermes-history';
 const PILL_KEY = 'adonis-hermes-pill-shown';
 const OPENED_KEY = 'adonis-hermes-opened';
@@ -347,7 +414,7 @@ export default function CoPilot() {
                       : 'bg-paper text-slate-700 rounded-bl-none'
                   }`}
                 >
-                  {m.text}
+                  {m.role === 'assistant' ? <HermesMessage text={m.text} /> : m.text}
                 </div>
               </div>
             ))}
