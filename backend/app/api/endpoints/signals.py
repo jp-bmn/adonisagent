@@ -99,7 +99,7 @@ async def list_signals(
 
     # Exclude dismissed unless caller opts in
     if not include_dismissed:
-        query = query.neq("review_status", "dismissed")
+        query = query.or_("review_status.neq.dismissed,review_status.is.null")
 
     # Territory filtering logic
     if not user.get("is_admin", False):
