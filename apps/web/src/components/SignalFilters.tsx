@@ -30,9 +30,9 @@ export default function SignalFilters() {
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 flex-wrap mb-5">
-      {/* Category chips */}
-      <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex flex-col gap-3 mb-5">
+      {/* Category chips — horizontal scroll on mobile */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.value}
@@ -49,7 +49,7 @@ export default function SignalFilters() {
       </div>
 
       {/* Sort toggle */}
-      <div className="flex items-center gap-1 bg-white border border-line rounded-lg p-0.5 flex-none">
+      <div className="flex items-center gap-1 bg-white border border-line rounded-lg p-0.5 self-start">
         <button
           onClick={() => setParam('sort', 'urgent')}
           className={`text-xs font-mono px-3 py-1.5 rounded-md transition ${

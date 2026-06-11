@@ -22,8 +22,11 @@ export default async function HospitalsPage() {
               <th className="text-left text-xs font-mono uppercase tracking-widest text-slate-500 px-5 py-3">
                 AE Coverage
               </th>
-              <th className="text-left text-xs font-mono uppercase tracking-widest text-slate-500 px-5 py-3">
+              <th className="text-left text-xs font-mono uppercase tracking-widest text-slate-500 px-5 py-3 hidden md:table-cell">
                 Notes
+              </th>
+              <th className="text-left text-xs font-mono uppercase tracking-widest text-slate-500 px-5 py-3 hidden md:table-cell">
+                Last viewed
               </th>
             </tr>
           </thead>
@@ -47,7 +50,10 @@ export default async function HospitalsPage() {
                     .map((u) => u.name)
                     .join(', ') || '—'}
                 </td>
-                <td className="px-5 py-4 text-sm text-slate-500">{h.division_note ?? '—'}</td>
+                <td className="px-5 py-4 text-sm text-slate-500 hidden md:table-cell">{h.division_note ?? '—'}</td>
+                <td className="px-5 py-4 hidden md:table-cell">
+                  <span className="text-xs font-mono text-slate-400">—</span>
+                </td>
               </tr>
             ))}
           </tbody>

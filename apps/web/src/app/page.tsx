@@ -69,10 +69,10 @@ export default async function HomePage({ searchParams }: PageProps) {
       </header>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <Kpi value={urgentCount} label="Urgent this week" tone="urgent" />
-        <Kpi value={worthKnowingCount} label="Updates this week" />
-        <Kpi value={hospitals.length} label="Accounts monitored" />
-        <Kpi value={allSignals.length} label="Signals total" />
+        <Kpi value={urgentCount} label="Urgent this week" tone="urgent" stripeColor="#C44A2C" />
+        <Kpi value={worthKnowingCount} label="Updates this week" stripeColor="#2D7B6C" />
+        <Kpi value={hospitals.length} label="Accounts monitored" stripeColor="#0F3D3E" />
+        <Kpi value={allSignals.length} label="Signals total" stripeColor="#DCEBE7" />
       </div>
 
       <Suspense>
@@ -133,13 +133,43 @@ function formatDate(iso: string): string {
   });
 }
 
-function Kpi({ value, label, tone }: { value: string | number; label: string; tone?: 'urgent' }) {
+type DeltaDirection = 'up' | 'down' | 'flat';
+
+const PILL_STYLES: Record<DeltaDirection, { background: string; color: string }> = {
+  up:   { background: '#FCE8E1', color: '#C44A2C' },
+  down: { background: '#DCEBE7', color: '#2D7B6C' },
+  flat: { background: '#F0F5F4', color: '#6b7480' },
+};
+
+function Kpi({
+  value,
+  label,
+  tone,
+  stripeColor,
+  delta,
+  deltaDirection,
+}: {
+  value: string | number;
+  label: string;
+  tone?: 'urgent';
+  stripeColor: string;
+  delta?: number | null;
+  deltaDirection?: DeltaDirection | null;
+}) {
   return (
-    <div className="bg-white border border-line rounded-xl p-4">
+    <div className="bg-white border border-line rounded-xl p-4 relative overflow-hidden">
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: stripeColor }} />
       <div className={`font-serif text-2xl font-bold ${tone === 'urgent' ? 'text-urgent' : 'text-brand'}`}>
         {value}
       </div>
       <div className="text-xs text-slate-500 mt-1">{label}</div>
+      {delta != null && deltaDirection && (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 7px', borderRadius: '10px', fontFamily: 'ui-monospace, monospace', fontSize: '10px', fontWeight: 600, marginTop: '8px', letterSpacing: '0.02em', ...PILL_STYLES[deltaDirection] }}>
+          {deltaDirection === 'up' && `↑ ${delta} vs last week`}
+          {deltaDirection === 'down' && `↓ ${delta} vs last week`}
+          {deltaDirection === 'flat' && 'same as last week'}
+        </div>
+      )}
     </div>
   );
 }
