@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { fetchSignals, fetchHospitals, fetchStatus, SignalType } from '@/lib/api';
+import { fetchSignals, fetchHospitals, fetchStatus, SignalType, SIGNAL_TYPE_LABELS } from '@/lib/api';
 import { SignalCard, TerritoryFilter } from '@/components';
 import SignalFilters from '@/components/SignalFilters';
 
@@ -90,8 +90,24 @@ export default async function HomePage({ searchParams }: PageProps) {
       </div>
 
       {signals.length === 0 ? (
-        <div className="bg-white border border-line rounded-xl p-10 text-center text-sm text-slate-500">
-          No signals match this filter.
+        <div className="bg-white border border-line rounded-xl p-10 text-center space-y-2">
+          {category ? (
+            <>
+              <p className="text-sm font-semibold text-brand">
+                No {SIGNAL_TYPE_LABELS[category as SignalType] ?? category.replace(/_/g, ' ')} signals this week.
+              </p>
+              <p className="text-xs text-slate-400">
+                Try a different category, or check back Monday after the next agent run.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-semibold text-brand">No signals yet.</p>
+              <p className="text-xs text-slate-400">
+                Agents run Mon / Wed / Fri — next update {nextAgentRun()}.
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-5">
@@ -127,6 +143,17 @@ export default async function HomePage({ searchParams }: PageProps) {
       </footer>
     </div>
   );
+}
+
+function nextAgentRun(): string {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
+  // Days until next Mon(1), Wed(3), Fri(5)
+  const targets = [1, 3, 5];
+  const daysAhead = targets.map((t) => (t - day + 7) % 7 || 7);
+  const next = new Date(now);
+  next.setDate(now.getDate() + Math.min(...daysAhead));
+  return next.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 }
 
 function formatDate(iso: string): string {
