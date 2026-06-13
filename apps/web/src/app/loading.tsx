@@ -13,7 +13,10 @@ export default function HomeLoading() {
       {/* KPI tiles */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-white border border-line rounded-xl p-4 space-y-2 overflow-hidden relative">
+          <div
+            key={i}
+            className="bg-white border border-line rounded-xl p-4 space-y-2 overflow-hidden relative"
+          >
             <div className="absolute top-0 left-0 right-0 h-[3px] bg-slate-200" />
             <div className="h-8 w-12 bg-slate-200 rounded" />
             <div className="h-3 w-28 bg-slate-100 rounded" />

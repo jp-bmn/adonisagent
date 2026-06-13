@@ -58,7 +58,11 @@ function HermesMessage({ text }: { text: string }) {
     }
 
     // Regular paragraph
-    nodes.push(<p key={i} className="my-0.5">{renderInline(line)}</p>);
+    nodes.push(
+      <p key={i} className="my-0.5">
+        {renderInline(line)}
+      </p>
+    );
     i++;
   }
 
@@ -70,7 +74,11 @@ function renderInline(text: string): React.ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="font-semibold text-slate-800">{part.slice(2, -2)}</strong>;
+      return (
+        <strong key={i} className="font-semibold text-slate-800">
+          {part.slice(2, -2)}
+        </strong>
+      );
     }
     return part;
   });
