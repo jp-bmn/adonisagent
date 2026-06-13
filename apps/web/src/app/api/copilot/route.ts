@@ -22,23 +22,25 @@ export async function POST(req: NextRequest) {
 
   const { message, history } = await req.json();
 
-  let signalsContext = "No live signals available.";
+  let signalsContext = 'No live signals available.';
   try {
     const [signals, hospitals] = await Promise.all([
       fetchSignals(undefined, { limit: 50 }),
-      fetchHospitals()
+      fetchHospitals(),
     ]);
-    const hospitalMap = Object.fromEntries(hospitals.map(h => [h.id, h.name]));
-    
+    const hospitalMap = Object.fromEntries(hospitals.map((h) => [h.id, h.name]));
+
     if (signals.length > 0) {
-      signalsContext = signals.map(s => {
-        const hospitalName = hospitalMap[s.hospital_id] || 'Unknown Hospital';
-        const date = s.published_date || s.created_at.split('T')[0];
-        return `[${date}] ${hospitalName} (${s.tier}) - ${s.title || s.signal_type}. Why it matters: ${s.why_it_matters || 'N/A'}`;
-      }).join('\n');
+      signalsContext = signals
+        .map((s) => {
+          const hospitalName = hospitalMap[s.hospital_id] || 'Unknown Hospital';
+          const date = s.published_date || s.created_at.split('T')[0];
+          return `[${date}] ${hospitalName} (${s.tier}) - ${s.title || s.signal_type}. Why it matters: ${s.why_it_matters || 'N/A'}`;
+        })
+        .join('\n');
     }
   } catch (err) {
-    console.error("Failed to fetch context for copilot:", err);
+    console.error('Failed to fetch context for copilot:', err);
   }
 
   const systemPrompt = `${SYSTEM_PROMPT_BASE}

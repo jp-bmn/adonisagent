@@ -34,20 +34,23 @@ export default function ReviewQueue({ initialSignals }: ReviewQueueProps) {
   return (
     <div className="space-y-4">
       {signals.map((signal) => (
-        <div key={signal.id} className="bg-white border border-line rounded-xl p-5 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+        <div
+          key={signal.id}
+          className="bg-white border border-line rounded-xl p-5 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center"
+        >
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
                 {Math.round(signal.confidence_score * 100)}% Match
               </span>
-              <span className="text-xs font-mono text-slate-400">
-                {signal.signal_type}
-              </span>
+              <span className="text-xs font-mono text-slate-400">{signal.signal_type}</span>
             </div>
-            <h3 className="font-semibold text-brand text-sm">{signal.title || 'Untitled Signal'}</h3>
+            <h3 className="font-semibold text-brand text-sm">
+              {signal.title || 'Untitled Signal'}
+            </h3>
             <p className="text-xs text-slate-500 mt-1 max-w-2xl">{signal.summary}</p>
           </div>
-          
+
           <div className="flex items-center gap-2 w-full md:w-auto mt-3 md:mt-0">
             <button
               disabled={loadingId === signal.id}

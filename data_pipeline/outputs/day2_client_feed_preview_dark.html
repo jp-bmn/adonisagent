@@ -1,133 +1,582 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Adonis Intel - Client Preview (Dark)</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --ad-bg: #0D1117; --ad-surface: #161C26; --ad-surface2: #1E2633; --ad-border: rgba(255,255,255,0.08); --ad-border2: rgba(255,255,255,0.13);
-    --ad-green: #00C48C; --ad-green-dim: rgba(0,196,140,0.10); --ad-green-border: rgba(0,196,140,0.20);
-    --ad-text: #F0F4F8; --ad-muted: #8896A8; --ad-subtle: #BCC8D4; --ad-danger: #FF5C5C; --ad-danger-bg: rgba(255,92,92,0.10); --ad-warn: #F5A623; --ad-warn-bg: rgba(245,166,35,0.10);
-  }
-  html, body { height: 100%; background: var(--ad-bg); font-family: 'Inter', sans-serif; color: var(--ad-text); font-size: 13px; }
-  .app { display: flex; flex-direction: column; min-height: 100vh; }
-  .topbar { display: flex; align-items: center; gap: 14px; padding: 0 20px; height: 48px; background: var(--ad-surface); border-bottom: 1px solid var(--ad-border); }
-  .logo { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; color: var(--ad-green); }
-  .logo-sep { color: var(--ad-border2); margin: 0 2px; }
-  .logo-sub { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--ad-muted); }
-  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-  .tb-btn { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--ad-border2); color: var(--ad-muted); background: transparent; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
-  .tb-btn:hover { border-color: var(--ad-green); color: var(--ad-green); }
-  .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--ad-green-dim); border: 1px solid var(--ad-green); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--ad-green); letter-spacing: 0.04em; }
-  .body { display: flex; flex: 1; min-height: 0; }
-  .sidebar { width: 196px; border-right: 1px solid var(--ad-border); background: var(--ad-surface); overflow-y: auto; padding: 16px 0; }
-  .sb-section { padding: 0 12px; margin-bottom: 22px; }
-  .sb-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ad-muted); margin-bottom: 8px; padding: 0 6px; }
-  .sb-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12px; color: var(--ad-muted); border: 1px solid transparent; transition: background 0.12s, color 0.12s, border-color 0.12s; }
-  .sb-item:hover { background: var(--ad-surface2); color: var(--ad-text); }
-  .sb-item.active { background: var(--ad-green-dim); color: var(--ad-green); border-color: var(--ad-green-border); }
-  .sb-badge { margin-left: auto; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 20px; }
-  .sb-badge-danger { background: var(--ad-danger-bg); color: var(--ad-danger); }
-  .sb-badge-muted { background: rgba(255,255,255,0.06); color: var(--ad-muted); }
-  .hosp-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-  .main-header { padding: 14px 20px 12px; background: var(--ad-surface); border-bottom: 1px solid var(--ad-border); }
-  .main-title { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
-  .main-sub { font-size: 12px; color: var(--ad-muted); }
-  .main-sub strong { color: var(--ad-danger); font-weight: 600; }
-  .filter-row { display: flex; gap: 7px; padding: 9px 20px; background: var(--ad-surface); border-bottom: 1px solid var(--ad-border); flex-wrap: wrap; align-items: center; }
-  .filter-btn { font-size: 11px; font-weight: 500; padding: 4px 11px; border-radius: 20px; border: 1px solid var(--ad-border2); color: var(--ad-muted); background: transparent; }
-  .filter-btn.on.danger { background: var(--ad-danger-bg); color: var(--ad-danger); border-color: rgba(255,92,92,0.28); }
-  .filter-btn.on.warn { background: var(--ad-warn-bg); color: var(--ad-warn); border-color: rgba(245,166,35,0.28); }
-  .filter-btn.on { background: var(--ad-surface2); color: var(--ad-text); }
-  .filter-sep { width: 1px; height: 14px; background: var(--ad-border2); margin: 0 2px; flex-shrink: 0; }
-  .feed { flex: 1; overflow-y: auto; padding: 14px 20px; display: flex; flex-direction: column; gap: 10px; }
-  .feed::-webkit-scrollbar { width: 4px; }
-  .feed::-webkit-scrollbar-track { background: transparent; }
-  .feed::-webkit-scrollbar-thumb { background: var(--ad-surface2); border-radius: 2px; }
-  .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ad-muted); padding: 2px 0; }
-  .card { background: var(--ad-surface); border: 1px solid var(--ad-border); border-radius: 10px; padding: 13px 15px; cursor: pointer; transition: border-color 0.15s; }
-  .card:hover { border-color: var(--ad-border2); }
-  .card.urgent { border-left: 2px solid var(--ad-danger); border-radius: 0 10px 10px 0; }
-  .card-top { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; flex-wrap: wrap; }
-  .hosp-name { font-size: 13px; font-weight: 600; }
-  .badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
-  .badge-danger { background: var(--ad-danger-bg); color: var(--ad-danger); }
-  .badge-warn { background: var(--ad-warn-bg); color: var(--ad-warn); }
-  .badge-muted { background: rgba(255,255,255,0.06); color: var(--ad-muted); }
-  .badge-type { background: var(--ad-green-dim); color: var(--ad-green); }
-  .card-time { margin-left: auto; font-size: 11px; color: var(--ad-muted); }
-  .card-summary { font-size: 12px; color: var(--ad-subtle); line-height: 1.6; margin-bottom: 7px; }
-  .card-why { font-size: 11px; font-weight: 500; line-height: 1.55; margin-bottom: 10px; padding: 6px 10px; background: var(--ad-green-dim); border-left: 2px solid var(--ad-green); color: var(--ad-green); border-radius: 0 5px 5px 0; }
-  .card-footer { display: flex; justify-content: space-between; align-items: center; }
-  .card-meta { font-size: 11px; color: var(--ad-muted); }
-  .card-actions { display: flex; gap: 5px; }
-  .act-icon { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--ad-border2); color: var(--ad-muted); background: transparent; text-decoration: none; cursor: pointer; transition: all 0.12s; }
-  .act-icon:hover { border-color: var(--ad-green); color: var(--ad-green); }
-  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; color: var(--ad-muted); text-align: center; gap: 8px; }
-</style>
-</head>
-<body>
-<div class="app">
-  <div class="topbar">
-    <span class="logo">ADONIS<span class="logo-sep"> · </span><span class="logo-sub">INTEL</span></span>
-    <div class="topbar-right">
-      <button class="tb-btn"><i class="ti ti-bell" style="font-size:13px"></i> Alerts</button>
-      <button class="tb-btn"><i class="ti ti-settings" style="font-size:13px"></i> Preferences</button>
-      <div class="avatar">MC</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adonis Intel - Client Preview (Dark)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --ad-bg: #0d1117;
+        --ad-surface: #161c26;
+        --ad-surface2: #1e2633;
+        --ad-border: rgba(255, 255, 255, 0.08);
+        --ad-border2: rgba(255, 255, 255, 0.13);
+        --ad-green: #00c48c;
+        --ad-green-dim: rgba(0, 196, 140, 0.1);
+        --ad-green-border: rgba(0, 196, 140, 0.2);
+        --ad-text: #f0f4f8;
+        --ad-muted: #8896a8;
+        --ad-subtle: #bcc8d4;
+        --ad-danger: #ff5c5c;
+        --ad-danger-bg: rgba(255, 92, 92, 0.1);
+        --ad-warn: #f5a623;
+        --ad-warn-bg: rgba(245, 166, 35, 0.1);
+      }
+      html,
+      body {
+        height: 100%;
+        background: var(--ad-bg);
+        font-family: 'Inter', sans-serif;
+        color: var(--ad-text);
+        font-size: 13px;
+      }
+      .app {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      .topbar {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 0 20px;
+        height: 48px;
+        background: var(--ad-surface);
+        border-bottom: 1px solid var(--ad-border);
+      }
+      .logo {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: var(--ad-green);
+      }
+      .logo-sep {
+        color: var(--ad-border2);
+        margin: 0 2px;
+      }
+      .logo-sub {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        color: var(--ad-muted);
+      }
+      .topbar-right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .tb-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 5px 11px;
+        border-radius: 6px;
+        border: 1px solid var(--ad-border2);
+        color: var(--ad-muted);
+        background: transparent;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
+      }
+      .tb-btn:hover {
+        border-color: var(--ad-green);
+        color: var(--ad-green);
+      }
+      .avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--ad-green-dim);
+        border: 1px solid var(--ad-green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--ad-green);
+        letter-spacing: 0.04em;
+      }
+      .body {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+      }
+      .sidebar {
+        width: 196px;
+        border-right: 1px solid var(--ad-border);
+        background: var(--ad-surface);
+        overflow-y: auto;
+        padding: 16px 0;
+      }
+      .sb-section {
+        padding: 0 12px;
+        margin-bottom: 22px;
+      }
+      .sb-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: var(--ad-muted);
+        margin-bottom: 8px;
+        padding: 0 6px;
+      }
+      .sb-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        color: var(--ad-muted);
+        border: 1px solid transparent;
+        transition:
+          background 0.12s,
+          color 0.12s,
+          border-color 0.12s;
+      }
+      .sb-item:hover {
+        background: var(--ad-surface2);
+        color: var(--ad-text);
+      }
+      .sb-item.active {
+        background: var(--ad-green-dim);
+        color: var(--ad-green);
+        border-color: var(--ad-green-border);
+      }
+      .sb-badge {
+        margin-left: auto;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 20px;
+      }
+      .sb-badge-danger {
+        background: var(--ad-danger-bg);
+        color: var(--ad-danger);
+      }
+      .sb-badge-muted {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--ad-muted);
+      }
+      .hosp-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+      .main-header {
+        padding: 14px 20px 12px;
+        background: var(--ad-surface);
+        border-bottom: 1px solid var(--ad-border);
+      }
+      .main-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
+      .main-sub {
+        font-size: 12px;
+        color: var(--ad-muted);
+      }
+      .main-sub strong {
+        color: var(--ad-danger);
+        font-weight: 600;
+      }
+      .filter-row {
+        display: flex;
+        gap: 7px;
+        padding: 9px 20px;
+        background: var(--ad-surface);
+        border-bottom: 1px solid var(--ad-border);
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .filter-btn {
+        font-size: 11px;
+        font-weight: 500;
+        padding: 4px 11px;
+        border-radius: 20px;
+        border: 1px solid var(--ad-border2);
+        color: var(--ad-muted);
+        background: transparent;
+      }
+      .filter-btn.on.danger {
+        background: var(--ad-danger-bg);
+        color: var(--ad-danger);
+        border-color: rgba(255, 92, 92, 0.28);
+      }
+      .filter-btn.on.warn {
+        background: var(--ad-warn-bg);
+        color: var(--ad-warn);
+        border-color: rgba(245, 166, 35, 0.28);
+      }
+      .filter-btn.on {
+        background: var(--ad-surface2);
+        color: var(--ad-text);
+      }
+      .filter-sep {
+        width: 1px;
+        height: 14px;
+        background: var(--ad-border2);
+        margin: 0 2px;
+        flex-shrink: 0;
+      }
+      .feed {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .feed::-webkit-scrollbar {
+        width: 4px;
+      }
+      .feed::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .feed::-webkit-scrollbar-thumb {
+        background: var(--ad-surface2);
+        border-radius: 2px;
+      }
+      .section-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--ad-muted);
+        padding: 2px 0;
+      }
+      .card {
+        background: var(--ad-surface);
+        border: 1px solid var(--ad-border);
+        border-radius: 10px;
+        padding: 13px 15px;
+        cursor: pointer;
+        transition: border-color 0.15s;
+      }
+      .card:hover {
+        border-color: var(--ad-border2);
+      }
+      .card.urgent {
+        border-left: 2px solid var(--ad-danger);
+        border-radius: 0 10px 10px 0;
+      }
+      .card-top {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 9px;
+        flex-wrap: wrap;
+      }
+      .hosp-name {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .badge {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 20px;
+      }
+      .badge-danger {
+        background: var(--ad-danger-bg);
+        color: var(--ad-danger);
+      }
+      .badge-warn {
+        background: var(--ad-warn-bg);
+        color: var(--ad-warn);
+      }
+      .badge-muted {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--ad-muted);
+      }
+      .badge-type {
+        background: var(--ad-green-dim);
+        color: var(--ad-green);
+      }
+      .card-time {
+        margin-left: auto;
+        font-size: 11px;
+        color: var(--ad-muted);
+      }
+      .card-summary {
+        font-size: 12px;
+        color: var(--ad-subtle);
+        line-height: 1.6;
+        margin-bottom: 7px;
+      }
+      .card-why {
+        font-size: 11px;
+        font-weight: 500;
+        line-height: 1.55;
+        margin-bottom: 10px;
+        padding: 6px 10px;
+        background: var(--ad-green-dim);
+        border-left: 2px solid var(--ad-green);
+        color: var(--ad-green);
+        border-radius: 0 5px 5px 0;
+      }
+      .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .card-meta {
+        font-size: 11px;
+        color: var(--ad-muted);
+      }
+      .card-actions {
+        display: flex;
+        gap: 5px;
+      }
+      .act-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        border: 1px solid var(--ad-border2);
+        color: var(--ad-muted);
+        background: transparent;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.12s;
+      }
+      .act-icon:hover {
+        border-color: var(--ad-green);
+        color: var(--ad-green);
+      }
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 24px;
+        color: var(--ad-muted);
+        text-align: center;
+        gap: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="topbar">
+        <span class="logo"
+          >ADONIS<span class="logo-sep"> · </span><span class="logo-sub">INTEL</span></span
+        >
+        <div class="topbar-right">
+          <button class="tb-btn"><i class="ti ti-bell" style="font-size: 13px"></i> Alerts</button>
+          <button class="tb-btn">
+            <i class="ti ti-settings" style="font-size: 13px"></i> Preferences
+          </button>
+          <div class="avatar">MC</div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="sidebar">
+          <div class="sb-section">
+            <div class="sb-label">Views</div>
+            <div class="sb-item active">
+              <i class="ti ti-layout-list"></i> All signals
+              <span class="sb-badge sb-badge-danger">4</span>
+            </div>
+            <div class="sb-item">
+              <i class="ti ti-alert-circle"></i> Urgent
+              <span class="sb-badge sb-badge-danger">2</span>
+            </div>
+            <div class="sb-item">
+              <i class="ti ti-network"></i> Connections
+              <span class="sb-badge sb-badge-muted">1</span>
+            </div>
+          </div>
+          <div class="sb-section">
+            <div class="sb-label">My accounts</div>
+            <div class="sb-item active"><i class="ti ti-building-hospital"></i> All accounts</div>
+            <div class="sb-item">
+              <span class="hosp-dot" style="background: #378add"></span>NewYork-Presbyterian
+            </div>
+            <div class="sb-item">
+              <span class="hosp-dot" style="background: #00c48c"></span>UMass Memorial
+            </div>
+          </div>
+          <div class="sb-section">
+            <div class="sb-label">Signal type</div>
+            <div class="sb-item"><i class="ti ti-user-check"></i> Executive</div>
+            <div class="sb-item"><i class="ti ti-arrows-join"></i> M&A</div>
+            <div class="sb-item"><i class="ti ti-chart-bar"></i> Financial</div>
+            <div class="sb-item"><i class="ti ti-scale"></i> Regulatory</div>
+            <div class="sb-item"><i class="ti ti-target"></i> Strategy</div>
+          </div>
+        </div>
+        <div class="main">
+          <div class="main-header">
+            <div class="main-title">My intel feed</div>
+            <div class="main-sub">
+              Generated 2026-06-04T15:56:01.638174+00:00 · 2 accounts ·
+              <strong>2 urgent signals</strong>
+            </div>
+          </div>
+          <div class="filter-row">
+            <button class="filter-btn on danger">
+              <i class="ti ti-alert-circle" style="font-size: 11px"></i> Urgent
+            </button>
+            <button class="filter-btn on warn">Medium</button>
+            <button class="filter-btn on">Low</button>
+            <div class="filter-sep"></div>
+            <button class="filter-btn on">Unread</button>
+            <button class="filter-btn">
+              <i class="ti ti-bookmark" style="font-size: 11px"></i> Saved
+            </button>
+          </div>
+          <div class="feed">
+            <div class="section-label">Urgent — act now</div>
+            <div class="card urgent">
+              <div class="card-top">
+                <span class="hosp-dot" style="background: #378add"></span
+                ><span class="hosp-name">NewYork-Presbyterian</span
+                ><span class="badge badge-danger">Urgent</span
+                ><span class="badge badge-type">Vendor Dispute</span
+                ><span class="card-time">conf 1.00</span>
+              </div>
+              <p class="card-summary">
+                DOJ sues NewYork-Presbyterian Hospital over alleged anticompetitive contracts
+              </p>
+              <p class="card-why">
+                Potential revenue cycle impact or buying-signal relevance for Adonis territory
+                accounts.
+              </p>
+              <div class="card-footer">
+                <div class="card-meta"><span>Healthcare Finance News</span></div>
+                <div class="card-actions">
+                  <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button
+                  ><a
+                    class="act-icon"
+                    title="Open article"
+                    href="https://www.healthcarefinancenews.com/news/doj-sues-newyork-presbyterian-hospital-over-alleged-anticompetitive-contracts"
+                    target="_blank"
+                    rel="noreferrer"
+                    ><i class="ti ti-external-link"></i
+                  ></a>
+                </div>
+              </div>
+            </div>
+            <div class="card urgent">
+              <div class="card-top">
+                <span class="hosp-dot" style="background: #378add"></span
+                ><span class="hosp-name">NewYork-Presbyterian</span
+                ><span class="badge badge-danger">Urgent</span
+                ><span class="badge badge-type">Vendor Dispute</span
+                ><span class="card-time">conf 1.00</span>
+              </div>
+              <p class="card-summary">
+                Justice Department sues NewYork-Presbyterian in second hospital antitrust case this
+                year
+              </p>
+              <p class="card-why">
+                Potential revenue cycle impact or buying-signal relevance for Adonis territory
+                accounts.
+              </p>
+              <div class="card-footer">
+                <div class="card-meta"><span>Healthcare Dive</span></div>
+                <div class="card-actions">
+                  <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button
+                  ><a
+                    class="act-icon"
+                    title="Open article"
+                    href="https://www.healthcaredive.com/news/justice-department-sues-newyork-presbyterian-in-second-hospital-antitrust-c/815891/"
+                    target="_blank"
+                    rel="noreferrer"
+                    ><i class="ti ti-external-link"></i
+                  ></a>
+                </div>
+              </div>
+            </div>
+            <div class="section-label">This week</div>
+            <div class="card">
+              <div class="card-top">
+                <span class="hosp-dot" style="background: #378add"></span
+                ><span class="hosp-name">NewYork-Presbyterian</span
+                ><span class="badge badge-warn">Worth Knowing</span
+                ><span class="badge badge-type">Leadership Change</span
+                ><span class="card-time">conf 0.75</span>
+              </div>
+              <p class="card-summary">NewYork-Presbyterian CEO is retiring, successor named</p>
+              <p class="card-why">Useful context for account monitoring and weekly AE planning.</p>
+              <div class="card-footer">
+                <div class="card-meta"><span>Chief Healthcare Executive</span></div>
+                <div class="card-actions">
+                  <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button
+                  ><a
+                    class="act-icon"
+                    title="Open article"
+                    href="https://www.chiefhealthcareexecutive.com/view/newyork-presbyterian-ceo-is-retiring-successor-named"
+                    target="_blank"
+                    rel="noreferrer"
+                    ><i class="ti ti-external-link"></i
+                  ></a>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-top">
+                <span class="hosp-dot" style="background: #00c48c"></span
+                ><span class="hosp-name">UMass Memorial</span
+                ><span class="badge badge-warn">Worth Knowing</span
+                ><span class="badge badge-type">Leadership Change</span
+                ><span class="card-time">conf 0.75</span>
+              </div>
+              <p class="card-summary">
+                Trump&#x27;s &#x27;big beautiful bill&#x27; creates potential dilemma for UMass
+                Memorial Health leader
+              </p>
+              <p class="card-why">Useful context for account monitoring and weekly AE planning.</p>
+              <div class="card-footer">
+                <div class="card-meta"><span>Worcester Telegram</span></div>
+                <div class="card-actions">
+                  <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button
+                  ><a
+                    class="act-icon"
+                    title="Open article"
+                    href="https://www.telegram.com/story/news/2025/07/03/trumps-big-beautiful-bill-creates-dilemma-for-umass-memorial-health/84447201007/"
+                    target="_blank"
+                    rel="noreferrer"
+                    ><i class="ti ti-external-link"></i
+                  ></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="body">
-    <div class="sidebar">
-      <div class="sb-section">
-        <div class="sb-label">Views</div>
-        <div class="sb-item active"><i class="ti ti-layout-list"></i> All signals <span class="sb-badge sb-badge-danger">4</span></div>
-        <div class="sb-item"><i class="ti ti-alert-circle"></i> Urgent <span class="sb-badge sb-badge-danger">2</span></div>
-        <div class="sb-item"><i class="ti ti-network"></i> Connections <span class="sb-badge sb-badge-muted">1</span></div>
-      </div>
-      <div class="sb-section">
-        <div class="sb-label">My accounts</div>
-        <div class="sb-item active"><i class="ti ti-building-hospital"></i> All accounts</div>
-        <div class="sb-item"><span class="hosp-dot" style="background:#378ADD"></span>NewYork-Presbyterian</div>
-<div class="sb-item"><span class="hosp-dot" style="background:#00C48C"></span>UMass Memorial</div>
-      </div>
-      <div class="sb-section">
-        <div class="sb-label">Signal type</div>
-        <div class="sb-item"><i class="ti ti-user-check"></i> Executive</div>
-        <div class="sb-item"><i class="ti ti-arrows-join"></i> M&A</div>
-        <div class="sb-item"><i class="ti ti-chart-bar"></i> Financial</div>
-        <div class="sb-item"><i class="ti ti-scale"></i> Regulatory</div>
-        <div class="sb-item"><i class="ti ti-target"></i> Strategy</div>
-      </div>
-    </div>
-    <div class="main">
-      <div class="main-header">
-        <div class="main-title">My intel feed</div>
-        <div class="main-sub">Generated 2026-06-04T15:56:01.638174+00:00 · 2 accounts · <strong>2 urgent signals</strong></div>
-      </div>
-      <div class="filter-row">
-        <button class="filter-btn on danger"><i class="ti ti-alert-circle" style="font-size:11px"></i> Urgent</button>
-        <button class="filter-btn on warn">Medium</button>
-        <button class="filter-btn on">Low</button>
-        <div class="filter-sep"></div>
-        <button class="filter-btn on">Unread</button>
-        <button class="filter-btn"><i class="ti ti-bookmark" style="font-size:11px"></i> Saved</button>
-      </div>
-      <div class="feed">
-        <div class="section-label">Urgent — act now</div>
-        <div class="card urgent"><div class="card-top"><span class="hosp-dot" style="background:#378ADD"></span><span class="hosp-name">NewYork-Presbyterian</span><span class="badge badge-danger">Urgent</span><span class="badge badge-type">Vendor Dispute</span><span class="card-time">conf 1.00</span></div><p class="card-summary">DOJ sues NewYork-Presbyterian Hospital over alleged anticompetitive contracts</p><p class="card-why">Potential revenue cycle impact or buying-signal relevance for Adonis territory accounts.</p><div class="card-footer"><div class="card-meta"><span>Healthcare Finance News</span></div><div class="card-actions"><button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button><a class="act-icon" title="Open article" href="https://www.healthcarefinancenews.com/news/doj-sues-newyork-presbyterian-hospital-over-alleged-anticompetitive-contracts" target="_blank" rel="noreferrer"><i class="ti ti-external-link"></i></a></div></div></div>
-<div class="card urgent"><div class="card-top"><span class="hosp-dot" style="background:#378ADD"></span><span class="hosp-name">NewYork-Presbyterian</span><span class="badge badge-danger">Urgent</span><span class="badge badge-type">Vendor Dispute</span><span class="card-time">conf 1.00</span></div><p class="card-summary">Justice Department sues NewYork-Presbyterian in second hospital antitrust case this year</p><p class="card-why">Potential revenue cycle impact or buying-signal relevance for Adonis territory accounts.</p><div class="card-footer"><div class="card-meta"><span>Healthcare Dive</span></div><div class="card-actions"><button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button><a class="act-icon" title="Open article" href="https://www.healthcaredive.com/news/justice-department-sues-newyork-presbyterian-in-second-hospital-antitrust-c/815891/" target="_blank" rel="noreferrer"><i class="ti ti-external-link"></i></a></div></div></div>
-        <div class="section-label">This week</div>
-        <div class="card"><div class="card-top"><span class="hosp-dot" style="background:#378ADD"></span><span class="hosp-name">NewYork-Presbyterian</span><span class="badge badge-warn">Worth Knowing</span><span class="badge badge-type">Leadership Change</span><span class="card-time">conf 0.75</span></div><p class="card-summary">NewYork-Presbyterian CEO is retiring, successor named</p><p class="card-why">Useful context for account monitoring and weekly AE planning.</p><div class="card-footer"><div class="card-meta"><span>Chief Healthcare Executive</span></div><div class="card-actions"><button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button><a class="act-icon" title="Open article" href="https://www.chiefhealthcareexecutive.com/view/newyork-presbyterian-ceo-is-retiring-successor-named" target="_blank" rel="noreferrer"><i class="ti ti-external-link"></i></a></div></div></div>
-<div class="card"><div class="card-top"><span class="hosp-dot" style="background:#00C48C"></span><span class="hosp-name">UMass Memorial</span><span class="badge badge-warn">Worth Knowing</span><span class="badge badge-type">Leadership Change</span><span class="card-time">conf 0.75</span></div><p class="card-summary">Trump&#x27;s &#x27;big beautiful bill&#x27; creates potential dilemma for UMass Memorial Health leader</p><p class="card-why">Useful context for account monitoring and weekly AE planning.</p><div class="card-footer"><div class="card-meta"><span>Worcester Telegram</span></div><div class="card-actions"><button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button><a class="act-icon" title="Open article" href="https://www.telegram.com/story/news/2025/07/03/trumps-big-beautiful-bill-creates-dilemma-for-umass-memorial-health/84447201007/" target="_blank" rel="noreferrer"><i class="ti ti-external-link"></i></a></div></div></div>
-      </div>
-    </div>
-  </div>
-</div>
-</body>
+  </body>
 </html>

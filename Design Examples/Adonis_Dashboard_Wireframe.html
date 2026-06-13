@@ -1,274 +1,720 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Adonis Account Intelligence — Dashboard Wireframe</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, -apple-system, sans-serif; background: #06111C; color: #F9FAFB; min-height: 100vh; padding: 20px; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adonis Account Intelligence — Dashboard Wireframe</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: #06111c;
+        color: #f9fafb;
+        min-height: 100vh;
+        padding: 20px;
+      }
 
-/* Page header */
-.page-hdr { text-align: center; margin-bottom: 20px; }
-.page-hdr h1 { font-size: 20px; font-weight: 800; color: #F9FAFB; margin-bottom: 4px; }
-.page-hdr p { font-size: 12px; color: #4B5563; }
-.page-hdr .tag { display: inline-block; background: #0E7A52; color: white; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
+      /* Page header */
+      .page-hdr {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .page-hdr h1 {
+        font-size: 20px;
+        font-weight: 800;
+        color: #f9fafb;
+        margin-bottom: 4px;
+      }
+      .page-hdr p {
+        font-size: 12px;
+        color: #4b5563;
+      }
+      .page-hdr .tag {
+        display: inline-block;
+        background: #0e7a52;
+        color: white;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        margin-bottom: 8px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
 
-.sec-label { font-size: 10px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+      .sec-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: #374151;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+      }
 
-/* ─── App frame ─────────────────────────────── */
-.app { background: #0F1F30; border-radius: 12px; overflow: hidden; border: 1px solid #1A2D40; margin-bottom: 20px; max-width: 960px; margin-left: auto; margin-right: auto; }
+      /* ─── App frame ─────────────────────────────── */
+      .app {
+        background: #0f1f30;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #1a2d40;
+        margin-bottom: 20px;
+        max-width: 960px;
+        margin-left: auto;
+        margin-right: auto;
+      }
 
-/* Header */
-.app-hdr { background: #0A1620; border-bottom: 1px solid #1A2D40; padding: 11px 18px; display: flex; align-items: center; gap: 12px; }
-.logo { font-weight: 900; font-size: 16px; color: #fff; letter-spacing: -0.5px; }
-.app-title { font-size: 12px; color: #374151; }
-.hdr-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-.sel { background: #1A2D40; color: #9CA3AF; border: 1px solid #263A50; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; }
-.updated { font-size: 10px; color: #2D3F52; }
-.avatar { width: 28px; height: 28px; border-radius: 50%; background: #0E7A52; color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      /* Header */
+      .app-hdr {
+        background: #0a1620;
+        border-bottom: 1px solid #1a2d40;
+        padding: 11px 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        font-weight: 900;
+        font-size: 16px;
+        color: #fff;
+        letter-spacing: -0.5px;
+      }
+      .app-title {
+        font-size: 12px;
+        color: #374151;
+      }
+      .hdr-right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .sel {
+        background: #1a2d40;
+        color: #9ca3af;
+        border: 1px solid #263a50;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 11px;
+        cursor: pointer;
+      }
+      .updated {
+        font-size: 10px;
+        color: #2d3f52;
+      }
+      .avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #0e7a52;
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
 
-/* Body */
-.app-body { display: flex; height: 480px; }
+      /* Body */
+      .app-body {
+        display: flex;
+        height: 480px;
+      }
 
-/* Sidebar */
-.sidebar { width: 200px; background: #0A1822; border-right: 1px solid #1A2D40; flex-shrink: 0; overflow-y: auto; }
-.sb-hd { padding: 12px 14px 6px; font-size: 9px; font-weight: 700; color: #2D3F52; text-transform: uppercase; letter-spacing: 0.09em; }
-.hosp { padding: 9px 14px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; border-left: 3px solid transparent; user-select: none; }
-.hosp:hover { background: #112030; }
-.hosp.active { background: #112030; border-left-color: #0E7A52; }
-.h-name { font-size: 12px; color: #9CA3AF; line-height: 1.35; }
-.hosp.active .h-name { color: #F9FAFB; font-weight: 600; }
-.bdg { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 10px; flex-shrink: 0; margin-left: 4px; }
-.bdg-r { background: #7F1D1D; color: #FCA5A5; }
-.bdg-n { background: #1A2D40; color: #374151; }
+      /* Sidebar */
+      .sidebar {
+        width: 200px;
+        background: #0a1822;
+        border-right: 1px solid #1a2d40;
+        flex-shrink: 0;
+        overflow-y: auto;
+      }
+      .sb-hd {
+        padding: 12px 14px 6px;
+        font-size: 9px;
+        font-weight: 700;
+        color: #2d3f52;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+      }
+      .hosp {
+        padding: 9px 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-left: 3px solid transparent;
+        user-select: none;
+      }
+      .hosp:hover {
+        background: #112030;
+      }
+      .hosp.active {
+        background: #112030;
+        border-left-color: #0e7a52;
+      }
+      .h-name {
+        font-size: 12px;
+        color: #9ca3af;
+        line-height: 1.35;
+      }
+      .hosp.active .h-name {
+        color: #f9fafb;
+        font-weight: 600;
+      }
+      .bdg {
+        font-size: 9px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        margin-left: 4px;
+      }
+      .bdg-r {
+        background: #7f1d1d;
+        color: #fca5a5;
+      }
+      .bdg-n {
+        background: #1a2d40;
+        color: #374151;
+      }
 
-/* Main */
-.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+      /* Main */
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
 
-/* Tabs */
-.tabs { border-bottom: 1px solid #1A2D40; display: flex; padding: 0 16px; flex-shrink: 0; }
-.tab { padding: 8px 12px; font-size: 11px; font-weight: 600; color: #374151; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; user-select: none; }
-.tab:hover { color: #6B7280; }
-.tab.active { color: #0E7A52; border-bottom-color: #0E7A52; }
+      /* Tabs */
+      .tabs {
+        border-bottom: 1px solid #1a2d40;
+        display: flex;
+        padding: 0 16px;
+        flex-shrink: 0;
+      }
+      .tab {
+        padding: 8px 12px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #374151;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        white-space: nowrap;
+        user-select: none;
+      }
+      .tab:hover {
+        color: #6b7280;
+      }
+      .tab.active {
+        color: #0e7a52;
+        border-bottom-color: #0e7a52;
+      }
 
-/* Feed */
-.feed { padding: 12px 14px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 10px; }
-.empty { color: #374151; font-size: 12px; text-align: center; padding: 40px 0; }
+      /* Feed */
+      .feed {
+        padding: 12px 14px;
+        overflow-y: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .empty {
+        color: #374151;
+        font-size: 12px;
+        text-align: center;
+        padding: 40px 0;
+      }
 
-/* Signal cards */
-.card { background: #0A1822; border: 1px solid #1A2D40; border-radius: 8px; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s; }
-.card:hover { border-color: #2D4A5E; }
-.c-tag { font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-.dot-red { background: #EF4444; }
-.dot-blue { background: #60A5FA; }
-.t-urgent { color: #F87171; }
-.t-worth { color: #60A5FA; }
-.c-title { font-size: 13px; font-weight: 700; color: #F9FAFB; margin-bottom: 5px; }
-.c-body { font-size: 11px; color: #6B7280; line-height: 1.55; margin-bottom: 7px; }
-.c-meta { font-size: 10px; color: #2D3F52; display: flex; gap: 10px; flex-wrap: wrap; }
-.c-hosp { color: #0E7A52; font-weight: 600; }
+      /* Signal cards */
+      .card {
+        background: #0a1822;
+        border: 1px solid #1a2d40;
+        border-radius: 8px;
+        padding: 12px 14px;
+        cursor: pointer;
+        transition: border-color 0.15s;
+      }
+      .card:hover {
+        border-color: #2d4a5e;
+      }
+      .c-tag {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+      }
+      .dot-red {
+        background: #ef4444;
+      }
+      .dot-blue {
+        background: #60a5fa;
+      }
+      .t-urgent {
+        color: #f87171;
+      }
+      .t-worth {
+        color: #60a5fa;
+      }
+      .c-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #f9fafb;
+        margin-bottom: 5px;
+      }
+      .c-body {
+        font-size: 11px;
+        color: #6b7280;
+        line-height: 1.55;
+        margin-bottom: 7px;
+      }
+      .c-meta {
+        font-size: 10px;
+        color: #2d3f52;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .c-hosp {
+        color: #0e7a52;
+        font-weight: 600;
+      }
 
-/* Profile panel */
-.profile-panel { border-top: 1px solid #1A2D40; padding: 10px 16px; flex-shrink: 0; background: #09151F; }
-.p-label { font-size: 10px; font-weight: 700; color: #0E7A52; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
-table.pt { width: 100%; border-collapse: collapse; }
-.pt th { font-size: 9px; color: #2D3F52; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; text-align: left; border-bottom: 1px solid #1A2D40; }
-.pt td { font-size: 11px; color: #9CA3AF; padding: 5px 8px; border-bottom: 1px solid #0F1F30; }
-.pt td:first-child { color: #E5E7EB; font-weight: 600; }
-.pt td:last-child { color: #4B5563; }
+      /* Profile panel */
+      .profile-panel {
+        border-top: 1px solid #1a2d40;
+        padding: 10px 16px;
+        flex-shrink: 0;
+        background: #09151f;
+      }
+      .p-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: #0e7a52;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        margin-bottom: 8px;
+      }
+      table.pt {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .pt th {
+        font-size: 9px;
+        color: #2d3f52;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 3px 8px;
+        text-align: left;
+        border-bottom: 1px solid #1a2d40;
+      }
+      .pt td {
+        font-size: 11px;
+        color: #9ca3af;
+        padding: 5px 8px;
+        border-bottom: 1px solid #0f1f30;
+      }
+      .pt td:first-child {
+        color: #e5e7eb;
+        font-weight: 600;
+      }
+      .pt td:last-child {
+        color: #4b5563;
+      }
 
-/* ─── Slack section ─────────────────────────── */
-.slack-wrap { max-width: 960px; margin: 0 auto 20px; }
-.slack { background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #E5E7EB; }
-.slack-hdr { background: #3F0F40; padding: 9px 16px; color: white; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-.slack-hash { opacity: 0.55; font-size: 14px; }
-.s-body { padding: 16px 18px; }
-.s-msg { display: flex; gap: 12px; }
-.s-icon { width: 36px; height: 36px; background: #0B1929; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #0E7A52; font-weight: 900; font-size: 12px; }
-.s-right { flex: 1; }
-.s-sender { font-size: 14px; font-weight: 700; color: #1D1C1D; }
-.s-time { font-size: 11px; color: #8B8B8B; margin-left: 6px; }
-.s-text { font-size: 13px; color: #1D1C1D; line-height: 1.7; margin-top: 4px; }
-.sb { font-weight: 700; }
-.sm { color: #8B8B8B; font-size: 11px; }
-.sl { color: #1264A3; cursor: pointer; font-weight: 600; }
-.s-note { margin-top: 12px; padding-top: 10px; border-top: 1px solid #F3F4F6; font-size: 11px; color: #9CA3AF; font-style: italic; }
+      /* ─── Slack section ─────────────────────────── */
+      .slack-wrap {
+        max-width: 960px;
+        margin: 0 auto 20px;
+      }
+      .slack {
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+      }
+      .slack-hdr {
+        background: #3f0f40;
+        padding: 9px 16px;
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .slack-hash {
+        opacity: 0.55;
+        font-size: 14px;
+      }
+      .s-body {
+        padding: 16px 18px;
+      }
+      .s-msg {
+        display: flex;
+        gap: 12px;
+      }
+      .s-icon {
+        width: 36px;
+        height: 36px;
+        background: #0b1929;
+        border-radius: 8px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0e7a52;
+        font-weight: 900;
+        font-size: 12px;
+      }
+      .s-right {
+        flex: 1;
+      }
+      .s-sender {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1d1c1d;
+      }
+      .s-time {
+        font-size: 11px;
+        color: #8b8b8b;
+        margin-left: 6px;
+      }
+      .s-text {
+        font-size: 13px;
+        color: #1d1c1d;
+        line-height: 1.7;
+        margin-top: 4px;
+      }
+      .sb {
+        font-weight: 700;
+      }
+      .sm {
+        color: #8b8b8b;
+        font-size: 11px;
+      }
+      .sl {
+        color: #1264a3;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .s-note {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px solid #f3f4f6;
+        font-size: 11px;
+        color: #9ca3af;
+        font-style: italic;
+      }
 
-/* ─── Questions strip ───────────────────────── */
-.q-strip { max-width: 960px; margin: 0 auto; background: #0F1F30; border: 1px solid #1A2D40; border-radius: 10px; padding: 16px 20px; }
-.q-title { font-size: 11px; font-weight: 700; color: #0E7A52; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
-.q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.q-item { font-size: 11px; color: #6B7280; padding: 6px 10px; background: #0A1822; border-radius: 6px; border-left: 3px solid #0E7A52; line-height: 1.45; }
+      /* ─── Questions strip ───────────────────────── */
+      .q-strip {
+        max-width: 960px;
+        margin: 0 auto;
+        background: #0f1f30;
+        border: 1px solid #1a2d40;
+        border-radius: 10px;
+        padding: 16px 20px;
+      }
+      .q-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #0e7a52;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        margin-bottom: 12px;
+      }
+      .q-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .q-item {
+        font-size: 11px;
+        color: #6b7280;
+        padding: 6px 10px;
+        background: #0a1822;
+        border-radius: 6px;
+        border-left: 3px solid #0e7a52;
+        line-height: 1.45;
+      }
 
-@media (max-width: 640px) {
-  .q-grid { grid-template-columns: 1fr; }
-  .app-body { height: auto; flex-direction: column; }
-  .sidebar { width: 100%; height: 80px; border-right: none; border-bottom: 1px solid #1A2D40; display: flex; overflow-x: auto; }
-  .hosp { flex-shrink: 0; flex-direction: column; gap: 2px; align-items: flex-start; }
-  .hdr-right .updated { display: none; }
-}
-</style>
-</head>
-<body>
-
-<div class="page-hdr">
-  <div class="tag">Wireframe · For Danielle Ferdon meeting</div>
-  <h1>Adonis Account Intelligence</h1>
-  <p>This is a mockup, not a live product. Click hospitals and tabs to explore the flow.</p>
-</div>
-
-<!-- ── DASHBOARD ───────────────────────────────── -->
-<div class="sec-label" style="max-width:960px;margin:0 auto 8px;">Dashboard view</div>
-<div class="app">
-  <div class="app-hdr">
-    <span class="logo">Adonis</span>
-    <span class="app-title">Account Intelligence</span>
-    <div class="hdr-right">
-      <select class="sel"><option>My territory ▾</option><option>All reps</option></select>
-      <span class="updated">Last updated: Today, 8:02 AM &nbsp;·&nbsp; Runs Mon &amp; Thu</span>
-      <div class="avatar">DF</div>
+      @media (max-width: 640px) {
+        .q-grid {
+          grid-template-columns: 1fr;
+        }
+        .app-body {
+          height: auto;
+          flex-direction: column;
+        }
+        .sidebar {
+          width: 100%;
+          height: 80px;
+          border-right: none;
+          border-bottom: 1px solid #1a2d40;
+          display: flex;
+          overflow-x: auto;
+        }
+        .hosp {
+          flex-shrink: 0;
+          flex-direction: column;
+          gap: 2px;
+          align-items: flex-start;
+        }
+        .hdr-right .updated {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-hdr">
+      <div class="tag">Wireframe · For Danielle Ferdon meeting</div>
+      <h1>Adonis Account Intelligence</h1>
+      <p>This is a mockup, not a live product. Click hospitals and tabs to explore the flow.</p>
     </div>
-  </div>
 
-  <div class="app-body">
-    <div class="sidebar">
-      <div class="sb-hd">Accounts (5)</div>
-      <div class="hosp active" onclick="sel(this,'nyp')">
-        <span class="h-name">New York–Presbyterian</span><span class="bdg bdg-r">2</span>
+    <!-- ── DASHBOARD ───────────────────────────────── -->
+    <div class="sec-label" style="max-width: 960px; margin: 0 auto 8px">Dashboard view</div>
+    <div class="app">
+      <div class="app-hdr">
+        <span class="logo">Adonis</span>
+        <span class="app-title">Account Intelligence</span>
+        <div class="hdr-right">
+          <select class="sel">
+            <option>My territory ▾</option>
+            <option>All reps</option>
+          </select>
+          <span class="updated">Last updated: Today, 8:02 AM &nbsp;·&nbsp; Runs Mon &amp; Thu</span>
+          <div class="avatar">DF</div>
+        </div>
       </div>
-      <div class="hosp" onclick="sel(this,'umass')">
-        <span class="h-name">UMass Memorial</span><span class="bdg bdg-r">1</span>
-      </div>
-      <div class="hosp" onclick="sel(this,'asc')">
-        <span class="h-name">Ascension</span><span class="bdg bdg-r">1</span>
-      </div>
-      <div class="hosp" onclick="sel(this,'uark')">
-        <span class="h-name">U of Arkansas Med. Sciences</span><span class="bdg bdg-n">0</span>
-      </div>
-      <div class="hosp" onclick="sel(this,'tbd')">
-        <span class="h-name">[ Hospital 5 — TBD ]</span><span class="bdg bdg-n">–</span>
-      </div>
-    </div>
 
-    <div class="main">
-      <div class="tabs">
-        <div class="tab active" onclick="setTab(this,'all')">All signals</div>
-        <div class="tab" onclick="setTab(this,'urgent')">Urgent</div>
-        <div class="tab" onclick="setTab(this,'worth')">Worth knowing</div>
-      </div>
-      <div class="feed" id="feed"></div>
-      <div class="profile-panel">
-        <div class="p-label" id="p-label"></div>
-        <table class="pt">
-          <thead><tr><th>Name</th><th>Role</th><th>Prior employer</th></tr></thead>
-          <tbody id="p-body"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
+      <div class="app-body">
+        <div class="sidebar">
+          <div class="sb-hd">Accounts (5)</div>
+          <div class="hosp active" onclick="sel(this, 'nyp')">
+            <span class="h-name">New York–Presbyterian</span><span class="bdg bdg-r">2</span>
+          </div>
+          <div class="hosp" onclick="sel(this, 'umass')">
+            <span class="h-name">UMass Memorial</span><span class="bdg bdg-r">1</span>
+          </div>
+          <div class="hosp" onclick="sel(this, 'asc')">
+            <span class="h-name">Ascension</span><span class="bdg bdg-r">1</span>
+          </div>
+          <div class="hosp" onclick="sel(this, 'uark')">
+            <span class="h-name">U of Arkansas Med. Sciences</span><span class="bdg bdg-n">0</span>
+          </div>
+          <div class="hosp" onclick="sel(this, 'tbd')">
+            <span class="h-name">[ Hospital 5 — TBD ]</span><span class="bdg bdg-n">–</span>
+          </div>
+        </div>
 
-<!-- ── SLACK ALERT ─────────────────────────────── -->
-<div class="slack-wrap">
-  <div class="sec-label">Slack alert — automatic ping when an urgent signal is detected</div>
-  <div class="slack">
-    <div class="slack-hdr"><span class="slack-hash">#</span> adonis-intelligence</div>
-    <div class="s-body">
-      <div class="s-msg">
-        <div class="s-icon">AI</div>
-        <div class="s-right">
-          <div><span class="s-sender">Adonis Intel Bot</span><span class="s-time">Today at 8:02 AM</span></div>
-          <div class="s-text">
-            <span class="sb">🏥 New York–Presbyterian</span><br>
-            <span class="sb">URGENT &nbsp;·&nbsp; New Chief Revenue Officer appointed</span><br>
-            Jessica Huang joins as CRO from Atlantic Health System, where she led revenue cycle ops for a 12-hospital network. New revenue leadership typically re-evaluates vendor relationships within 90 days — high-priority outreach window.<br><br>
-            <span class="sm">Source: Becker's Hospital Review &nbsp;·&nbsp; May 17, 2026</span><br>
-            <span class="sl">→ View full profile in dashboard</span>
+        <div class="main">
+          <div class="tabs">
+            <div class="tab active" onclick="setTab(this, 'all')">All signals</div>
+            <div class="tab" onclick="setTab(this, 'urgent')">Urgent</div>
+            <div class="tab" onclick="setTab(this, 'worth')">Worth knowing</div>
+          </div>
+          <div class="feed" id="feed"></div>
+          <div class="profile-panel">
+            <div class="p-label" id="p-label"></div>
+            <table class="pt">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Prior employer</th>
+                </tr>
+              </thead>
+              <tbody id="p-body"></tbody>
+            </table>
           </div>
         </div>
       </div>
-      <div class="s-note">Sent automatically the moment an Urgent signal is detected. Every Monday at 8:00 AM, reps also receive a digest covering all Worth Knowing items across their territory from the past week.</div>
     </div>
-  </div>
-</div>
 
-<!-- ── QUESTIONS FOR DANIELLE ──────────────────── -->
-<div class="q-strip">
-  <div class="q-title">Questions to validate with Danielle tomorrow</div>
-  <div class="q-grid">
-    <div class="q-item">How often should the tool run — twice weekly feels right, but does cadence change by signal type?</div>
-    <div class="q-item">When a new CRO is flagged, what does the rep do next — do they call, email, or does the tool draft an outreach?</div>
-    <div class="q-item">How detailed does the hospital profile need to be? Just name, role, and prior employer — or more?</div>
-    <div class="q-item">Should the weekly digest be one Slack message per hospital, or one combined message per rep?</div>
-    <div class="q-item">Does HubSpot get updated when a new contact is identified, and if so, who does that step today?</div>
-    <div class="q-item">What's the 5th hospital on the seed list — or should we proceed with the four confirmed accounts?</div>
-  </div>
-</div>
+    <!-- ── SLACK ALERT ─────────────────────────────── -->
+    <div class="slack-wrap">
+      <div class="sec-label">Slack alert — automatic ping when an urgent signal is detected</div>
+      <div class="slack">
+        <div class="slack-hdr"><span class="slack-hash">#</span> adonis-intelligence</div>
+        <div class="s-body">
+          <div class="s-msg">
+            <div class="s-icon">AI</div>
+            <div class="s-right">
+              <div>
+                <span class="s-sender">Adonis Intel Bot</span
+                ><span class="s-time">Today at 8:02 AM</span>
+              </div>
+              <div class="s-text">
+                <span class="sb">🏥 New York–Presbyterian</span><br />
+                <span class="sb">URGENT &nbsp;·&nbsp; New Chief Revenue Officer appointed</span
+                ><br />
+                Jessica Huang joins as CRO from Atlantic Health System, where she led revenue cycle
+                ops for a 12-hospital network. New revenue leadership typically re-evaluates vendor
+                relationships within 90 days — high-priority outreach window.<br /><br />
+                <span class="sm">Source: Becker's Hospital Review &nbsp;·&nbsp; May 17, 2026</span
+                ><br />
+                <span class="sl">→ View full profile in dashboard</span>
+              </div>
+            </div>
+          </div>
+          <div class="s-note">
+            Sent automatically the moment an Urgent signal is detected. Every Monday at 8:00 AM,
+            reps also receive a digest covering all Worth Knowing items across their territory from
+            the past week.
+          </div>
+        </div>
+      </div>
+    </div>
 
-<script>
-const D = {
-  nyp: {
-    label: "New York–Presbyterian &nbsp;·&nbsp; Key revenue &amp; finance contacts",
-    signals: [
-      { t:"urgent", title:"New Chief Revenue Officer appointed", body:"Jessica Huang joins as CRO from Atlantic Health System, where she led revenue cycle for a 12-hospital network. New leadership typically reassesses vendor relationships within 90 days.", hosp:"New York–Presbyterian", src:"Becker's Hospital Review", date:"May 17, 2026" },
-      { t:"urgent", title:"VP Revenue Cycle Management departs", body:"Thomas Reid has transitioned out of the role. The position is currently open — a window to establish a relationship with interim leadership before a permanent hire is named.", hosp:"New York–Presbyterian", src:"NYP Official Newsroom", date:"May 15, 2026" },
-    ],
-    contacts: [
-      ["Jessica Huang","Chief Revenue Officer (new)","Atlantic Health System"],
-      ["Thomas Reid","VP Revenue Cycle (departing)","NYP"],
-      ["Maria Santos","CFO","Montefiore Health System"],
-    ]
-  },
-  umass: {
-    label: "UMass Memorial &nbsp;·&nbsp; Key revenue &amp; finance contacts",
-    signals: [
-      { t:"worth", title:"Revenue cycle outsourcing partnership announced", body:"UMass Memorial is partnering with a regional RCM services firm to manage billing for two satellite campuses. Vendor contract terms not disclosed — potential opening for a competing conversation.", hosp:"UMass Memorial", src:"Modern Healthcare", date:"May 14, 2026" },
-    ],
-    contacts: [
-      ["Sarah Collins","CFO","Brigham and Women's Hospital"],
-      ["David Park","VP Revenue Cycle","UMass Memorial (internal)"],
-    ]
-  },
-  asc: {
-    label: "Ascension &nbsp;·&nbsp; Key revenue &amp; finance contacts",
-    signals: [
-      { t:"worth", title:"CFO discusses AI in financial operations", body:"Ascension's CFO addressed automating prior authorization and denial management in a recent Healthcare Finance podcast — useful context for an upcoming conversation.", hosp:"Ascension", src:"Healthcare Finance News", date:"May 12, 2026" },
-    ],
-    contacts: [
-      ["Kevin Moore","CFO","CommonSpirit Health"],
-      ["Linda Torres","VP Revenue Cycle","Ascension (internal)"],
-    ]
-  },
-  uark: {
-    label: "U of Arkansas Medical Sciences &nbsp;·&nbsp; Key contacts",
-    signals: [],
-    contacts: [
-      ["James Wu","CFO","UAMS (internal)"],
-      ["Rachel Green","Director, Revenue Cycle","Baptist Health Arkansas"],
-    ]
-  },
-  tbd: {
-    label: "Hospital 5 — pending confirmation from Reed",
-    signals: [],
-    contacts: []
-  }
-};
+    <!-- ── QUESTIONS FOR DANIELLE ──────────────────── -->
+    <div class="q-strip">
+      <div class="q-title">Questions to validate with Danielle tomorrow</div>
+      <div class="q-grid">
+        <div class="q-item">
+          How often should the tool run — twice weekly feels right, but does cadence change by
+          signal type?
+        </div>
+        <div class="q-item">
+          When a new CRO is flagged, what does the rep do next — do they call, email, or does the
+          tool draft an outreach?
+        </div>
+        <div class="q-item">
+          How detailed does the hospital profile need to be? Just name, role, and prior employer —
+          or more?
+        </div>
+        <div class="q-item">
+          Should the weekly digest be one Slack message per hospital, or one combined message per
+          rep?
+        </div>
+        <div class="q-item">
+          Does HubSpot get updated when a new contact is identified, and if so, who does that step
+          today?
+        </div>
+        <div class="q-item">
+          What's the 5th hospital on the seed list — or should we proceed with the four confirmed
+          accounts?
+        </div>
+      </div>
+    </div>
 
-let hosp = 'nyp', tab = 'all';
+    <script>
+      const D = {
+        nyp: {
+          label: 'New York–Presbyterian &nbsp;·&nbsp; Key revenue &amp; finance contacts',
+          signals: [
+            {
+              t: 'urgent',
+              title: 'New Chief Revenue Officer appointed',
+              body: 'Jessica Huang joins as CRO from Atlantic Health System, where she led revenue cycle for a 12-hospital network. New leadership typically reassesses vendor relationships within 90 days.',
+              hosp: 'New York–Presbyterian',
+              src: "Becker's Hospital Review",
+              date: 'May 17, 2026',
+            },
+            {
+              t: 'urgent',
+              title: 'VP Revenue Cycle Management departs',
+              body: 'Thomas Reid has transitioned out of the role. The position is currently open — a window to establish a relationship with interim leadership before a permanent hire is named.',
+              hosp: 'New York–Presbyterian',
+              src: 'NYP Official Newsroom',
+              date: 'May 15, 2026',
+            },
+          ],
+          contacts: [
+            ['Jessica Huang', 'Chief Revenue Officer (new)', 'Atlantic Health System'],
+            ['Thomas Reid', 'VP Revenue Cycle (departing)', 'NYP'],
+            ['Maria Santos', 'CFO', 'Montefiore Health System'],
+          ],
+        },
+        umass: {
+          label: 'UMass Memorial &nbsp;·&nbsp; Key revenue &amp; finance contacts',
+          signals: [
+            {
+              t: 'worth',
+              title: 'Revenue cycle outsourcing partnership announced',
+              body: 'UMass Memorial is partnering with a regional RCM services firm to manage billing for two satellite campuses. Vendor contract terms not disclosed — potential opening for a competing conversation.',
+              hosp: 'UMass Memorial',
+              src: 'Modern Healthcare',
+              date: 'May 14, 2026',
+            },
+          ],
+          contacts: [
+            ['Sarah Collins', 'CFO', "Brigham and Women's Hospital"],
+            ['David Park', 'VP Revenue Cycle', 'UMass Memorial (internal)'],
+          ],
+        },
+        asc: {
+          label: 'Ascension &nbsp;·&nbsp; Key revenue &amp; finance contacts',
+          signals: [
+            {
+              t: 'worth',
+              title: 'CFO discusses AI in financial operations',
+              body: "Ascension's CFO addressed automating prior authorization and denial management in a recent Healthcare Finance podcast — useful context for an upcoming conversation.",
+              hosp: 'Ascension',
+              src: 'Healthcare Finance News',
+              date: 'May 12, 2026',
+            },
+          ],
+          contacts: [
+            ['Kevin Moore', 'CFO', 'CommonSpirit Health'],
+            ['Linda Torres', 'VP Revenue Cycle', 'Ascension (internal)'],
+          ],
+        },
+        uark: {
+          label: 'U of Arkansas Medical Sciences &nbsp;·&nbsp; Key contacts',
+          signals: [],
+          contacts: [
+            ['James Wu', 'CFO', 'UAMS (internal)'],
+            ['Rachel Green', 'Director, Revenue Cycle', 'Baptist Health Arkansas'],
+          ],
+        },
+        tbd: {
+          label: 'Hospital 5 — pending confirmation from Reed',
+          signals: [],
+          contacts: [],
+        },
+      };
 
-function render() {
-  const signals = D[hosp].signals.filter(s => tab === 'all' ? true : s.t === tab);
-  const feed = document.getElementById('feed');
-  if (!signals.length) {
-    feed.innerHTML = '<div class="empty">No signals this period — account is quiet.</div>';
-  } else {
-    feed.innerHTML = signals.map(s => `
+      let hosp = 'nyp',
+        tab = 'all';
+
+      function render() {
+        const signals = D[hosp].signals.filter((s) => (tab === 'all' ? true : s.t === tab));
+        const feed = document.getElementById('feed');
+        if (!signals.length) {
+          feed.innerHTML = '<div class="empty">No signals this period — account is quiet.</div>';
+        } else {
+          feed.innerHTML = signals
+            .map(
+              (s) => `
       <div class="card">
-        <div class="c-tag ${s.t==='urgent'?'t-urgent':'t-worth'}">
-          <span class="dot ${s.t==='urgent'?'dot-red':'dot-blue'}"></span>
-          ${s.t==='urgent'?'Urgent — instant alert sent':'Worth knowing — in weekly digest'}
+        <div class="c-tag ${s.t === 'urgent' ? 't-urgent' : 't-worth'}">
+          <span class="dot ${s.t === 'urgent' ? 'dot-red' : 'dot-blue'}"></span>
+          ${s.t === 'urgent' ? 'Urgent — instant alert sent' : 'Worth knowing — in weekly digest'}
         </div>
         <div class="c-title">${s.title}</div>
         <div class="c-body">${s.body}</div>
@@ -277,33 +723,37 @@ function render() {
           <span>${s.src}</span>
           <span>${s.date}</span>
         </div>
-      </div>`).join('');
-  }
-  document.getElementById('p-label').innerHTML = D[hosp].label;
-  const pb = document.getElementById('p-body');
-  if (!D[hosp].contacts.length) {
-    pb.innerHTML = '<tr><td colspan="3" style="color:#2D3F52;padding:6px 8px;">Profile pending — hospital TBD.</td></tr>';
-  } else {
-    pb.innerHTML = D[hosp].contacts.map(([n,r,p]) =>
-      `<tr><td>${n}</td><td>${r}</td><td>${p}</td></tr>`).join('');
-  }
-}
+      </div>`
+            )
+            .join('');
+        }
+        document.getElementById('p-label').innerHTML = D[hosp].label;
+        const pb = document.getElementById('p-body');
+        if (!D[hosp].contacts.length) {
+          pb.innerHTML =
+            '<tr><td colspan="3" style="color:#2D3F52;padding:6px 8px;">Profile pending — hospital TBD.</td></tr>';
+        } else {
+          pb.innerHTML = D[hosp].contacts
+            .map(([n, r, p]) => `<tr><td>${n}</td><td>${r}</td><td>${p}</td></tr>`)
+            .join('');
+        }
+      }
 
-function sel(el, id) {
-  document.querySelectorAll('.hosp').forEach(h => h.classList.remove('active'));
-  el.classList.add('active');
-  hosp = id;
-  render();
-}
+      function sel(el, id) {
+        document.querySelectorAll('.hosp').forEach((h) => h.classList.remove('active'));
+        el.classList.add('active');
+        hosp = id;
+        render();
+      }
 
-function setTab(el, id) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  tab = id;
-  render();
-}
+      function setTab(el, id) {
+        document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+        el.classList.add('active');
+        tab = id;
+        render();
+      }
 
-render();
-</script>
-</body>
+      render();
+    </script>
+  </body>
 </html>
