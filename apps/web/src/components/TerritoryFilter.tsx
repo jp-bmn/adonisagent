@@ -23,6 +23,7 @@ export default function TerritoryFilter({ aes }: { aes: AeUser[] }) {
     <select
       value={current}
       onChange={handleChange}
+      suppressHydrationWarning
       className="bg-white border border-line rounded-lg px-3 py-1.5 text-xs font-mono text-slate-600 focus:outline-none focus:ring-1 focus:ring-accent"
     >
       <option value="">All accounts</option>

@@ -19,7 +19,7 @@ export default function ExportPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      setError('Export failed — endpoint may not be live yet (Joel Task 13).');
+      setError('Export failed — please try again or contact Joel.');
     } finally {
       setLoading(false);
     }

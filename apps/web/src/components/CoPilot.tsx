@@ -9,9 +9,84 @@ interface Message {
   text: string;
 }
 
-const STORAGE_KEY = 'adonis-copilot-history';
-const PILL_KEY = 'adonis-copilot-pill-shown';
-const OPENED_KEY = 'adonis-copilot-opened';
+function HermesMessage({ text }: { text: string }) {
+  const lines = text.split('\n');
+  const nodes: React.ReactNode[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i] ?? '';
+
+    // Blank line — spacing between blocks
+    if (line.trim() === '') {
+      i++;
+      continue;
+    }
+
+    // Bullet list block
+    if (/^[-•*]\s/.test(line.trim())) {
+      const items: string[] = [];
+      while (i < lines.length && /^[-•*]\s/.test((lines[i] ?? '').trim())) {
+        items.push((lines[i] ?? '').trim().replace(/^[-•*]\s/, ''));
+        i++;
+      }
+      nodes.push(
+        <ul key={i} className="list-disc list-outside pl-4 space-y-0.5 my-1">
+          {items.map((item, j) => (
+            <li key={j}>{renderInline(item)}</li>
+          ))}
+        </ul>
+      );
+      continue;
+    }
+
+    // Numbered list block
+    if (/^\d+\.\s/.test(line.trim())) {
+      const items: string[] = [];
+      while (i < lines.length && /^\d+\.\s/.test((lines[i] ?? '').trim())) {
+        items.push((lines[i] ?? '').trim().replace(/^\d+\.\s/, ''));
+        i++;
+      }
+      nodes.push(
+        <ol key={i} className="list-decimal list-outside pl-4 space-y-0.5 my-1">
+          {items.map((item, j) => (
+            <li key={j}>{renderInline(item)}</li>
+          ))}
+        </ol>
+      );
+      continue;
+    }
+
+    // Regular paragraph
+    nodes.push(
+      <p key={i} className="my-0.5">
+        {renderInline(line)}
+      </p>
+    );
+    i++;
+  }
+
+  return <div className="space-y-0.5">{nodes}</div>;
+}
+
+function renderInline(text: string): React.ReactNode {
+  // Split on **bold** patterns
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <strong key={i} className="font-semibold text-slate-800">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
+const STORAGE_KEY = 'adonis-hermes-history';
+const PILL_KEY = 'adonis-hermes-pill-shown';
+const OPENED_KEY = 'adonis-hermes-opened';
 const MAX_STORED = 200;
 const MAX_CONTEXT = 40;
 const BUBBLE_SIZE = 56;
@@ -263,7 +338,7 @@ export default function CoPilot() {
               pointerEvents: 'none',
             }}
           >
-            Ask about any signal
+            Ask Hermes
           </div>
         )}
 
@@ -302,7 +377,7 @@ export default function CoPilot() {
               cursor: 'grab',
               transition: 'background 150ms',
             }}
-            title="Adonis Intel co-pilot (drag to move)"
+            title="Hermes — signal co-pilot (drag to move)"
           >
             {open ? (
               <span style={{ fontSize: 24, lineHeight: 1 }}>×</span>
@@ -340,8 +415,8 @@ export default function CoPilot() {
             }}
           >
             <div>
-              <div className="text-white text-sm font-semibold">Adonis Intel</div>
-              <div className="text-slate-400 text-[10px] font-mono">AI co-pilot · beta</div>
+              <div className="text-white text-sm font-semibold">Hermes</div>
+              <div className="text-slate-400 text-[10px] font-mono">for Adonis · beta</div>
             </div>
             <div className="flex items-center gap-3">
               {messages.length > 0 && (
@@ -366,7 +441,7 @@ export default function CoPilot() {
           <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-72 min-h-[8rem]">
             {messages.length === 0 && (
               <p className="text-xs text-slate-400 text-center">
-                Ask about your accounts, signals, or territory.
+                Ask Hermes about your accounts, signals, or territory.
               </p>
             )}
             {messages.map((m, i) => (
@@ -381,7 +456,7 @@ export default function CoPilot() {
                       : 'bg-paper text-slate-700 rounded-bl-none'
                   }`}
                 >
-                  {m.text}
+                  {m.role === 'assistant' ? <HermesMessage text={m.text} /> : m.text}
                 </div>
               </div>
             ))}
