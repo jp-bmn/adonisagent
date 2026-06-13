@@ -36,10 +36,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 function Sidebar() {
   return (
     <aside
-      className="hidden md:flex md:flex-col w-56 text-slate-200 py-6 flex-none"
+      className="hidden md:flex md:flex-col w-56 h-screen sticky top-0 text-slate-200 py-6 flex-none overflow-y-auto"
       style={{
         background:
-          'radial-gradient(circle at 110% 120%, rgba(63, 215, 190, 0.55) 0%, transparent 55%), linear-gradient(135deg, #0A2A2B 0%, #0F3D3E 50%, #1A5E5C 100%)',
+          'radial-gradient(circle at 110% 100%, rgba(63, 215, 190, 0.55) 0%, transparent 55%), linear-gradient(135deg, #0A2A2B 0%, #0F3D3E 50%, #1A5E5C 100%)',
       }}
     >
       <div className="px-5 pb-5 mb-3 border-b border-white/10 flex items-center gap-3">

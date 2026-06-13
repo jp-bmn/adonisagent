@@ -56,6 +56,10 @@ class FluentTableMock:
         self._filters.append(("neq", field, value))
         return self
 
+    def or_(self, filter_str):
+        self._filters.append(("or", None, filter_str))
+        return self
+
     def gte(self, field, value):
         self._filters.append(("gte", field, value))
         return self
@@ -133,6 +137,25 @@ class FluentTableMock:
                 filtered = [r for r in filtered if r.get(field) is not None and r.get(field) >= val]
             elif op == "in":
                 filtered = [r for r in filtered if r.get(field) in val]
+            elif op == "or":
+                new_filtered = []
+                for r in filtered:
+                    match = False
+                    for cond in val.split(','):
+                        if cond == "review_status.is.null":
+                            if r.get("review_status") is None:
+                                match = True
+                        elif cond == "review_status.neq.dismissed":
+                            if r.get("review_status") != "dismissed":
+                                match = True
+                        elif cond == "review_status.eq.pending":
+                            if r.get("review_status") == "pending":
+                                match = True
+                        else:
+                            match = True
+                    if match:
+                        new_filtered.append(r)
+                filtered = new_filtered
 
         # Order
         if self._order:

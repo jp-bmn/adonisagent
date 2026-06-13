@@ -75,3 +75,6 @@ Thumbs.db
 
 # ngrok binary (downloaded to tmp, but just in case)
 ngrok
+
+# TypeScript build info
+*.tsbuildinfo
