@@ -11,12 +11,12 @@ interface HospitalLogoProps {
 
 // Fallback domain map for known hospitals — used when website_url is not in the API response
 const KNOWN_DOMAINS: Record<string, string> = {
-  'ascension': 'ascension.org',
-  'commonspirit': 'commonspirithealth.org',
+  ascension: 'ascension.org',
+  commonspirit: 'commonspirithealth.org',
   'newyork-presbyterian': 'nyp.org',
   'umass memorial': 'umassmemorial.org',
   'university of arkansas medical sciences': 'uams.edu',
-  'uams': 'uams.edu',
+  uams: 'uams.edu',
 };
 
 function logoUrl(name: string, websiteUrl: string | null): string {
@@ -28,7 +28,7 @@ function logoUrl(name: string, websiteUrl: string | null): string {
       domain = new URL(websiteUrl).hostname.replace(/^www\./, '');
     } else {
       const key = Object.keys(KNOWN_DOMAINS).find((k) => name.toLowerCase().includes(k));
-      if (key) domain = KNOWN_DOMAINS[key];
+      if (key) domain = KNOWN_DOMAINS[key] || '';
     }
     if (!domain) return '';
     return `https://img.logo.dev/${domain}?token=${token}&size=64`;
