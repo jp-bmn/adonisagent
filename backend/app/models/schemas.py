@@ -42,6 +42,8 @@ class HospitalBase(BaseModel):
     name: str
     website_url: Optional[str] = None
     division_note: Optional[str] = None
+    account_type: str = "hospital"
+
 
 
 class HospitalCreate(HospitalBase):
@@ -101,6 +103,7 @@ class SignalCreate(BaseModel):
     confidence_score: float = 0.0
     title: Optional[str] = None
     summary: Optional[str] = None
+    why_it_matters: Optional[str] = None
     source_url: Optional[HttpUrl] = None
     source_name: Optional[str] = None
     published_date: Optional[date] = None
@@ -130,6 +133,7 @@ class Signal(BaseModel):
     review_status: Optional[ReviewStatusType] = None
     title: Optional[str] = None
     summary: Optional[str] = None
+    why_it_matters: Optional[str] = None
     source_url: Optional[str] = None
     source_name: Optional[str] = None
     published_date: Optional[date] = None
@@ -274,6 +278,7 @@ class ClassifyResponse(BaseModel):
     title: str
     summary: str
     why_relevant: str
+    why_it_matters: Optional[str] = None
     classification_source: Literal["rules_engine", "claude_api", "error"]
 
 
@@ -293,6 +298,22 @@ class StatusResponse(BaseModel):
     total_signals_stored: int
     total_hospitals_monitored: int
     pending_review_count: int
+
+
+# ---------------------------------------------------------------------------
+# Co-pilot (Phase 3)
+# ---------------------------------------------------------------------------
+
+class CopilotRequest(BaseModel):
+    user_id: uuid.UUID
+    message: str
+    history: list[dict] = []
+    context_hospital_id: Optional[uuid.UUID] = None
+
+
+class CopilotResponse(BaseModel):
+    reply: str
+    sources: list[str] = []
 
 
 # Forward refs

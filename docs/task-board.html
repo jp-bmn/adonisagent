@@ -1,73 +1,291 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Adonis — Antigravity Task Board (Joel)</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,-apple-system,sans-serif;background:#0D1117;color:#E6EDF3;min-height:100vh;padding:24px}
-h1{font-size:22px;font-weight:800;color:#F0F6FC;margin-bottom:4px}
-.subtitle{font-size:13px;color:#656D76;margin-bottom:28px}
-.tag{display:inline-block;background:#1D4ED8;color:#BFDBFE;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
-.week-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#1D4ED8;margin:28px 0 10px;padding-left:2px;display:flex;align-items:center;gap:10px}
-.week-header::after{content:"";flex:1;height:1px;background:#21262D}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin-bottom:4px}
-.card{background:#161B22;border:1px solid #30363D;border-radius:10px;overflow:hidden;transition:border-color .15s}
-.card:hover{border-color:#1D4ED8}
-.card-hdr{padding:14px 16px 10px;cursor:pointer;user-select:none;display:flex;align-items:flex-start;gap:10px}
-.card-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#1D4ED8;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
-.card-meta{flex:1;min-width:0}
-.card-title{font-size:13px;font-weight:700;color:#F0F6FC;line-height:1.4;margin-bottom:3px}
-.card-sub{font-size:11px;color:#656D76}
-.expand-btn{flex-shrink:0;color:#656D76;font-size:11px;padding:2px 6px;border:1px solid #30363D;border-radius:5px;background:transparent;cursor:pointer;transition:all .1s;white-space:nowrap;margin-top:1px}
-.expand-btn:hover{border-color:#1D4ED8;color:#93C5FD}
-.prompt-area{display:none;padding:0 16px 14px}
-.prompt-area.open{display:block}
-.prompt-box{background:#0D1117;border:1px solid #21262D;border-radius:7px;padding:12px;font-size:11.5px;line-height:1.75;color:#C9D1D9;font-family:"SF Mono",Consolas,"Courier New",monospace;white-space:pre-wrap;word-break:break-word;max-height:320px;overflow-y:auto}
-.copy-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
-.copy-hint{font-size:11px;color:#484F58}
-.copy-btn{background:#1D4ED8;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:background .12s;display:flex;align-items:center;gap:5px}
-.copy-btn:hover{background:#2563EB}
-.copy-btn.copied{background:#15803D}
-.milestone-card{background:#161B22;border:1px solid #1D4ED8;border-radius:10px;padding:14px 18px;margin-bottom:4px}
-.milestone-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#1D4ED8;margin-bottom:4px}
-.milestone-title{font-size:14px;font-weight:700;color:#93C5FD;margin-bottom:3px}
-.milestone-desc{font-size:12px;color:#656D76}
-.legend{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#656D76}
-.legend-dot{width:8px;height:8px;border-radius:50%}
-.footer{margin-top:32px;padding-top:16px;border-top:1px solid #21262D;font-size:11px;color:#484F58;text-align:center}
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:#0D1117}
-::-webkit-scrollbar-thumb{background:#30363D;border-radius:3px}
-</style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adonis — Antigravity Task Board (Joel)</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: #0d1117;
+        color: #e6edf3;
+        min-height: 100vh;
+        padding: 24px;
+      }
+      h1 {
+        font-size: 22px;
+        font-weight: 800;
+        color: #f0f6fc;
+        margin-bottom: 4px;
+      }
+      .subtitle {
+        font-size: 13px;
+        color: #656d76;
+        margin-bottom: 28px;
+      }
+      .tag {
+        display: inline-block;
+        background: #1d4ed8;
+        color: #bfdbfe;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-left: 8px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        vertical-align: middle;
+      }
+      .week-header {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #1d4ed8;
+        margin: 28px 0 10px;
+        padding-left: 2px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .week-header::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #21262d;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 12px;
+        margin-bottom: 4px;
+      }
+      .card {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: border-color 0.15s;
+      }
+      .card:hover {
+        border-color: #1d4ed8;
+      }
+      .card-hdr {
+        padding: 14px 16px 10px;
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .card-num {
+        flex-shrink: 0;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #1d4ed8;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1px;
+      }
+      .card-meta {
+        flex: 1;
+        min-width: 0;
+      }
+      .card-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #f0f6fc;
+        line-height: 1.4;
+        margin-bottom: 3px;
+      }
+      .card-sub {
+        font-size: 11px;
+        color: #656d76;
+      }
+      .expand-btn {
+        flex-shrink: 0;
+        color: #656d76;
+        font-size: 11px;
+        padding: 2px 6px;
+        border: 1px solid #30363d;
+        border-radius: 5px;
+        background: transparent;
+        cursor: pointer;
+        transition: all 0.1s;
+        white-space: nowrap;
+        margin-top: 1px;
+      }
+      .expand-btn:hover {
+        border-color: #1d4ed8;
+        color: #93c5fd;
+      }
+      .prompt-area {
+        display: none;
+        padding: 0 16px 14px;
+      }
+      .prompt-area.open {
+        display: block;
+      }
+      .prompt-box {
+        background: #0d1117;
+        border: 1px solid #21262d;
+        border-radius: 7px;
+        padding: 12px;
+        font-size: 11.5px;
+        line-height: 1.75;
+        color: #c9d1d9;
+        font-family: 'SF Mono', Consolas, 'Courier New', monospace;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 320px;
+        overflow-y: auto;
+      }
+      .copy-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 10px;
+      }
+      .copy-hint {
+        font-size: 11px;
+        color: #484f58;
+      }
+      .copy-btn {
+        background: #1d4ed8;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.12s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .copy-btn:hover {
+        background: #2563eb;
+      }
+      .copy-btn.copied {
+        background: #15803d;
+      }
+      .milestone-card {
+        background: #161b22;
+        border: 1px solid #1d4ed8;
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 4px;
+      }
+      .milestone-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #1d4ed8;
+        margin-bottom: 4px;
+      }
+      .milestone-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #93c5fd;
+        margin-bottom: 3px;
+      }
+      .milestone-desc {
+        font-size: 12px;
+        color: #656d76;
+      }
+      .legend {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #656d76;
+      }
+      .legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+      .footer {
+        margin-top: 32px;
+        padding-top: 16px;
+        border-top: 1px solid #21262d;
+        font-size: 11px;
+        color: #484f58;
+        text-align: center;
+      }
+      ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0d1117;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #30363d;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Adonis Account Intelligence Tool <span class="tag">Joel · Backend</span></h1>
+    <p class="subtitle">
+      19 Antigravity tasks · Copy any prompt directly into the Agent Manager · Organized by sprint
+      week
+    </p>
 
-<h1>Adonis Account Intelligence Tool <span class="tag">Joel · Backend</span></h1>
-<p class="subtitle">19 Antigravity tasks · Copy any prompt directly into the Agent Manager · Organized by sprint week</p>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #1d4ed8"></div>
+        Core build
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #0f766e"></div>
+        Luminai enhancement
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #c2410c"></div>
+        Milestone / checkpoint
+      </div>
+    </div>
 
-<div class="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:#1D4ED8"></div>Core build</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#0F766E"></div>Luminai enhancement</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#C2410C"></div>Milestone / checkpoint</div>
-</div>
+    <div id="board"></div>
 
-<div id="board"></div>
+    <div class="footer">
+      Adonis Account Intelligence Tool · Internal · Not for client distribution · Pursuit L3 AI
+      Native Demo Day · May 2026
+    </div>
 
-<div class="footer">Adonis Account Intelligence Tool · Internal · Not for client distribution · Pursuit L3 AI Native Demo Day · May 2026</div>
-
-<script>
-const WEEKS = [
-  {
-    label: "Week 1  ·  May 19–23",
-    tasks: [
-      {
-        id: 1,
-        title: "Initialize repository and backend project structure",
-        sub: "Monorepo, FastAPI skeleton, Dockerfile, Railway config",
-        prompt: `You are setting up the Adonis Account Intelligence Tool — a sales intelligence system for a healthcare company called Adonis. The tool monitors hospital news and delivers weekly Slack digests to sales reps.
+    <script>
+      const WEEKS = [
+        {
+          label: 'Week 1  ·  May 19–23',
+          tasks: [
+            {
+              id: 1,
+              title: 'Initialize repository and backend project structure',
+              sub: 'Monorepo, FastAPI skeleton, Dockerfile, Railway config',
+              prompt: `You are setting up the Adonis Account Intelligence Tool — a sales intelligence system for a healthcare company called Adonis. The tool monitors hospital news and delivers weekly Slack digests to sales reps.
 
 PROJECT CONTEXT:
 - Stack: Python FastAPI backend + Next.js frontend (in a monorepo)
@@ -127,13 +345,13 @@ builder = "dockerfile"
 startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/"
 
-Start the server and confirm GET / returns 200 with the health check JSON. Provide a screenshot of the running terminal.`
-      },
-      {
-        id: 2,
-        title: "Supabase database schema and seed data",
-        sub: "All 8 tables, constraints, seed hospitals and users",
-        prompt: `You are building the Adonis Account Intelligence Tool. Backend: Python FastAPI + Supabase (PostgreSQL).
+Start the server and confirm GET / returns 200 with the health check JSON. Provide a screenshot of the running terminal.`,
+            },
+            {
+              id: 2,
+              title: 'Supabase database schema and seed data',
+              sub: 'All 8 tables, constraints, seed hospitals and users',
+              prompt: `You are building the Adonis Account Intelligence Tool. Backend: Python FastAPI + Supabase (PostgreSQL).
 
 TASK: Create the complete database schema in Supabase and seed it with initial data.
 
@@ -234,13 +452,13 @@ Assignments:
 - University of Arkansas → David
 - CommonSpirit → David
 
-Write a verification script that queries all tables and confirms: 5 hospitals, 4 users, 5 assignments. Run it and show the output.`
-      },
-      {
-        id: 3,
-        title: "Core hospital and signal API endpoints",
-        sub: "GET /hospitals, GET /signals, POST /signals with confidence logic",
-        prompt: `You are building the Adonis Account Intelligence Tool. Python FastAPI backend connected to Supabase.
+Write a verification script that queries all tables and confirms: 5 hospitals, 4 users, 5 assignments. Run it and show the output.`,
+            },
+            {
+              id: 3,
+              title: 'Core hospital and signal API endpoints',
+              sub: 'GET /hospitals, GET /signals, POST /signals with confidence logic',
+              prompt: `You are building the Adonis Account Intelligence Tool. Python FastAPI backend connected to Supabase.
 
 TASK: Build the first set of core REST API endpoints. All responses are JSON. Use supabase-py for all database operations.
 
@@ -271,13 +489,13 @@ GET /api/v1/signals/pending-review
 Returns signals where review_status = 'pending', ordered by confidence_score ASC (lowest confidence first — needs most review).
 Include hospital_name in each result via a join.
 
-Write pytest tests for all 5 endpoints using httpx AsyncClient with mocked Supabase responses. Confirm all tests pass. Provide test output.`
-      },
-      {
-        id: 4,
-        title: "Slack bot setup and test DM",
-        sub: "WebClient, send_dm(), format_weekly_digest(), send_urgent_alert()",
-        prompt: `You are building the Adonis Account Intelligence Tool. Set up the Slack integration using Slack Bolt for Python.
+Write pytest tests for all 5 endpoints using httpx AsyncClient with mocked Supabase responses. Confirm all tests pass. Provide test output.`,
+            },
+            {
+              id: 4,
+              title: 'Slack bot setup and test DM',
+              sub: 'WebClient, send_dm(), format_weekly_digest(), send_urgent_alert()',
+              prompt: `You are building the Adonis Account Intelligence Tool. Set up the Slack integration using Slack Bolt for Python.
 
 TASK: Create /backend/app/services/slack_service.py with these four functions.
 
@@ -319,14 +537,14 @@ Returns the message ts or None on failure.
 After building these functions, write a test_slack_integration.py script that:
 1. Calls send_dm() to Danielle's placeholder Slack user ID with message "Adonis Intel Bot is online. Slack integration test confirmed."
 2. Prints "✓ DM sent successfully" if ts is returned, or "✗ DM failed" if None.
-Run it and confirm the integration works. Provide a screenshot of the Slack DM received.`
-      },
-      {
-        id: 5,
-        title: "Deterministic rules_engine() function",
-        sub: "Pre-AI tier assignment · Luminai Enforce pattern",
-        color: "teal",
-        prompt: `You are building the Adonis Account Intelligence Tool. Build the signal classification rules engine.
+Run it and confirm the integration works. Provide a screenshot of the Slack DM received.`,
+            },
+            {
+              id: 5,
+              title: 'Deterministic rules_engine() function',
+              sub: 'Pre-AI tier assignment · Luminai Enforce pattern',
+              color: 'teal',
+              prompt: `You are building the Adonis Account Intelligence Tool. Build the signal classification rules engine.
 
 CONTEXT: This function implements the "Enforce" pattern from the Luminai platform architecture review. It runs BEFORE calling the Claude AI API. It checks if a signal matches known high-priority patterns and forces the tier and confidence, skipping the expensive and slower Claude call entirely for cases we already know the answer to.
 
@@ -394,18 +612,18 @@ Write comprehensive pytest tests:
 - Rule 6 fires for posting_count=5, does NOT fire for posting_count=2
 - Default case returns None when no rules match
 
-Confirm all tests pass and provide test output.`
-      },
-    ]
-  },
-  {
-    label: "Week 2  ·  May 26–30",
-    tasks: [
-      {
-        id: 6,
-        title: "Trigger.dev weekly scheduler",
-        sub: "3x weekly cron jobs, manual trigger endpoint, run_scraper_job()",
-        prompt: `You are building the Adonis Account Intelligence Tool. Set up the Trigger.dev job scheduler.
+Confirm all tests pass and provide test output.`,
+            },
+          ],
+        },
+        {
+          label: 'Week 2  ·  May 26–30',
+          tasks: [
+            {
+              id: 6,
+              title: 'Trigger.dev weekly scheduler',
+              sub: '3x weekly cron jobs, manual trigger endpoint, run_scraper_job()',
+              prompt: `You are building the Adonis Account Intelligence Tool. Set up the Trigger.dev job scheduler.
 
 SCHEDULE: Three weekly scraper runs — Monday 6:00 AM ET, Wednesday 6:00 AM ET, Friday 6:00 AM ET (= 11:00 AM UTC for each). Monday run also triggers the digest send.
 
@@ -447,13 +665,13 @@ export default defineConfig({
 5. Add POST /api/v1/admin/send-digest (requires INTERNAL_API_KEY):
    Calls run_monday_digest() and returns the result.
 
-Test by hitting POST /admin/run-scraper and confirming it returns a valid summary. Show the response JSON.`
-      },
-      {
-        id: 7,
-        title: "Claude API signal classification with confidence scoring",
-        sub: "classify_signal(), rules engine integration, POST /classify test endpoint",
-        prompt: `You are building the Adonis Account Intelligence Tool. Build the Claude AI signal classification pipeline.
+Test by hitting POST /admin/run-scraper and confirming it returns a valid summary. Show the response JSON.`,
+            },
+            {
+              id: 7,
+              title: 'Claude API signal classification with confidence scoring',
+              sub: 'classify_signal(), rules engine integration, POST /classify test endpoint',
+              prompt: `You are building the Adonis Account Intelligence Tool. Build the Claude AI signal classification pipeline.
 
 TASK: Create /backend/app/services/classifier.py
 
@@ -478,13 +696,13 @@ TASK: Create /backend/app/services/classifier.py
 
 2. Build POST /api/v1/classify (no auth, for testing only).
 
-TEST: Classify three articles — CRO hire (rules engine), financial results (Claude), cafeteria renovation (Claude filtered_out).`
-      },
-      {
-        id: 8,
-        title: "Weekly Slack digest formatter and send logic",
-        sub: "digest_service.py, send_weekly_digest_to_all_aes(), digest send guard",
-        prompt: `You are building the Adonis Account Intelligence Tool. Build the complete weekly digest compilation and send system.
+TEST: Classify three articles — CRO hire (rules engine), financial results (Claude), cafeteria renovation (Claude filtered_out).`,
+            },
+            {
+              id: 8,
+              title: 'Weekly Slack digest formatter and send logic',
+              sub: 'digest_service.py, send_weekly_digest_to_all_aes(), digest send guard',
+              prompt: `You are building the Adonis Account Intelligence Tool. Build the complete weekly digest compilation and send system.
 
 TASK: Create /backend/app/services/digest_service.py
 
@@ -493,24 +711,24 @@ TASK: Create /backend/app/services/digest_service.py
 3. Admin summary DM to Danielle after all digests sent.
 4. Update run_monday_digest() to use real digest_service import.
 
-TEST: Seed 3 signals for Michael's territory. Call POST /admin/send-digest. Verify DMs and DB state.`
-      },
-    ]
-  },
-  {
-    label: "Midpoint Review  ·  June 2",
-    milestone: true,
-    desc: "Live demo to Reed and Danielle. Goal: working Slack digest for all 5 hospitals, dashboard rendering live data, signal quality review with Danielle."
-  },
-  {
-    label: "Week 3  ·  June 2–6",
-    tasks: [
-      {
-        id: 9,
-        title: "Signal review and approval endpoints",
-        sub: "POST /signals/{id}/review · Digest send guard · Luminai Escalate pattern",
-        color: "teal",
-        prompt: `You are building the Adonis Account Intelligence Tool. Build the signal review approval flow (Luminai "Escalate exceptions to humans" pattern).
+TEST: Seed 3 signals for Michael's territory. Call POST /admin/send-digest. Verify DMs and DB state.`,
+            },
+          ],
+        },
+        {
+          label: 'Midpoint Review  ·  June 2',
+          milestone: true,
+          desc: 'Live demo to Reed and Danielle. Goal: working Slack digest for all 5 hospitals, dashboard rendering live data, signal quality review with Danielle.',
+        },
+        {
+          label: 'Week 3  ·  June 2–6',
+          tasks: [
+            {
+              id: 9,
+              title: 'Signal review and approval endpoints',
+              sub: 'POST /signals/{id}/review · Digest send guard · Luminai Escalate pattern',
+              color: 'teal',
+              prompt: `You are building the Adonis Account Intelligence Tool. Build the signal review approval flow (Luminai "Escalate exceptions to humans" pattern).
 
 TASK:
 1. POST /api/v1/signals/{signal_id}/review — admin only. action: approved | dismissed. Sets review_status and bumps confidence to >= 0.70 on approve.
@@ -518,13 +736,13 @@ TASK:
 3. check_review_queue_and_notify() — notifies Danielle of pending count, blocks digest if > 0.
 4. Properly implement admin key middleware in auth.py.
 
-Tests: approve/dismiss flows, non-admin 403, correct ordering, digest guard.`
-      },
-      {
-        id: 10,
-        title: "Territory-filtered API and auth middleware",
-        sub: "Admin vs AE views, GET /me, hospital assignment endpoint",
-        prompt: `You are building the Adonis Account Intelligence Tool. Build territory filtering and user auth.
+Tests: approve/dismiss flows, non-admin 403, correct ordering, digest guard.`,
+            },
+            {
+              id: 10,
+              title: 'Territory-filtered API and auth middleware',
+              sub: 'Admin vs AE views, GET /me, hospital assignment endpoint',
+              prompt: `You are building the Adonis Account Intelligence Tool. Build territory filtering and user auth.
 
 TASK:
 1. get_current_user / get_required_user / get_admin_user FastAPI dependencies.
@@ -532,113 +750,113 @@ TASK:
 3. GET /signals — territory-filtered for AEs.
 4. GET /me — profile + hospitals + new_signals_this_week count.
 5. GET /ae-users (admin only) — with last_viewed_digest.
-6. POST /hospital-ae-assignments (admin only) — with duplicate check.`
-      },
-      {
-        id: 11,
-        title: "Contact storage endpoints",
-        sub: "POST /contacts, PATCH /contacts, verify-linkedin, duplicate detection",
-        prompt: `You are building the Adonis Account Intelligence Tool. Build the contacts management API.
+6. POST /hospital-ae-assignments (admin only) — with duplicate check.`,
+            },
+            {
+              id: 11,
+              title: 'Contact storage endpoints',
+              sub: 'POST /contacts, PATCH /contacts, verify-linkedin, duplicate detection',
+              prompt: `You are building the Adonis Account Intelligence Tool. Build the contacts management API.
 
 TASK:
 1. GET /contacts — by hospital_id, role-priority ordered, territory-gated.
 2. POST /contacts — case-insensitive duplicate check by full_name + hospital_id → 409.
 3. PATCH /contacts/{id} — partial update, always updates updated_at.
 4. POST /contacts/{id}/verify-linkedin — validates linkedin.com domain, sets verified=true.
-5. DELETE /contacts/{id} — soft delete (admin only), sets is_active=false.`
-      },
-      {
-        id: 12,
-        title: "Run logging and agent run tracking",
-        sub: "agent_runs table writes, GET /runs, GET /runs/latest, GET /status",
-        prompt: `You are building the Adonis Account Intelligence Tool. Build the agent run logging system.
+5. DELETE /contacts/{id} — soft delete (admin only), sets is_active=false.`,
+            },
+            {
+              id: 12,
+              title: 'Run logging and agent run tracking',
+              sub: 'agent_runs table writes, GET /runs, GET /runs/latest, GET /status',
+              prompt: `You are building the Adonis Account Intelligence Tool. Build the agent run logging system.
 
 TASK:
 1. run_logger.py: start_run(), update_run(), complete_run() — writes to agent_runs table.
 2. Wire run_logger into run_scraper_job() — track hospitals_checked, signals_found, rules_engine_hits, errors, duration_ms.
 3. GET /runs (admin) — paginated.
 4. GET /runs/latest (public) — for dashboard "Last updated" header.
-5. GET /status (public) — api_version, last_scraper_run, next_scraper_run (next Mon/Wed/Fri 11:00 UTC), total_signals_stored, pending_review_count.`
-      },
-    ]
-  },
-  {
-    label: "Week 4  ·  June 9–13",
-    tasks: [
-      {
-        id: 13,
-        title: "CSV export endpoint",
-        sub: "HubSpot-formatted contact export, StreamingResponse, territory-gated",
-        prompt: `You are building the Adonis Account Intelligence Tool. Build the HubSpot-compatible CSV export.
+5. GET /status (public) — api_version, last_scraper_run, next_scraper_run (next Mon/Wed/Fri 11:00 UTC), total_signals_stored, pending_review_count.`,
+            },
+          ],
+        },
+        {
+          label: 'Week 4  ·  June 9–13',
+          tasks: [
+            {
+              id: 13,
+              title: 'CSV export endpoint',
+              sub: 'HubSpot-formatted contact export, StreamingResponse, territory-gated',
+              prompt: `You are building the Adonis Account Intelligence Tool. Build the HubSpot-compatible CSV export.
 
 TASK:
 GET /api/v1/export/csv — StreamingResponse, text/csv, Content-Disposition attachment.
 HubSpot columns: First Name, Last Name, Job Title, Company Name, Website URL, LinkedIn Biodata URL (verified only), Notes.
 Notes = "Prior employer: {x}. | Recent signals: {last 2 signal summaries}".
 Territory-gated: AEs export own territory, admin exports all or filtered.
-GET /api/v1/export/contacts-count — count of exportable contacts.`
-      },
-      {
-        id: 14,
-        title: "Immediate urgent alert Slack DM",
-        sub: "send_urgent_alert_for_signal(), deduplication, BackgroundTasks hook",
-        prompt: `You are building the Adonis Account Intelligence Tool. Build immediate urgent alert system.
+GET /api/v1/export/contacts-count — count of exportable contacts.`,
+            },
+            {
+              id: 14,
+              title: 'Immediate urgent alert Slack DM',
+              sub: 'send_urgent_alert_for_signal(), deduplication, BackgroundTasks hook',
+              prompt: `You are building the Adonis Account Intelligence Tool. Build immediate urgent alert system.
 
 TASK:
 1. alert_service.py: send_urgent_alert_for_signal(signal_id) — fetch AE for hospital, same-day dedup check (urgent_sent=true for same hospital today), send DM, update urgent_sent=true, notify Danielle.
 2. POST /signals: use FastAPI BackgroundTasks to trigger send_urgent_alert_for_signal() for tier='urgent' signals (non-blocking).
 
-Tests: urgent signal triggers alert, same-day dedup blocks second alert, non-urgent skips.`
-      },
-      {
-        id: 15,
-        title: "UTM digest tracking and closed-loop visibility",
-        sub: "digest_views table writes · GET /ae-users last_viewed · Luminai closed-loop",
-        color: "teal",
-        prompt: `You are building the Adonis Account Intelligence Tool. Build closed-loop digest visibility (Luminai "Closed-Loop" pattern).
+Tests: urgent signal triggers alert, same-day dedup blocks second alert, non-urgent skips.`,
+            },
+            {
+              id: 15,
+              title: 'UTM digest tracking and closed-loop visibility',
+              sub: 'digest_views table writes · GET /ae-users last_viewed · Luminai closed-loop',
+              color: 'teal',
+              prompt: `You are building the Adonis Account Intelligence Tool. Build closed-loop digest visibility (Luminai "Closed-Loop" pattern).
 
 TASK:
 1. Update format_weekly_digest() UTM link to include digest_id.
 2. POST /digest-view — upsert digest_views (no auth). Invalid digest_id → {"recorded": false}, not 404.
 3. Update GET /ae-users — add last_viewed_digest (MAX viewed_at per ae_id).
-4. GET /digest-analytics (admin) — per-digest engagement: viewed_at, time_to_open_minutes.`
-      },
-      {
-        id: 16,
-        title: "Error handling, retry logic, and rate limiting",
-        sub: "Global exception handler, with_retry() decorator, Slack rate limiter",
-        prompt: `You are building the Adonis Account Intelligence Tool. Add production-grade error handling.
+4. GET /digest-analytics (admin) — per-digest engagement: viewed_at, time_to_open_minutes.`,
+            },
+            {
+              id: 16,
+              title: 'Error handling, retry logic, and rate limiting',
+              sub: 'Global exception handler, with_retry() decorator, Slack rate limiter',
+              prompt: `You are building the Adonis Account Intelligence Tool. Add production-grade error handling.
 
 TASK:
 1. Global exception handler — no raw stack traces in responses, 500 JSON.
 2. with_retry(max_attempts=3, base_delay=2.0) decorator — exponential backoff. Apply to classify_signal() and send_dm().
 3. Slack rate limiter — deque(maxlen=10), sleep if 10 messages in < 60s.
 4. Request logging middleware — method, path, status, duration_ms.
-5. Pydantic validation — signal title max 200, summary max 1000, source_url HttpUrl, contact full_name max 200.`
-      },
-      {
-        id: 17,
-        title: "Dashboard polish and performance tuning",
-        sub: "Response caching, pagination, Next.js dashboard final pass",
-        prompt: `You are building the Adonis Account Intelligence Tool. Polish performance and dashboard.
+5. Pydantic validation — signal title max 200, summary max 1000, source_url HttpUrl, contact full_name max 200.`,
+            },
+            {
+              id: 17,
+              title: 'Dashboard polish and performance tuning',
+              sub: 'Response caching, pagination, Next.js dashboard final pass',
+              prompt: `You are building the Adonis Account Intelligence Tool. Polish performance and dashboard.
 
 TASK:
 1. Add response caching to GET /status and GET /runs/latest — 60s TTL using functools.lru_cache or redis (prefer simple lru_cache for now).
 2. Confirm all list endpoints return total_count in response for pagination.
 3. Next.js dashboard final pass — confirm all API calls use correct base URL from env, loading states, error boundaries.
 4. Add CORS preflight caching (max_age=3600) to reduce OPTIONS requests.
-5. Run full pytest suite, confirm all green. Note any flaky tests and fix.`
-      },
-    ]
-  },
-  {
-    label: "Week 5  ·  June 16–20",
-    tasks: [
-      {
-        id: 18,
-        title: "End-to-end integration test suite",
-        sub: "Full pipeline smoke test, Slack DM verified, seed → classify → digest → view",
-        prompt: `You are building the Adonis Account Intelligence Tool. Build the end-to-end integration test suite.
+5. Run full pytest suite, confirm all green. Note any flaky tests and fix.`,
+            },
+          ],
+        },
+        {
+          label: 'Week 5  ·  June 16–20',
+          tasks: [
+            {
+              id: 18,
+              title: 'End-to-end integration test suite',
+              sub: 'Full pipeline smoke test, Slack DM verified, seed → classify → digest → view',
+              prompt: `You are building the Adonis Account Intelligence Tool. Build the end-to-end integration test suite.
 
 TASK: Create /backend/tests/test_e2e.py
 
@@ -656,13 +874,13 @@ test_full_pipeline():
 9. GET /ae-users → confirm last_viewed_digest is not null for the AE who opened the digest
 
 Also write test_rules_engine_coverage() to test all 8 rules with representative inputs.
-Run full suite. Provide complete test output.`
-      },
-      {
-        id: 19,
-        title: "Demo Day prep and final system rehearsal",
-        sub: "Slide deck, live system walkthrough, backup recording",
-        prompt: `You are building the Adonis Account Intelligence Tool. Prepare for the L3 AI Native Demo Day.
+Run full suite. Provide complete test output.`,
+            },
+            {
+              id: 19,
+              title: 'Demo Day prep and final system rehearsal',
+              sub: 'Slide deck, live system walkthrough, backup recording',
+              prompt: `You are building the Adonis Account Intelligence Tool. Prepare for the L3 AI Native Demo Day.
 
 TASK: Prepare the live demo and supporting materials.
 
@@ -693,53 +911,59 @@ TASK: Prepare the live demo and supporting materials.
    [ ] At least one digest sent and viewed in digest_views
    [ ] All pytest tests green
    [ ] .env.example is up to date (no real keys committed)
-   [ ] README.md documents setup steps`
-      },
-    ]
-  },
-];
+   [ ] README.md documents setup steps`,
+            },
+          ],
+        },
+      ];
 
-function toggleCard(id) {
-  const area = document.getElementById('prompt-' + id);
-  const btn = document.getElementById('btn-' + id);
-  const open = area.classList.toggle('open');
-  btn.textContent = open ? '▲ Hide' : '▼ Prompt';
-}
+      function toggleCard(id) {
+        const area = document.getElementById('prompt-' + id);
+        const btn = document.getElementById('btn-' + id);
+        const open = area.classList.toggle('open');
+        btn.textContent = open ? '▲ Hide' : '▼ Prompt';
+      }
 
-function copyPrompt(id) {
-  const box = document.getElementById('text-' + id);
-  navigator.clipboard.writeText(box.textContent).then(() => {
-    const btn = document.getElementById('copy-' + id);
-    btn.textContent = '✓ Copied';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = '⧉ Copy prompt'; btn.classList.remove('copied'); }, 2000);
-  });
-}
+      function copyPrompt(id) {
+        const box = document.getElementById('text-' + id);
+        navigator.clipboard.writeText(box.textContent).then(() => {
+          const btn = document.getElementById('copy-' + id);
+          btn.textContent = '✓ Copied';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = '⧉ Copy prompt';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      }
 
-function buildBoard() {
-  const board = document.getElementById('board');
-  WEEKS.forEach(week => {
-    const hdr = document.createElement('div');
-    hdr.className = 'week-header';
-    hdr.textContent = week.label;
-    board.appendChild(hdr);
+      function buildBoard() {
+        const board = document.getElementById('board');
+        WEEKS.forEach((week) => {
+          const hdr = document.createElement('div');
+          hdr.className = 'week-header';
+          hdr.textContent = week.label;
+          board.appendChild(hdr);
 
-    if (week.milestone) {
-      const mc = document.createElement('div');
-      mc.className = 'milestone-card';
-      mc.innerHTML = '<div class="milestone-label">Midpoint Milestone</div>' +
-        '<div class="milestone-title">Live Demo — Reed & Danielle</div>' +
-        '<div class="milestone-desc">' + week.desc + '</div>';
-      board.appendChild(mc);
-      return;
-    }
+          if (week.milestone) {
+            const mc = document.createElement('div');
+            mc.className = 'milestone-card';
+            mc.innerHTML =
+              '<div class="milestone-label">Midpoint Milestone</div>' +
+              '<div class="milestone-title">Live Demo — Reed & Danielle</div>' +
+              '<div class="milestone-desc">' +
+              week.desc +
+              '</div>';
+            board.appendChild(mc);
+            return;
+          }
 
-    const grid = document.createElement('div');
-    grid.className = 'grid';
-    week.tasks.forEach(task => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
+          const grid = document.createElement('div');
+          grid.className = 'grid';
+          week.tasks.forEach((task) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
         <div class="card-hdr" onclick="toggleCard(${task.id})">
           <div class="card-num">${task.id}</div>
           <div class="card-meta">
@@ -749,19 +973,19 @@ function buildBoard() {
           <button class="expand-btn" id="btn-${task.id}" onclick="event.stopPropagation();toggleCard(${task.id})">▼ Prompt</button>
         </div>
         <div class="prompt-area" id="prompt-${task.id}">
-          <div class="prompt-box" id="text-${task.id}">${task.prompt.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+          <div class="prompt-box" id="text-${task.id}">${task.prompt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
           <div class="copy-row">
             <span class="copy-hint">Paste directly into Antigravity Agent Manager</span>
             <button class="copy-btn" id="copy-${task.id}" onclick="copyPrompt(${task.id})">⧉ Copy prompt</button>
           </div>
         </div>`;
-      grid.appendChild(card);
-    });
-    board.appendChild(grid);
-  });
-}
+            grid.appendChild(card);
+          });
+          board.appendChild(grid);
+        });
+      }
 
-buildBoard();
-</script>
-</body>
+      buildBoard();
+    </script>
+  </body>
 </html>

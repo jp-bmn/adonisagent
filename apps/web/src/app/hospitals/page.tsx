@@ -1,12 +1,14 @@
 import Link from 'next/link';
-import { SEED_HOSPITALS } from '@adonis/shared';
+import { fetchHospitals } from '@/lib/api';
 
-export default function HospitalsPage() {
+export default async function HospitalsPage() {
+  const hospitals = await fetchHospitals();
+
   return (
-    <div className="px-8 py-7">
+    <div className="px-4 py-5 md:px-8 md:py-7 pb-20 md:pb-7">
       <header className="mb-6">
         <h1 className="font-serif text-2xl font-semibold text-ink">Hospitals</h1>
-        <p className="text-sm text-slate-500 mt-1">{SEED_HOSPITALS.length} accounts monitored</p>
+        <p className="text-sm text-slate-500 mt-1">{hospitals.length} accounts monitored</p>
       </header>
 
       <div className="bg-white border border-line rounded-xl overflow-hidden">
@@ -25,21 +27,32 @@ export default function HospitalsPage() {
             </tr>
           </thead>
           <tbody>
-            {SEED_HOSPITALS.map((h) => (
+            {hospitals.map((h) => (
               <tr key={h.id} className="border-b border-line last:border-b-0 hover:bg-paper">
                 <td className="px-5 py-4">
                   <Link
                     href={`/hospitals/${h.id}`}
                     className="font-serif font-semibold text-navy-900 hover:underline"
                   >
-                    {h.display_name}
+                    {h.name}
                   </Link>
                 </td>
                 <td className="px-5 py-4 text-sm text-slate-600">
-                  {h.city ? `${h.city}, ` : ''}
-                  {h.state}
+                  {/* Location is not returned by fetchHospitals currently, but website is */}
+                  {h.website_url ? (
+                    <a
+                      href={h.website_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-accent hover:underline"
+                    >
+                      {h.website_url.replace(/^https?:\/\//, '')}
+                    </a>
+                  ) : (
+                    '—'
+                  )}
                 </td>
-                <td className="px-5 py-4 text-sm text-slate-500">{h.notes}</td>
+                <td className="px-5 py-4 text-sm text-slate-500">{h.division_note || '—'}</td>
               </tr>
             ))}
           </tbody>

@@ -224,7 +224,7 @@ class TestRcmHiringSpike:
         r = classify("UMass Memorial hiring 12 RCM specialists this quarter")
         assert r.matched
         assert r.signal_type == "rcm_hiring_spike"
-        assert r.tier == "worth_knowing"
+        assert r.tier == "urgent"
 
     def test_revenue_cycle_positions(self):
         r = classify("", text="Revenue cycle coordinator positions open at Ascension — 8 roles posted")
@@ -252,7 +252,7 @@ class TestVendorChange:
         r = classify("Ascension switching RCM vendor after contract dispute")
         assert r.matched
         assert r.signal_type == "vendor_change"
-        assert r.tier == "worth_knowing"
+        assert r.tier == "urgent"
 
     def test_replacing_platform(self):
         r = classify("", text="UAMS replacing current billing platform with new solution")

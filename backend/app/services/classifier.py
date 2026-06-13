@@ -76,6 +76,7 @@ class ClassificationResult:
     summary:               str
     why_relevant:          str
     classification_source: Literal["rules_engine", "claude_api", "error"]
+    why_it_matters:        Optional[str] = None
     model_used:            Optional[str] = None
     tokens_used:           Optional[int] = None
     rule_name:             Optional[str] = None   # set when rules_engine fires
@@ -88,6 +89,7 @@ class ClassificationResult:
             "title":                 self.title,
             "summary":               self.summary,
             "why_relevant":          self.why_relevant,
+            "why_it_matters":        self.why_it_matters,
             "classification_source": self.classification_source,
             "model_used":            self.model_used,
             "tokens_used":           self.tokens_used,
@@ -137,7 +139,8 @@ Return ONLY valid JSON, no markdown, no explanation:
   "confidence_score": <0.0 to 1.0>,
   "title": "<concise 10-word headline>",
   "summary": "<2-3 sentence summary of what happened and why it matters for RCM>",
-  "why_relevant": "<1-2 sentences: specific reason this is an RCM sales opportunity>"
+  "why_relevant": "<1-2 sentences: specific reason this is an RCM sales opportunity>",
+  "why_it_matters": "<1-2 sentences: the specific reason this matters for RCM sales>"
 }"""
 
 
@@ -195,6 +198,7 @@ async def classify_signal(
             title                 = short_text[:80] if short_text else f"{hospital_name} signal",
             summary               = summary,
             why_relevant          = f"Deterministic match: {rules_result.rule_name.replace('_', ' ').title()} pattern.",
+            why_it_matters        = None,
             classification_source = "rules_engine",
             rule_name             = rules_result.rule_name,
         )
@@ -269,6 +273,7 @@ async def _classify_with_claude(
                 title                 = parsed.get("title", "Low-confidence signal"),
                 summary               = parsed.get("summary", ""),
                 why_relevant          = "Filtered: confidence below threshold.",
+                why_it_matters        = None,
                 classification_source = "claude_api",
                 model_used            = CLAUDE_MODEL,
                 tokens_used           = tokens,
@@ -281,6 +286,7 @@ async def _classify_with_claude(
             title                 = parsed.get("title", "")[:80],
             summary               = parsed.get("summary", "")[:1000],
             why_relevant          = parsed.get("why_relevant", ""),
+            why_it_matters        = parsed.get("why_it_matters"),
             classification_source = "claude_api",
             model_used            = CLAUDE_MODEL,
             tokens_used           = tokens,
@@ -356,6 +362,7 @@ def _parse_claude_response(raw_text: str) -> dict:
         "title":            str(data.get("title", ""))[:80],
         "summary":          str(data.get("summary", ""))[:1000],
         "why_relevant":     str(data.get("why_relevant", "")),
+        "why_it_matters":   str(data.get("why_it_matters")) if data.get("why_it_matters") else None,
     }
 
 
@@ -368,5 +375,6 @@ def _error_result(reason: str) -> ClassificationResult:
         title                 = "Classification error",
         summary               = reason,
         why_relevant          = "",
+        why_it_matters        = None,
         classification_source = "error",
     )

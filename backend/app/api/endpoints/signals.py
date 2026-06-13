@@ -44,7 +44,7 @@ async def get_pending_review(
     query = (
         supabase.table("signals")
         .select("*, hospitals(name)", count="exact")
-        .eq("review_status", "pending")
+        .or_("review_status.eq.pending,review_status.is.null")
         .order("confidence_score", desc=False)
         .limit(limit)
     )
@@ -65,6 +65,11 @@ async def get_pending_review(
     result = query.execute()
     response.headers["X-Total-Count"] = str(result.count or 0)
     rows = result.data or []
+
+    # Map null to pending
+    for r in rows:
+        if r.get("review_status") is None:
+            r["review_status"] = "pending"
 
     # Flatten hospital name into top-level field
     return [
@@ -99,7 +104,7 @@ async def list_signals(
 
     # Exclude dismissed unless caller opts in
     if not include_dismissed:
-        query = query.or_("review_status.neq.dismissed,review_status.is.null")
+        query = query.or_("review_status.is.null,review_status.neq.dismissed")
 
     # Territory filtering logic
     if not user.get("is_admin", False):
@@ -126,7 +131,14 @@ async def list_signals(
 
     result = query.execute()
     response.headers["X-Total-Count"] = str(result.count or 0)
-    return result.data or []
+    data = result.data or []
+    
+    # Map null to pending
+    for d in data:
+        if d.get("review_status") is None:
+            d["review_status"] = "pending"
+            
+    return data
 
 
 @router.post("", status_code=201)
