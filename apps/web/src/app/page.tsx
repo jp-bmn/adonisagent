@@ -80,8 +80,21 @@ export default async function HomePage({ searchParams }: PageProps) {
       </header>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <Kpi value={urgentCount} label="Urgent this week" tone="urgent" stripeColor="#C44A2C" />
-        <Kpi value={worthKnowingCount} label="Updates this week" stripeColor="#2D7B6C" />
+        <Kpi
+          value={urgentCount}
+          label="Urgent this week"
+          tone="urgent"
+          stripeColor="#C44A2C"
+          delta={status.urgent_delta}
+          deltaDirection={status.urgent_delta_direction}
+        />
+        <Kpi
+          value={worthKnowingCount}
+          label="Updates this week"
+          stripeColor="#2D7B6C"
+          delta={status.worth_knowing_delta}
+          deltaDirection={status.worth_knowing_delta_direction}
+        />
         <Kpi value={hospitals.length} label="Accounts monitored" stripeColor="#0F3D3E" />
         <Kpi value={allSignals.length} label="Signals total" stripeColor="#DCEBE7" />
       </div>
