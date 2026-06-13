@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { fetchHospitals } from '@/lib/api';
+import { HospitalLogo } from '@/components';
 
 export default async function HospitalsPage() {
   const hospitals = await fetchHospitals();
@@ -30,11 +31,11 @@ export default async function HospitalsPage() {
             {hospitals.map((h) => (
               <tr key={h.id} className="border-b border-line last:border-b-0 hover:bg-paper">
                 <td className="px-5 py-4">
-                  <Link
-                    href={`/hospitals/${h.id}`}
-                    className="font-serif font-semibold text-navy-900 hover:underline"
-                  >
-                    {h.name}
+                  <Link href={`/hospitals/${h.id}`} className="flex items-center gap-3 group">
+                    <HospitalLogo name={h.name} websiteUrl={h.website_url} size="sm" />
+                    <span className="font-serif font-semibold text-navy-900 group-hover:underline">
+                      {h.name}
+                    </span>
                   </Link>
                 </td>
                 <td className="px-5 py-4 text-sm text-slate-600">
