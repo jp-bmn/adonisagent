@@ -64,6 +64,10 @@ class FluentTableMock:
         self._filters.append(("gte", field, value))
         return self
 
+    def lt(self, field, value):
+        self._filters.append(("lt", field, value))
+        return self
+
     def in_(self, field, values):
         self._filters.append(("in", field, values))
         return self
@@ -135,6 +139,8 @@ class FluentTableMock:
                 filtered = [r for r in filtered if r.get(field) != val]
             elif op == "gte":
                 filtered = [r for r in filtered if r.get(field) is not None and r.get(field) >= val]
+            elif op == "lt":
+                filtered = [r for r in filtered if r.get(field) is not None and r.get(field) < val]
             elif op == "in":
                 filtered = [r for r in filtered if r.get(field) in val]
             elif op == "or":

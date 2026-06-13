@@ -293,11 +293,17 @@ class HealthResponse(BaseModel):
 
 class StatusResponse(BaseModel):
     api_version: str
-    last_scraper_run: Optional[datetime] = None
-    next_scraper_run: Optional[datetime] = None
+    last_scraper_run: Optional[str] = None
+    next_scraper_run: Optional[str] = None
     total_signals_stored: int
     total_hospitals_monitored: int
     pending_review_count: int
+    urgent_count: int
+    urgent_delta: int
+    urgent_delta_direction: Literal["up", "down", "flat"]
+    worth_knowing_count: int
+    worth_knowing_delta: int
+    worth_knowing_delta_direction: Literal["up", "down", "flat"]
 
 
 # ---------------------------------------------------------------------------

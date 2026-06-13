@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException, Response
 from app.core.auth import get_admin_user
 from app.core.database import get_supabase
 from app.core.cache import ttl_cache
-from app.models.schemas import AgentRun
+from app.models.schemas import AgentRun, StatusResponse
 
 router = APIRouter(tags=["runs"])
 logger = logging.getLogger(__name__)
@@ -92,7 +92,7 @@ async def latest_run():
         raise HTTPException(status_code=500, detail="Failed to retrieve latest run")
 
 
-@router.get("/status")
+@router.get("/status", response_model=StatusResponse)
 @ttl_cache(60.0)
 async def system_status():
     """
@@ -133,6 +133,64 @@ async def system_status():
         )
         pending_review_count = pending_count_res.count or 0
 
+        # 6. Calculate rolling 7-day stats for KPIs comparing this week vs last week
+        now = datetime.now(timezone.utc)
+        seven_days_ago = (now - timedelta(days=7)).isoformat()
+        fourteen_days_ago = (now - timedelta(days=14)).isoformat()
+
+        # Count this week's urgent signals
+        urgent_this_week = (
+            supabase.table("signals")
+            .select("id", count="exact")
+            .eq("tier", "urgent")
+            .gte("created_at", seven_days_ago)
+            .or_("review_status.is.null,review_status.neq.dismissed")
+            .execute()
+        )
+        urgent_count = urgent_this_week.count or 0
+
+        # Count this week's worth_knowing signals
+        worth_this_week = (
+            supabase.table("signals")
+            .select("id", count="exact")
+            .eq("tier", "worth_knowing")
+            .gte("created_at", seven_days_ago)
+            .or_("review_status.is.null,review_status.neq.dismissed")
+            .execute()
+        )
+        worth_knowing_count = worth_this_week.count or 0
+
+        # Count last week's urgent signals (between 14 and 7 days ago)
+        urgent_last_week = (
+            supabase.table("signals")
+            .select("id", count="exact")
+            .eq("tier", "urgent")
+            .gte("created_at", fourteen_days_ago)
+            .lt("created_at", seven_days_ago)
+            .or_("review_status.is.null,review_status.neq.dismissed")
+            .execute()
+        )
+        urgent_prev = urgent_last_week.count or 0
+
+        # Count last week's worth_knowing signals (between 14 and 7 days ago)
+        worth_last_week = (
+            supabase.table("signals")
+            .select("id", count="exact")
+            .eq("tier", "worth_knowing")
+            .gte("created_at", fourteen_days_ago)
+            .lt("created_at", seven_days_ago)
+            .or_("review_status.is.null,review_status.neq.dismissed")
+            .execute()
+        )
+        worth_prev = worth_last_week.count or 0
+
+        # Calculate deltas & directions
+        urgent_delta = urgent_count - urgent_prev
+        urgent_delta_direction = "up" if urgent_delta > 0 else "down" if urgent_delta < 0 else "flat"
+
+        worth_knowing_delta = worth_knowing_count - worth_prev
+        worth_knowing_delta_direction = "up" if worth_knowing_delta > 0 else "down" if worth_knowing_delta < 0 else "flat"
+
         return {
             "api_version": "1.0.0",
             "last_scraper_run": last_scraper_run,
@@ -140,6 +198,12 @@ async def system_status():
             "total_signals_stored": total_signals_stored,
             "total_hospitals_monitored": total_hospitals_monitored,
             "pending_review_count": pending_review_count,
+            "urgent_count": urgent_count,
+            "urgent_delta": urgent_delta,
+            "urgent_delta_direction": urgent_delta_direction,
+            "worth_knowing_count": worth_knowing_count,
+            "worth_knowing_delta": worth_knowing_delta,
+            "worth_knowing_delta_direction": worth_knowing_delta_direction,
         }
     except Exception as e:
         logger.error(f"Failed to get system status: {e}")
