@@ -42,8 +42,19 @@ export default async function HomePage({ searchParams }: PageProps) {
       </header>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <Kpi value={urgentCount} label="Urgent this week" tone="urgent" />
-        <Kpi value={worthKnowingCount} label="Updates this week" />
+        <Kpi
+          value={status.urgent_count ?? urgentCount}
+          label="Urgent this week"
+          tone="urgent"
+          delta={status.urgent_delta}
+          deltaDirection={status.urgent_delta_direction}
+        />
+        <Kpi
+          value={status.worth_knowing_count ?? worthKnowingCount}
+          label="Updates this week"
+          delta={status.worth_knowing_delta}
+          deltaDirection={status.worth_knowing_delta_direction}
+        />
         <Kpi value={hospitals.length} label="Accounts monitored" />
         <Kpi value={signals.length} label="Signals total" />
       </div>
@@ -106,17 +117,49 @@ function formatDate(iso: string): string {
   });
 }
 
-function Kpi({ value, label, tone }: { value: string | number; label: string; tone?: 'urgent' }) {
+function Kpi({
+  value,
+  label,
+  tone,
+  delta,
+  deltaDirection,
+}: {
+  value: string | number;
+  label: string;
+  tone?: 'urgent';
+  delta?: number;
+  deltaDirection?: 'up' | 'down' | 'flat';
+}) {
+  const showDelta = delta !== undefined && deltaDirection !== undefined;
+
   return (
-    <div className="bg-white border border-line rounded-xl p-4">
-      <div
-        className={`font-serif text-2xl font-bold ${
-          tone === 'urgent' ? 'text-urgent' : 'text-brand'
-        }`}
-      >
-        {value}
+    <div className="bg-white border border-line rounded-xl p-4 flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between">
+          <div
+            className={`font-serif text-2xl font-bold ${
+              tone === 'urgent' ? 'text-urgent' : 'text-brand'
+            }`}
+          >
+            {value}
+          </div>
+          {showDelta && (
+            <div
+              className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
+                deltaDirection === 'up'
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50'
+                  : deltaDirection === 'down'
+                    ? 'bg-rose-50 text-rose-700 border border-rose-200/50'
+                    : 'bg-slate-50 text-slate-500 border border-slate-200/50'
+              }`}
+            >
+              <span>{deltaDirection === 'up' ? '↑' : deltaDirection === 'down' ? '↓' : '→'}</span>
+              <span>{Math.abs(delta)}</span>
+            </div>
+          )}
+        </div>
+        <div className="text-xs text-slate-500 mt-1">{label}</div>
       </div>
-      <div className="text-xs text-slate-500 mt-1">{label}</div>
     </div>
   );
 }

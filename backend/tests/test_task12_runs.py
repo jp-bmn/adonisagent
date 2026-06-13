@@ -228,6 +228,12 @@ async def test_status_endpoint():
             assert "next_scraper_run" in data
             assert data["total_signals_stored"] == 42
             assert data["total_hospitals_monitored"] == 5
+            assert data["urgent_count"] == 42
+            assert data["urgent_delta"] == 0
+            assert data["urgent_delta_direction"] == "flat"
+            assert data["worth_knowing_count"] == 42
+            assert data["worth_knowing_delta"] == 0
+            assert data["worth_knowing_delta_direction"] == "flat"
 
 
 # ===========================================================================

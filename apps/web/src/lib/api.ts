@@ -82,7 +82,13 @@ export interface ApiStatus {
   total_signals_stored: number;
   total_hospitals_monitored: number;
   pending_review_count: number;
-  message: string;
+  message?: string;
+  urgent_count: number;
+  urgent_delta: number;
+  urgent_delta_direction: 'up' | 'down' | 'flat';
+  worth_knowing_count: number;
+  worth_knowing_delta: number;
+  worth_knowing_delta_direction: 'up' | 'down' | 'flat';
 }
 
 // ---------------------------------------------------------------------------
