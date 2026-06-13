@@ -1,4 +1,4 @@
-import type { Hospital, Signal, Contact, Rep, Digest, SignalPriority } from '@adonis/shared';
+import type { Hospital, Signal, Contact, SignalPriority } from '@adonis/shared';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**

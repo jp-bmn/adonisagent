@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Adonis Client Feed Preview</title>
+    <style>
+      :root {
+        --bg: #eef3f6;
+        --card: #ffffff;
+        --ink: #1b2430;
+        --muted: #55606f;
+        --line: #d8e0e8;
+        --urgent: #b42318;
+        --worth: #0b4f8c;
+        --filtered: #6b7280;
+        --accent: #0f766e;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          -apple-system,
+          Segoe UI,
+          Helvetica,
+          Arial,
+          sans-serif;
+        color: var(--ink);
+        background: linear-gradient(180deg, #dfeef2 0%, var(--bg) 35%);
+      }
+      .wrap {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 24px 18px 34px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 2rem;
+      }
+      .stamp {
+        margin: 4px 0 14px;
+        color: var(--muted);
+      }
+      .stats {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        margin-bottom: 12px;
+      }
+      .stat {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .stat .k {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      .stat .v {
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+      .panel {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+      .feed {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .chip {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        padding: 3px 8px;
+        border-radius: 999px;
+        color: white;
+      }
+      .tier-urgent {
+        background: var(--urgent);
+      }
+      .tier-worth {
+        background: var(--worth);
+      }
+      .tier-filtered {
+        background: var(--filtered);
+      }
+      .confidence {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      h3 {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.3;
+      }
+      p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.35;
+      }
+      .foot {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+      .source-link {
+        margin-left: auto;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Adonis Client Feed Preview</h1>
+      <div class="stamp">Generated: 2026-06-03T16:15:28.839634+00:00</div>
+      <section class="stats">
+        <div class="stat">
+          <div class="k">Total Classified</div>
+          <div class="v">9</div>
+        </div>
+        <div class="stat">
+          <div class="k">Urgent</div>
+          <div class="v">3</div>
+        </div>
+        <div class="stat">
+          <div class="k">Worth Knowing</div>
+          <div class="v">6</div>
+        </div>
+        <div class="stat">
+          <div class="k">Filtered Out</div>
+          <div class="v">0</div>
+        </div>
+      </section>
+      <section class="panel">
+        <strong>Top Sources</strong>
+        <ul>
+          <li>Crain&#x27;s New York: 2</li>
+          <li>JLL: 1</li>
+          <li>HIT Consultant: 1</li>
+          <li>CNBC: 1</li>
+          <li>Fierce Healthcare: 1</li>
+          <li>Modern Healthcare: 1</li>
+          <li>The Boston Globe: 1</li>
+          <li>Worcester Business Journal: 1</li>
+        </ul>
+      </section>
+      <section class="feed">
+        <article class="card">
+          <div class="meta">
+            <span class="chip tier-urgent">urgent</span><span class="confidence">conf 1.00</span>
+          </div>
+          <h3>JLL advises Weill Cornell Medicine on acquisition of Manhattan’s 1334 York Avenue</h3>
+          <p>NEW YORK, Nov.</p>
+          <div class="foot">
+            <span>NewYork-Presbyterian</span><span>JLL</span
+            ><a
+              class="source-link"
+              href="https://www.jll.com/en-us/newsroom/jll-advises-weill-cornell-medicine-on-acquisition-of-manhattans-1334-york-avenue"
+              target="_blank"
+              rel="noreferrer"
+              >Open source</a
+            >
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="chip tier-urgent">urgent</span><span class="confidence">conf 1.00</span>
+          </div>
+          <h3>
+            Epic&#x27;s lawsuit against Health Gorilla raises broader issues about the future of
+            data sharing, industry executives say
+          </h3>
+          <p>
+            In the lawsuit, Epic and the providers allege that Health Gorilla and its clients
+            exploited nationwide interoperability frameworks.
+          </p>
+          <div class="foot">
+            <span>UMass Memorial</span><span>Fierce Healthcare</span
+            ><a
+              class="source-link"
+              href="https://www.fiercehealthcare.com/health-tech/epics-lawsuit-against-health-gorilla-raises-broader-issues-about-future-data-sharing"
+              target="_blank"
+              rel="noreferrer"
+              >Open source</a
+            >
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="chip tier-urgent">urgent</span><span class="confidence">conf 1.00</span>
+          </div>
+          <h3>UMass Memorial Health ends some services as Medicaid cuts loom</h3>
+          <p>
+            The Worcester safety-net hospital has already shut several programs, including two
+            primary care clinics and a substance use treatment center.
+          </p>
+          <div class="foot">
+            <span>UMass Memorial</span><span>The Boston Globe</span
+            ><a
+              class="source-link"
+              href="https://www.bostonglobe.com/2025/08/14/business/umass-memorial-psych-program-closure/"
+              target="_blank"
+              rel="noreferrer"
+              >Open source</a
+            >
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="chip tier-worth">worth_knowing</span
+            ><span class="confidence">conf 0.90</span>
+          </div>
+          <h3>How five AI startups are strategizing around Epic’s big push</h3>
+          <p>
+            Artificial intelligence-focused companies that have made inroads among health systems
+            suddenly find themselves with a new competitor: Epic.
+          </p>
+          <div class="foot">
+            <span>UMass Memorial</span><span>Modern Healthcare</span
+            ><a
+              class="source-link"
+              href="http://www.modernhealthcare.com/health-tech/ai/mh-epic-ai-tools-abridge-innovaccer-ambience/"
+              target="_blank"
+              rel="noreferrer"
+              >Open source</a
+            >
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="chip tier-worth">worth_knowing</span
+            ><span class="confidence">conf 0.75</span>
+          </div>
+          <h3>New York-Presbyterian CEO Steven Corwin to step down</h3>
+          <p>New York-Presbyterian CEO and President Dr.</p>
+          <div class="foot">
+            <span>NewYork-Presbyterian</span><span>Crain&#x27;s New York</span
+            ><a
+              class="source-link"
+              href="https://www.crainsnewyork.com/health-pulse/new-york-presbyterian-ceo-steven-corwin-announces-resignation/"
+              target="_blank"
+              rel="noreferrer"
+              >Open source</a
+            >
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="chip tier-worth">worth_knowing</span
+            ><span class="confidence">conf 0.75</span>
+          </div>
+          <h3>New generation of health system CEOs take the helm amid federal regulatory shift</h3>
+          <p>
+            Departures at New York-Presbyterian, Northwell and NYU Langone have made way for new
+            leaders at the city&#x27;s largest health systems.
+          </p>
+          <div class="foot">
+            <span>NewYork-Presbyterian</span><span>Crain&#x27;s New York</span
+            ><a
+              class="source-link"
+              href="https://www.crainsnewyork.com/health-pulse/new-york-presbyterian-northwell-nyu-langone-get-new-ceos/"
+              target="_blank"
+              rel="noreferrer"
+              >Open source</a
+            >
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="chip tier-worth">worth_knowing</span
+            ><span class="confidence">conf 0.75</span>
+          </div>
+          <h3>
+            Gartner Healthcare Supply Chain Top 25: AdventHealth Ranks No. 1, Driven by AI and
+            Clinical Collaboration
+          </h3>
+          <p>Gartner, Inc.</p>
+          <div class="foot">
+            <span>NewYork-Presbyterian</span><span>HIT Consultant</span
+            ><a
+              class="source-link"
+              href="https://hitconsultant.net/2025/11/21/gartner-healthcare-supply-chain-top-25-adventhealth-ranks-no-1-driven-by-ai-and-clinical-collaboration/"
+              target="_blank"
+              rel="noreferrer"
+              >Open source</a
+            >
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="chip tier-worth">worth_knowing</span
+            ><span class="confidence">conf 0.75</span>
+          </div>
+          <h3>
+            Bill Gates meets Willy Wonka: How Epic&#x27;s 82-year-old billionaire CEO, Judy
+            Faulkner, built her software factory
+          </h3>
+          <p>
+            Judy Faulkner has run Epic Systems for 46 years and has a detailed plan for what happens
+            when she&#x27;s no longer the boss.
+          </p>
+          <div class="foot">
+            <span>UMass Memorial</span><span>CNBC</span
+            ><a
+              class="source-link"
+              href="https://www.cnbc.com/2025/08/16/how-epics-82-year-old-ceo-judy-faulkner-built-her-software-factory.html"
+              target="_blank"
+              rel="noreferrer"
+              >Open source</a
+            >
+          </div>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="chip tier-worth">worth_knowing</span
+            ><span class="confidence">conf 0.75</span>
+          </div>
+          <h3>Six of 10 Central Mass. hospitals were profitable in fiscal 2024</h3>
+          <p>
+            While the profitability of hospitals throughout the commonwealth varied widely in fiscal
+            2024, Athol Hospital has risen to the top as the.
+          </p>
+          <div class="foot">
+            <span>UMass Memorial</span><span>Worcester Business Journal</span
+            ><a
+              class="source-link"
+              href="https://wbjournal.com/article/six-of-10-central-mass-hospitals-were-profitable-in-fiscal-2024/"
+              target="_blank"
+              rel="noreferrer"
+              >Open source</a
+            >
+          </div>
+        </article>
+      </section>
+    </div>
+  </body>
+</html>

@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { fetchHospitals } from '@/lib/api';
-import { HospitalLogo } from '@/components';
 
 export default async function HospitalsPage() {
   const hospitals = await fetchHospitals();
@@ -8,7 +7,7 @@ export default async function HospitalsPage() {
   return (
     <div className="px-4 py-5 md:px-8 md:py-7 pb-20 md:pb-7">
       <header className="mb-6">
-        <h1 className="font-serif text-2xl font-semibold text-brand">Hospitals</h1>
+        <h1 className="font-serif text-2xl font-semibold text-ink">Hospitals</h1>
         <p className="text-sm text-slate-500 mt-1">{hospitals.length} accounts monitored</p>
       </header>
 
@@ -20,13 +19,10 @@ export default async function HospitalsPage() {
                 Hospital
               </th>
               <th className="text-left text-xs font-mono uppercase tracking-widest text-slate-500 px-5 py-3">
-                AE Coverage
+                Location
               </th>
-              <th className="text-left text-xs font-mono uppercase tracking-widest text-slate-500 px-5 py-3 hidden md:table-cell">
+              <th className="text-left text-xs font-mono uppercase tracking-widest text-slate-500 px-5 py-3">
                 Notes
-              </th>
-              <th className="text-left text-xs font-mono uppercase tracking-widest text-slate-500 px-5 py-3 hidden md:table-cell">
-                Last viewed
               </th>
             </tr>
           </thead>
@@ -36,24 +32,27 @@ export default async function HospitalsPage() {
                 <td className="px-5 py-4">
                   <Link
                     href={`/hospitals/${h.id}`}
-                    className="flex items-center gap-3 group"
+                    className="font-serif font-semibold text-navy-900 hover:underline"
                   >
-                    <HospitalLogo name={h.name} websiteUrl={h.website_url} size="sm" />
-                    <span className="font-serif font-semibold text-navy-900 group-hover:underline">
-                      {h.name}
-                    </span>
+                    {h.name}
                   </Link>
                 </td>
                 <td className="px-5 py-4 text-sm text-slate-600">
-                  {h.ae_users
-                    .filter((u) => !u.is_admin)
-                    .map((u) => u.name)
-                    .join(', ') || '—'}
+                  {/* Location is not returned by fetchHospitals currently, but website is */}
+                  {h.website_url ? (
+                    <a
+                      href={h.website_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-accent hover:underline"
+                    >
+                      {h.website_url.replace(/^https?:\/\//, '')}
+                    </a>
+                  ) : (
+                    '—'
+                  )}
                 </td>
-                <td className="px-5 py-4 text-sm text-slate-500 hidden md:table-cell">{h.division_note ?? '—'}</td>
-                <td className="px-5 py-4 hidden md:table-cell">
-                  <span className="text-xs font-mono text-slate-400">—</span>
-                </td>
+                <td className="px-5 py-4 text-sm text-slate-500">{h.division_note || '—'}</td>
               </tr>
             ))}
           </tbody>

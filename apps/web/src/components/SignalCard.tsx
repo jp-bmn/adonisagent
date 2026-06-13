@@ -54,7 +54,9 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
         <p className="font-serif text-lg font-bold text-brand leading-snug">{headline}</p>
 
         {/* Summary */}
-        {signal.summary && <p className="text-sm text-slate-600 leading-relaxed">{signal.summary}</p>}
+        {signal.summary && (
+          <p className="text-sm text-slate-600 leading-relaxed">{signal.summary}</p>
+        )}
 
         {/* Why it matters callout */}
         {signal.why_it_matters && (
@@ -182,10 +184,12 @@ function formatDate(iso: string): string {
 }
 
 function formatShortDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  }).toUpperCase();
+  return new Date(iso)
+    .toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    })
+    .toUpperCase();
 }
 
 // ---------------------------------------------------------------------------
@@ -209,7 +213,8 @@ export const PREVIEW_SIGNALS: ApiSignal[] = [
     created_at: '2026-05-28T10:14:00Z',
     included_in_digest: false,
     urgent_sent: false,
-    why_it_matters: 'Incoming CFOs from RCM backgrounds re-evaluate vendors in their first 90 days — prime outreach window for Adonis.',
+    why_it_matters:
+      'Incoming CFOs from RCM backgrounds re-evaluate vendors in their first 90 days — prime outreach window for Adonis.',
   },
   {
     id: 'preview-2',
@@ -227,7 +232,8 @@ export const PREVIEW_SIGNALS: ApiSignal[] = [
     created_at: '2026-05-30T15:02:00Z',
     included_in_digest: false,
     urgent_sent: false,
-    why_it_matters: 'Post-Epic-migration is when RCM gaps surface fastest — a 90-day window to evaluate revenue capture tooling.',
+    why_it_matters:
+      'Post-Epic-migration is when RCM gaps surface fastest — a 90-day window to evaluate revenue capture tooling.',
   },
   {
     id: 'preview-3',

@@ -9,12 +9,3 @@ body {
   color: theme('colors.ink');
   font-feature-settings: 'cv11';
 }
-
-.scrollbar-none {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-

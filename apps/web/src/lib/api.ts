@@ -4,7 +4,8 @@
  * Auth: X-User-Id header (Danielle's admin ID hardcoded until T-11 wires real auth)
  */
 
-const BASE_URL = 'https://adonisagents-production.up.railway.app/api/v1';
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'https://adonisagents-production.up.railway.app/api/v1';
 
 // Danielle's admin ID — sees all hospitals and signals.
 // Swapped for the real session user in T-11.
@@ -140,8 +141,10 @@ export async function fetchSignals(
   if (opts.tier) params.set('tier', opts.tier);
   if (opts.ae_id) params.set('ae_id', opts.ae_id);
   if (opts.limit) params.set('limit', String(opts.limit));
+
   const qs = params.size > 0 ? `?${params}` : '';
-  return apiFetch<ApiSignal[]>(`/signals${qs}`, userId);
+  // Force no-cache so we see the new signals immediately
+  return apiFetch<ApiSignal[]>(`/signals${qs}`, userId, { cache: 'no-store' });
 }
 
 export async function fetchHospitalSignals(
