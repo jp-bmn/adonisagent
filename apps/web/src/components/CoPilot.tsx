@@ -166,11 +166,22 @@ export default function CoPilot() {
     function onUp() {
       drag.current.active = false;
     }
+    function onResize() {
+      setPos((prev) => {
+        if (!prev) return defaultPos();
+        return {
+          x: Math.max(0, Math.min(window.innerWidth - BUBBLE_SIZE, prev.x)),
+          y: Math.max(0, Math.min(window.innerHeight - BUBBLE_SIZE, prev.y)),
+        };
+      });
+    }
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
+    window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('resize', onResize);
     };
   }, []);
 
