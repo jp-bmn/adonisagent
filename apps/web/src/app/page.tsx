@@ -1,6 +1,12 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { fetchSignals, fetchHospitals, fetchStatus, SignalType, SIGNAL_TYPE_LABELS } from '@/lib/api';
+import {
+  fetchSignals,
+  fetchHospitals,
+  fetchStatus,
+  SignalType,
+  SIGNAL_TYPE_LABELS,
+} from '@/lib/api';
 import { SignalCard, TerritoryFilter } from '@/components';
 import SignalFilters from '@/components/SignalFilters';
 
@@ -86,7 +92,11 @@ export default async function HomePage({ searchParams }: PageProps) {
 
       <div className="text-xs font-mono uppercase tracking-widest text-slate-500 mb-3">
         {category ? `${category.replace(/_/g, ' ')} signals` : 'Recent signals'} ·{' '}
-        {sort === 'recent' ? 'newest first' : sort === 'hospital' ? 'hospital A–Z' : 'most urgent first'}
+        {sort === 'recent'
+          ? 'newest first'
+          : sort === 'hospital'
+            ? 'hospital A–Z'
+            : 'most urgent first'}
       </div>
 
       {signals.length === 0 ? (
@@ -94,7 +104,8 @@ export default async function HomePage({ searchParams }: PageProps) {
           {category ? (
             <>
               <p className="text-sm font-semibold text-brand">
-                No {SIGNAL_TYPE_LABELS[category as SignalType] ?? category.replace(/_/g, ' ')} signals this week.
+                No {SIGNAL_TYPE_LABELS[category as SignalType] ?? category.replace(/_/g, ' ')}{' '}
+                signals this week.
               </p>
               <p className="text-xs text-slate-400">
                 Try a different category, or check back Monday after the next agent run.
@@ -171,7 +182,7 @@ function formatDate(iso: string): string {
 type DeltaDirection = 'up' | 'down' | 'flat';
 
 const PILL_STYLES: Record<DeltaDirection, { background: string; color: string }> = {
-  up:   { background: '#FCE8E1', color: '#C44A2C' },
+  up: { background: '#FCE8E1', color: '#C44A2C' },
   down: { background: '#DCEBE7', color: '#2D7B6C' },
   flat: { background: '#F0F5F4', color: '#6b7480' },
 };
@@ -193,13 +204,38 @@ function Kpi({
 }) {
   return (
     <div className="bg-white border border-line rounded-xl p-4 relative overflow-hidden">
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: stripeColor }} />
-      <div className={`font-serif text-2xl font-bold ${tone === 'urgent' ? 'text-urgent' : 'text-brand'}`}>
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '3px',
+          background: stripeColor,
+        }}
+      />
+      <div
+        className={`font-serif text-2xl font-bold ${tone === 'urgent' ? 'text-urgent' : 'text-brand'}`}
+      >
         {value}
       </div>
       <div className="text-xs text-slate-500 mt-1">{label}</div>
       {delta != null && deltaDirection && (
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 7px', borderRadius: '10px', fontFamily: 'ui-monospace, monospace', fontSize: '10px', fontWeight: 600, marginTop: '8px', letterSpacing: '0.02em', ...PILL_STYLES[deltaDirection] }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '2px 7px',
+            borderRadius: '10px',
+            fontFamily: 'ui-monospace, monospace',
+            fontSize: '10px',
+            fontWeight: 600,
+            marginTop: '8px',
+            letterSpacing: '0.02em',
+            ...PILL_STYLES[deltaDirection],
+          }}
+        >
           {deltaDirection === 'up' && `↑ ${delta} vs last week`}
           {deltaDirection === 'down' && `↓ ${delta} vs last week`}
           {deltaDirection === 'flat' && 'same as last week'}
