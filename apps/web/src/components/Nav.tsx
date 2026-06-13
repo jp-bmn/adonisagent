@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 const items = [
   { href: '/', label: 'Signal feed', glyph: '▦' },
   { href: '/hospitals', label: 'Hospitals', glyph: '▢' },
-  { href: '/review', label: 'Review queue', glyph: '◈' },
   { href: '/alerts', label: 'Alerts', glyph: '◷' },
   { href: '/export', label: 'Export (CSV)', glyph: '↧' },
 ];
@@ -24,7 +23,7 @@ export default function Nav() {
             href={item.href}
             className={`flex items-center gap-3 px-5 py-2.5 text-sm transition ${
               isActive
-                ? 'bg-cream text-brand font-semibold'
+                ? 'bg-white/10 text-white'
                 : 'text-slate-200 hover:bg-white/5 hover:text-white'
             }`}
           >
