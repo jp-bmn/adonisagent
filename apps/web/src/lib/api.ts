@@ -51,6 +51,7 @@ export interface ApiSignal {
   created_at: string;
   included_in_digest: boolean;
   urgent_sent: boolean;
+  why_it_matters: string | null;
 }
 
 export interface ApiHospital {
@@ -141,10 +142,6 @@ export async function fetchSignals(
   if (opts.ae_id) params.set('ae_id', opts.ae_id);
   if (opts.limit) params.set('limit', String(opts.limit));
 
-  // Temporary workaround: Always include dismissed to ensure we fetch new signals
-  // whose review_status is null (which the current production backend filters out by default).
-  params.set('include_dismissed', 'true');
-
   const qs = params.size > 0 ? `?${params}` : '';
   // Force no-cache so we see the new signals immediately
   return apiFetch<ApiSignal[]>(`/signals${qs}`, userId, { cache: 'no-store' });
@@ -163,4 +160,44 @@ export async function fetchMe(userId: string): Promise<ApiMe> {
 
 export async function fetchStatus(userId?: string): Promise<ApiStatus> {
   return apiFetch<ApiStatus>('/status', userId);
+}
+
+export async function fetchPendingReview(userId?: string): Promise<ApiSignal[]> {
+  return apiFetch<ApiSignal[]>('/signals/pending-review', userId);
+}
+
+export async function reviewSignal(
+  id: string,
+  status: 'approved' | 'dismissed',
+  userId?: string
+): Promise<ApiSignal> {
+  return apiFetch<ApiSignal>(`/signals/${id}/review`, userId, {
+    method: 'POST',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export interface ApiContact {
+  id: string;
+  name: string;
+  title: string | null;
+  email: string | null;
+  linkedin_url: string | null;
+  department: string | null;
+  created_at: string;
+}
+
+export async function fetchHospitalContacts(
+  hospitalId: string,
+  userId?: string
+): Promise<ApiContact[]> {
+  return apiFetch<ApiContact[]>(`/hospitals/${hospitalId}/contacts`, userId);
+}
+
+export async function exportCsv(userId?: string): Promise<Blob> {
+  const res = await fetch(`${BASE_URL}/export/csv`, {
+    headers: { 'X-User-Id': userId ?? DEFAULT_USER_ID },
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: /export/csv`);
+  return res.blob();
 }

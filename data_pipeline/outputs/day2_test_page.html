@@ -1,71 +1,143 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Adonis Day 2 Test Page</title>
-  <style>
-    :root {
-      --bg: #f6f4ef;
-      --ink: #1f1f1f;
-      --muted: #5f5a53;
-      --card: #fffdf8;
-      --line: #ddd4c5;
-      --good: #1f7a4d;
-      --warn: #8b5e00;
-      --bad: #9c2f2f;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
-      color: var(--ink);
-      background: radial-gradient(circle at 20% 0%, #fff6d9 0%, var(--bg) 48%);
-    }
-    .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 40px; }
-    h1 { margin: 0 0 6px; font-size: 1.8rem; }
-    .stamp { color: var(--muted); margin-bottom: 18px; }
-    .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
-    .label { color: var(--muted); font-size: 0.85rem; margin-bottom: 6px; }
-    .value { font-size: 1.4rem; font-weight: 700; }
-    .good { color: var(--good); }
-    .warn { color: var(--warn); }
-    .bad { color: var(--bad); }
-    .panel { margin-top: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-    ul { margin: 8px 0 0 18px; padding: 0; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <h1>Adonis Day 2 Test Page</h1>
-    <div class="stamp">Generated: 2026-06-04T15:56:01.637211+00:00</div>
-    <div class="grid">
-      <section class="card"><div class="label">Signals New</div><div class="value">4</div></section>
-      <section class="card"><div class="label">Signals Skipped</div><div class="value">16</div></section>
-      <section class="card"><div class="label">Rules Hits</div><div class="value">2</div></section>
-      <section class="card"><div class="label">Run Duration (ms)</div><div class="value">3758</div></section>
-      <section class="card"><div class="label">Recommended Leads</div><div class="value good">1</div></section>
-      <section class="card"><div class="label">Rejected Matches</div><div class="value bad">2</div></section>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Adonis Day 2 Test Page</title>
+    <style>
+      :root {
+        --bg: #f6f4ef;
+        --ink: #1f1f1f;
+        --muted: #5f5a53;
+        --card: #fffdf8;
+        --line: #ddd4c5;
+        --good: #1f7a4d;
+        --warn: #8b5e00;
+        --bad: #9c2f2f;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          -apple-system,
+          Segoe UI,
+          Helvetica,
+          Arial,
+          sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at 20% 0%, #fff6d9 0%, var(--bg) 48%);
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 28px 20px 40px;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 1.8rem;
+      }
+      .stamp {
+        color: var(--muted);
+        margin-bottom: 18px;
+      }
+      .grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px;
+      }
+      .label {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+      }
+      .value {
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+      .good {
+        color: var(--good);
+      }
+      .warn {
+        color: var(--warn);
+      }
+      .bad {
+        color: var(--bad);
+      }
+      .panel {
+        margin-top: 14px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px;
+      }
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+      ul {
+        margin: 8px 0 0 18px;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Adonis Day 2 Test Page</h1>
+      <div class="stamp">Generated: 2026-06-04T15:56:01.637211+00:00</div>
+      <div class="grid">
+        <section class="card">
+          <div class="label">Signals New</div>
+          <div class="value">4</div>
+        </section>
+        <section class="card">
+          <div class="label">Signals Skipped</div>
+          <div class="value">16</div>
+        </section>
+        <section class="card">
+          <div class="label">Rules Hits</div>
+          <div class="value">2</div>
+        </section>
+        <section class="card">
+          <div class="label">Run Duration (ms)</div>
+          <div class="value">3758</div>
+        </section>
+        <section class="card">
+          <div class="label">Recommended Leads</div>
+          <div class="value good">1</div>
+        </section>
+        <section class="card">
+          <div class="label">Rejected Matches</div>
+          <div class="value bad">2</div>
+        </section>
+      </div>
+
+      <section class="panel">
+        <div><strong>Delivery Enabled:</strong> <span class="mono">False</span></div>
+        <div><strong>Delivered:</strong> <span class="mono">False</span></div>
+        <div><strong>Lead Count:</strong> <span class="mono">3</span></div>
+        <div>
+          <strong>Bucket Counts:</strong>
+          <span class="mono">high=1, medium=0, low=0, missing=2</span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div><strong>Artifacts</strong></div>
+        <ul>
+          <li class="mono">outputs/day2_contact_leads_review.md</li>
+          <li class="mono">outputs/day2_contact_leads_review.csv</li>
+          <li class="mono">outputs/day2_handoff_summary.md</li>
+          <li class="mono">outputs/day2_status_snapshot.md</li>
+        </ul>
+      </section>
     </div>
-
-    <section class="panel">
-      <div><strong>Delivery Enabled:</strong> <span class="mono">False</span></div>
-      <div><strong>Delivered:</strong> <span class="mono">False</span></div>
-      <div><strong>Lead Count:</strong> <span class="mono">3</span></div>
-      <div><strong>Bucket Counts:</strong> <span class="mono">high=1, medium=0, low=0, missing=2</span></div>
-    </section>
-
-    <section class="panel">
-      <div><strong>Artifacts</strong></div>
-      <ul>
-        <li class="mono">outputs/day2_contact_leads_review.md</li>
-        <li class="mono">outputs/day2_contact_leads_review.csv</li>
-        <li class="mono">outputs/day2_handoff_summary.md</li>
-        <li class="mono">outputs/day2_status_snapshot.md</li>
-      </ul>
-    </section>
-  </div>
-</body>
+  </body>
 </html>

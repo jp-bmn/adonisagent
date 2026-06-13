@@ -1,63 +1,109 @@
 import Link from 'next/link';
-import { SignalCard } from '@/components';
-import { fetchSignals } from '@/lib/api';
+import { Suspense } from 'react';
+import { fetchSignals, fetchHospitals, fetchStatus } from '@/lib/api';
+import { SignalCard, TerritoryFilter } from '@/components';
 
-// Hospital name lookup using real backend UUIDs
-const HOSPITAL_NAMES: Record<string, string> = {
-  'f0f6b915-3e9d-4040-ba4d-c89339a1e134': 'NewYork-Presbyterian',
-  'f3ab9c05-4b2b-42e9-9653-2e9dc8f98476': 'UMass Memorial',
-  'a4725891-7354-4187-a6c1-93d7ea9a078f': 'Ascension',
-  '3aebd89a-1d2c-465c-a22b-08ced9613027': 'UAMS',
-  '7b836e62-3ee8-4d10-b30e-028734a5f812': 'CommonSpirit',
-};
+interface PageProps {
+  searchParams: Promise<{ ae_id?: string }>;
+}
 
-export default async function HomePage() {
-  const signals = await fetchSignals();
+export default async function HomePage({ searchParams }: PageProps) {
+  const { ae_id } = await searchParams;
+  const [signals, hospitals, status] = await Promise.all([
+    fetchSignals(undefined, { ae_id }),
+    fetchHospitals(),
+    fetchStatus(),
+  ]);
+
+  const hospitalMap = Object.fromEntries(hospitals.map((h) => [h.id, h.name]));
   const urgentCount = signals.filter((s) => s.tier === 'urgent').length;
-  const standardCount = signals.filter((s) => s.tier === 'worth_knowing').length;
+  const worthKnowingCount = signals.filter((s) => s.tier === 'worth_knowing').length;
+
+  const aeMap = new Map<string, string>();
+  hospitals.forEach((h) =>
+    h.ae_users.forEach((u) => {
+      if (!u.is_admin) aeMap.set(u.id, u.name);
+    })
+  );
+  const aes = Array.from(aeMap.entries()).map(([id, name]) => ({ id, name }));
 
   return (
-    <div className="px-8 py-7">
+    <div className="px-4 py-5 md:px-8 md:py-7 pb-20 md:pb-7">
       <header className="flex items-end justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="font-serif text-2xl font-semibold text-ink">Signal Feed</h1>
+          <h1 className="font-serif text-2xl font-semibold text-brand">Signal Feed</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Last refreshed — placeholder · agents run Mon/Wed/Fri
+            Live · agents run Mon/Wed/Fri · {signals.length} signals
           </p>
         </div>
-        <div className="bg-white border border-line rounded-lg px-3 py-1.5 text-xs font-mono text-slate-600">
-          Territory: <strong className="text-ink">Admin (Danielle)</strong> · 5 accounts
-        </div>
+        <Suspense>
+          <TerritoryFilter aes={aes} />
+        </Suspense>
       </header>
 
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <Kpi value={urgentCount} label="Urgent this week" tone="urgent" />
-        <Kpi value={standardCount} label="Updates this week" />
-        <Kpi value={5} label="Accounts monitored" />
-        <Kpi value="0" label="Sources scanned" />
+        <Kpi value={worthKnowingCount} label="Updates this week" />
+        <Kpi value={hospitals.length} label="Accounts monitored" />
+        <Kpi value={signals.length} label="Signals total" />
       </div>
 
       <div className="text-xs font-mono uppercase tracking-widest text-slate-500 mb-3">
         Recent signals · newest first
       </div>
 
-      <div className="space-y-3">
-        {signals.map((signal) => (
-          <SignalCard
-            key={signal.id}
-            signal={signal}
-            hospitalName={HOSPITAL_NAMES[signal.hospital_id]}
-          />
-        ))}
-      </div>
+      {signals.length === 0 ? (
+        <div className="bg-white border border-line rounded-xl p-10 text-center text-sm text-slate-500">
+          No signals yet — agents will populate this on the next scheduled run.
+        </div>
+      ) : (
+        <div className="space-y-5">
+          {signals.map((signal) => (
+            <SignalCard
+              key={signal.id}
+              signal={signal}
+              hospitalName={hospitalMap[signal.hospital_id]}
+            />
+          ))}
+        </div>
+      )}
 
-      <div className="mt-8 text-xs text-slate-500">
-        <Link href="/hospitals" className="text-accent hover:underline">
+      <footer className="mt-8 pt-5 border-t border-line flex items-center justify-between flex-wrap gap-4">
+        <Link href="/hospitals" className="text-xs text-accent hover:underline">
           View all hospitals →
         </Link>
-      </div>
+
+        <div className="flex items-center gap-5 text-xs font-mono text-slate-400 flex-wrap">
+          {status.pending_review_count > 0 && (
+            <Link href="/review" className="text-urgent font-semibold hover:underline">
+              {status.pending_review_count} pending review
+            </Link>
+          )}
+          <span>
+            <span className="text-slate-500">last run:</span>{' '}
+            {status.last_scraper_run ? formatDate(status.last_scraper_run) : 'never'}
+          </span>
+          <span>
+            <span className="text-slate-500">next run:</span>{' '}
+            {status.next_scraper_run ? formatDate(status.next_scraper_run) : 'scheduled'}
+          </span>
+          <span>
+            <span className="text-slate-500">stored:</span> {status.total_signals_stored}
+          </span>
+          <span className="text-slate-300">v{status.api_version}</span>
+        </div>
+      </footer>
     </div>
   );
+}
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 }
 
 function Kpi({ value, label, tone }: { value: string | number; label: string; tone?: 'urgent' }) {
@@ -65,7 +111,7 @@ function Kpi({ value, label, tone }: { value: string | number; label: string; to
     <div className="bg-white border border-line rounded-xl p-4">
       <div
         className={`font-serif text-2xl font-bold ${
-          tone === 'urgent' ? 'text-urgent' : 'text-navy-900'
+          tone === 'urgent' ? 'text-urgent' : 'text-brand'
         }`}
       >
         {value}

@@ -1,507 +1,877 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Adonis Intel — Sales Feed</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --ad-bg: #0D1117;
-    --ad-surface: #161C26;
-    --ad-surface2: #1E2633;
-    --ad-border: rgba(255,255,255,0.08);
-    --ad-border2: rgba(255,255,255,0.13);
-    --ad-green: #00C48C;
-    --ad-green-dim: rgba(0,196,140,0.10);
-    --ad-green-border: rgba(0,196,140,0.20);
-    --ad-text: #F0F4F8;
-    --ad-muted: #8896A8;
-    --ad-subtle: #BCC8D4;
-    --ad-danger: #FF5C5C;
-    --ad-danger-bg: rgba(255,92,92,0.10);
-    --ad-warn: #F5A623;
-    --ad-warn-bg: rgba(245,166,35,0.10);
-  }
-
-  html, body { height: 100%; background: var(--ad-bg); font-family: 'Inter', sans-serif; color: var(--ad-text); font-size: 13px; }
-
-  /* ── LAYOUT ── */
-  .app { display: flex; flex-direction: column; height: 100vh; }
-
-  .topbar {
-    display: flex; align-items: center; gap: 14px;
-    padding: 0 20px; height: 48px; flex-shrink: 0;
-    background: var(--ad-surface);
-    border-bottom: 1px solid var(--ad-border);
-  }
-  .logo { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; color: var(--ad-green); }
-  .logo-sep { color: var(--ad-border2); margin: 0 2px; }
-  .logo-sub { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--ad-muted); }
-  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-  .tb-btn {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 11px; font-weight: 500; padding: 5px 11px;
-    border-radius: 6px; border: 1px solid var(--ad-border2);
-    background: transparent; cursor: pointer; color: var(--ad-muted);
-    font-family: inherit; transition: border-color 0.15s, color 0.15s;
-  }
-  .tb-btn:hover { border-color: var(--ad-green); color: var(--ad-green); }
-  .avatar {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: var(--ad-green-dim); border: 1px solid var(--ad-green);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 700; color: var(--ad-green); flex-shrink: 0;
-    letter-spacing: 0.04em;
-  }
-
-  .body { display: flex; flex: 1; overflow: hidden; }
-
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: 196px; flex-shrink: 0;
-    border-right: 1px solid var(--ad-border);
-    background: var(--ad-surface);
-    overflow-y: auto; padding: 16px 0;
-  }
-  .sb-section { padding: 0 12px; margin-bottom: 22px; }
-  .sb-label {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.09em; color: var(--ad-muted);
-    margin-bottom: 8px; padding: 0 6px;
-  }
-  .sb-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 6px 8px; border-radius: 6px; cursor: pointer;
-    font-size: 12px; font-weight: 400; color: var(--ad-muted);
-    border: 1px solid transparent;
-    transition: background 0.12s, color 0.12s, border-color 0.12s;
-    user-select: none;
-  }
-  .sb-item:hover { background: var(--ad-surface2); color: var(--ad-text); }
-  .sb-item.active {
-    background: var(--ad-green-dim); color: var(--ad-green);
-    border-color: var(--ad-green-border); font-weight: 500;
-  }
-  .sb-item i { font-size: 14px; flex-shrink: 0; }
-  .sb-badge {
-    margin-left: auto; font-size: 10px; font-weight: 700;
-    padding: 1px 6px; border-radius: 20px; letter-spacing: 0.02em;
-  }
-  .sb-badge-danger { background: var(--ad-danger-bg); color: var(--ad-danger); }
-  .sb-badge-muted { background: rgba(255,255,255,0.06); color: var(--ad-muted); }
-  .hosp-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-
-  /* ── MAIN ── */
-  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-  .main-header {
-    padding: 14px 20px 12px;
-    background: var(--ad-surface);
-    border-bottom: 1px solid var(--ad-border);
-    flex-shrink: 0;
-  }
-  .main-title { font-size: 15px; font-weight: 600; color: var(--ad-text); margin-bottom: 3px; }
-  .main-sub { font-size: 12px; color: var(--ad-muted); }
-  .main-sub strong { color: var(--ad-danger); font-weight: 600; }
-
-  .filter-row {
-    display: flex; align-items: center; gap: 7px;
-    padding: 9px 20px; background: var(--ad-surface);
-    border-bottom: 1px solid var(--ad-border);
-    flex-shrink: 0; flex-wrap: wrap;
-  }
-  .filter-btn {
-    font-size: 11px; font-weight: 500; padding: 4px 11px;
-    border-radius: 20px; border: 1px solid var(--ad-border2);
-    background: transparent; cursor: pointer; color: var(--ad-muted);
-    font-family: inherit; display: flex; align-items: center; gap: 4px;
-    transition: all 0.12s;
-  }
-  .filter-btn:hover { color: var(--ad-text); border-color: var(--ad-border2); }
-  .filter-btn.on { background: var(--ad-surface2); color: var(--ad-text); border-color: var(--ad-border2); }
-  .filter-btn.on.danger { background: var(--ad-danger-bg); color: var(--ad-danger); border-color: rgba(255,92,92,0.28); }
-  .filter-btn.on.warn { background: var(--ad-warn-bg); color: var(--ad-warn); border-color: rgba(245,166,35,0.28); }
-  .filter-sep { width: 1px; height: 14px; background: var(--ad-border2); margin: 0 2px; flex-shrink: 0; }
-
-  /* ── FEED ── */
-  .feed { flex: 1; overflow-y: auto; padding: 14px 20px; display: flex; flex-direction: column; gap: 10px; }
-  .feed::-webkit-scrollbar { width: 4px; }
-  .feed::-webkit-scrollbar-track { background: transparent; }
-  .feed::-webkit-scrollbar-thumb { background: var(--ad-surface2); border-radius: 2px; }
-
-  .section-label {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.08em; color: var(--ad-muted); padding: 2px 0 2px;
-  }
-  .section-label + .section-label { margin-top: 4px; }
-
-  .card {
-    background: var(--ad-surface); border: 1px solid var(--ad-border);
-    border-radius: 10px; padding: 13px 15px; cursor: pointer;
-    transition: border-color 0.15s;
-  }
-  .card:hover { border-color: var(--ad-border2); }
-  .card.urgent { border-left: 2px solid var(--ad-danger); border-radius: 0 10px 10px 0; }
-
-  .card-top { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; flex-wrap: wrap; }
-  .hosp-name { font-size: 13px; font-weight: 600; color: var(--ad-text); }
-  .badge {
-    display: inline-block; font-size: 10px; font-weight: 600;
-    padding: 2px 7px; border-radius: 20px; letter-spacing: 0.02em; flex-shrink: 0;
-  }
-  .badge-danger { background: var(--ad-danger-bg); color: var(--ad-danger); }
-  .badge-warn   { background: var(--ad-warn-bg); color: var(--ad-warn); }
-  .badge-muted  { background: rgba(255,255,255,0.06); color: var(--ad-muted); }
-  .badge-type   { background: var(--ad-green-dim); color: var(--ad-green); }
-  .card-time { margin-left: auto; font-size: 11px; color: var(--ad-muted); flex-shrink: 0; }
-
-  .card-summary { font-size: 12px; color: var(--ad-subtle); line-height: 1.6; margin-bottom: 7px; }
-  .card-why {
-    font-size: 11px; font-weight: 500; line-height: 1.55; margin-bottom: 10px;
-    padding: 6px 10px; background: var(--ad-green-dim);
-    border-left: 2px solid var(--ad-green);
-    border-radius: 0 5px 5px 0; color: var(--ad-green);
-  }
-  .card-footer { display: flex; align-items: center; justify-content: space-between; }
-  .card-meta { font-size: 11px; color: var(--ad-muted); display: flex; align-items: center; gap: 10px; }
-  .card-meta i { font-size: 11px; vertical-align: -1px; margin-right: 2px; }
-  .card-actions { display: flex; gap: 5px; }
-  .act-icon {
-    display: flex; align-items: center; justify-content: center;
-    width: 26px; height: 26px; border-radius: 6px;
-    border: 1px solid var(--ad-border2); background: transparent;
-    cursor: pointer; color: var(--ad-muted); transition: all 0.12s;
-    font-size: 13px;
-  }
-  .act-icon:hover { border-color: var(--ad-green); color: var(--ad-green); }
-
-  /* ── CONNECTIONS CARD ── */
-  .conn-card {
-    background: var(--ad-surface); border: 1px solid var(--ad-border);
-    border-radius: 10px; padding: 13px 15px;
-  }
-  .conn-label {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.08em; color: var(--ad-muted); margin-bottom: 10px;
-  }
-  .conn-row {
-    display: flex; align-items: flex-start; gap: 10px;
-    padding: 8px 0; border-bottom: 1px solid var(--ad-border);
-  }
-  .conn-row:last-child { border-bottom: none; padding-bottom: 0; }
-  .conn-av-group { display: flex; flex-shrink: 0; }
-  .conn-av {
-    width: 28px; height: 28px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 9px; font-weight: 700; flex-shrink: 0;
-    border: 2px solid var(--ad-surface);
-  }
-  .conn-text { font-size: 12px; color: var(--ad-muted); line-height: 1.5; }
-  .conn-text strong { color: var(--ad-text); font-weight: 500; }
-
-  /* ── EMPTY STATE ── */
-  .empty-state {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; padding: 48px 24px;
-    color: var(--ad-muted); text-align: center; gap: 8px;
-  }
-  .empty-state i { font-size: 28px; opacity: 0.4; }
-  .empty-state p { font-size: 12px; }
-</style>
-</head>
-<body>
-
-<div class="app">
-
-  <!-- Top bar -->
-  <div class="topbar">
-    <span class="logo">ADONIS<span class="logo-sep"> · </span><span class="logo-sub">INTEL</span></span>
-    <div class="topbar-right">
-      <button class="tb-btn"><i class="ti ti-bell" style="font-size:13px"></i> Alerts</button>
-      <button class="tb-btn"><i class="ti ti-settings" style="font-size:13px"></i> Preferences</button>
-      <div class="avatar">DF</div>
-    </div>
-  </div>
-
-  <div class="body">
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="sb-section">
-        <div class="sb-label">Views</div>
-        <div class="sb-item active" onclick="setView('all',this)">
-          <i class="ti ti-layout-list"></i> All signals
-          <span class="sb-badge sb-badge-danger">7</span>
-        </div>
-        <div class="sb-item" onclick="setView('urgent',this)">
-          <i class="ti ti-alert-circle"></i> Urgent
-          <span class="sb-badge sb-badge-danger">2</span>
-        </div>
-        <div class="sb-item" onclick="setView('connections',this)">
-          <i class="ti ti-network"></i> Connections
-          <span class="sb-badge sb-badge-muted">1</span>
-        </div>
-      </div>
-
-      <div class="sb-section">
-        <div class="sb-label">My accounts</div>
-        <div class="sb-item active" onclick="filterHosp('all',this)">
-          <i class="ti ti-building-hospital"></i> All accounts
-        </div>
-        <div class="sb-item" onclick="filterHosp('nyp',this)">
-          <span class="hosp-dot" style="background:#378ADD"></span> NY Presbyterian
-        </div>
-        <div class="sb-item" onclick="filterHosp('umass',this)">
-          <span class="hosp-dot" style="background:#00C48C"></span> UMass Memorial
-        </div>
-        <div class="sb-item" onclick="filterHosp('ascension',this)">
-          <span class="hosp-dot" style="background:#D85A30"></span> Ascension
-        </div>
-        <div class="sb-item" onclick="filterHosp('uams',this)">
-          <span class="hosp-dot" style="background:#F5A623"></span> Univ. of Arkansas
-        </div>
-      </div>
-
-      <div class="sb-section">
-        <div class="sb-label">Signal type</div>
-        <div class="sb-item" onclick="filterType('executive',this)">
-          <i class="ti ti-user-check"></i> Executive
-        </div>
-        <div class="sb-item" onclick="filterType('ma',this)">
-          <i class="ti ti-arrows-join"></i> M&A
-        </div>
-        <div class="sb-item" onclick="filterType('financial',this)">
-          <i class="ti ti-chart-bar"></i> Financial
-        </div>
-        <div class="sb-item" onclick="filterType('regulatory',this)">
-          <i class="ti ti-scale"></i> Regulatory
-        </div>
-        <div class="sb-item" onclick="filterType('strategy',this)">
-          <i class="ti ti-target"></i> Strategy
-        </div>
-      </div>
-    </div>
-
-    <!-- Main content -->
-    <div class="main">
-      <div class="main-header">
-        <div class="main-title">My intel feed</div>
-        <div class="main-sub">Week of May 11 &nbsp;·&nbsp; 4 accounts &nbsp;·&nbsp; <strong>2 urgent signals</strong></div>
-      </div>
-
-      <div class="filter-row">
-        <button class="filter-btn on danger" onclick="toggleFilter(this,'high')">
-          <i class="ti ti-alert-circle" style="font-size:11px"></i> Urgent
-        </button>
-        <button class="filter-btn on warn" onclick="toggleFilter(this,'medium')">Medium</button>
-        <button class="filter-btn on" onclick="toggleFilter(this,'low')">Low</button>
-        <div class="filter-sep"></div>
-        <button class="filter-btn on" onclick="toggleFilter(this,'unread')">Unread</button>
-        <button class="filter-btn" onclick="toggleFilter(this,'saved')">
-          <i class="ti ti-bookmark" style="font-size:11px"></i> Saved
-        </button>
-      </div>
-
-      <div class="feed" id="feed">
-
-        <div class="section-label" id="lbl-urgent">Urgent — act now</div>
-
-        <div class="card urgent" data-urgency="high" data-hosp="nyp" data-type="executive">
-          <div class="card-top">
-            <span class="hosp-dot" style="background:#378ADD"></span>
-            <span class="hosp-name">NY Presbyterian</span>
-            <span class="badge badge-danger">Urgent</span>
-            <span class="badge badge-type">Executive change</span>
-            <span class="card-time">2 days ago</span>
-          </div>
-          <p class="card-summary">Sarah Chen named CFO, replacing David Ortiz who departed after 5 years. Chen joins from Northwell Health where she led revenue cycle transformation. Effective March 1.</p>
-          <p class="card-why">Incoming CFOs from RCM backgrounds re-evaluate vendors in their first 90 days — prime outreach window for Adonis.</p>
-          <div class="card-footer">
-            <div class="card-meta">
-              <span><i class="ti ti-user"></i>Sarah Chen, CFO</span>
-              <span>Becker's</span>
-            </div>
-            <div class="card-actions">
-              <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button>
-              <button class="act-icon" title="Open article"><i class="ti ti-external-link"></i></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card urgent" data-urgency="high" data-hosp="ascension" data-type="ma">
-          <div class="card-top">
-            <span class="hosp-dot" style="background:#D85A30"></span>
-            <span class="hosp-name">Ascension</span>
-            <span class="badge badge-danger">Urgent</span>
-            <span class="badge badge-type">M&amp;A</span>
-            <span class="card-time">3 days ago</span>
-          </div>
-          <p class="card-summary">Ascension acquiring 3 Mercy Health Midwest facilities (~1,200 beds). Integration expected over 18 months.</p>
-          <p class="card-why">System integrations surface revenue cycle gaps — strong opener during the integration window.</p>
-          <div class="card-footer">
-            <div class="card-meta"><span>Google News</span></div>
-            <div class="card-actions">
-              <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button>
-              <button class="act-icon" title="Open article"><i class="ti ti-external-link"></i></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="section-label" id="lbl-week">This week</div>
-
-        <div class="card" data-urgency="medium" data-hosp="umass" data-type="financial">
-          <div class="card-top">
-            <span class="hosp-dot" style="background:#00C48C"></span>
-            <span class="hosp-name">UMass Memorial</span>
-            <span class="badge badge-warn">Medium</span>
-            <span class="badge badge-type">Financial</span>
-            <span class="card-time">4 days ago</span>
-          </div>
-          <p class="card-summary">$34M Q1 operating loss — leadership cited adverse payer mix and increased prior auth denials from commercial insurers.</p>
-          <p class="card-why">Prior auth denials explicitly named — direct pain point Adonis addresses. Reference this in outreach.</p>
-          <div class="card-footer">
-            <div class="card-meta"><span>Becker's</span></div>
-            <div class="card-actions">
-              <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button>
-              <button class="act-icon" title="Open article"><i class="ti ti-external-link"></i></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" data-urgency="medium" data-hosp="uams" data-type="strategy">
-          <div class="card-top">
-            <span class="hosp-dot" style="background:#F5A623"></span>
-            <span class="hosp-name">University of Arkansas</span>
-            <span class="badge badge-warn">Medium</span>
-            <span class="badge badge-type">Strategy</span>
-            <span class="card-time">5 days ago</span>
-          </div>
-          <p class="card-summary">CEO Dr. Cam Patterson named revenue cycle automation as a 2025 strategic priority in Q1 earnings call, citing admin burden on clinical staff.</p>
-          <p class="card-why">Public CEO commitment to RCM automation signals organizational readiness — schedule a call.</p>
-          <div class="card-footer">
-            <div class="card-meta">
-              <span><i class="ti ti-user"></i>Dr. Cam Patterson, CEO</span>
-              <span>News API</span>
-            </div>
-            <div class="card-actions">
-              <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button>
-              <button class="act-icon" title="Open article"><i class="ti ti-external-link"></i></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" data-urgency="low" data-hosp="nyp" data-type="regulatory">
-          <div class="card-top">
-            <span class="hosp-dot" style="background:#378ADD"></span>
-            <span class="hosp-name">NY Presbyterian</span>
-            <span class="badge badge-muted">Low</span>
-            <span class="badge badge-type">Regulatory</span>
-            <span class="card-time">6 days ago</span>
-          </div>
-          <p class="card-summary">CMS proposed new prior auth transparency rules for Medicare Advantage — expected to increase denial documentation burden for large academic centers.</p>
-          <p class="card-why">Regulatory pressure on prior auth creates near-term complexity — useful context for an executive conversation.</p>
-          <div class="card-footer">
-            <div class="card-meta"><span>Google News</span></div>
-            <div class="card-actions">
-              <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button>
-              <button class="act-icon" title="Open article"><i class="ti ti-external-link"></i></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="section-label" id="lbl-conn">Connections</div>
-
-        <div class="conn-card" id="conn-card">
-          <div class="conn-label">Warm paths this week</div>
-          <div class="conn-row">
-            <div class="conn-av-group">
-              <div class="conn-av" style="background:rgba(0,196,140,0.15);color:#00C48C">MW</div>
-              <div class="conn-av" style="background:rgba(55,138,221,0.15);color:#378ADD;margin-left:-8px">SC</div>
-            </div>
-            <p class="conn-text"><strong>Marcus Webb</strong> (Adonis AE) and <strong>Sarah Chen</strong> (NYP, new CFO) both attended Wharton MBA '14. Consider asking Marcus for a warm intro before the 90-day window closes.</p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  var activeFilters = { high: true, medium: true, low: true, unread: true, saved: false };
-  var activeHosp = 'all';
-  var activeType = 'all';
-  var activeView = 'all';
-
-  function applyFilters() {
-    document.querySelectorAll('.card[data-urgency]').forEach(function(c) {
-      var u = c.getAttribute('data-urgency');
-      var h = c.getAttribute('data-hosp');
-      var t = c.getAttribute('data-type');
-      var show = true;
-      if (!activeFilters[u]) show = false;
-      if (activeHosp !== 'all' && h !== activeHosp) show = false;
-      if (activeType !== 'all' && t !== activeType) show = false;
-      if (activeView === 'urgent' && u !== 'high') show = false;
-      c.style.display = show ? '' : 'none';
-    });
-
-    var cc = document.getElementById('conn-card');
-    var lc = document.getElementById('lbl-conn');
-    var showConn = (activeView === 'connections' || activeView === 'all');
-    if (cc) cc.style.display = showConn ? '' : 'none';
-    if (lc) lc.style.display = showConn ? '' : 'none';
-
-    ['lbl-urgent', 'lbl-week'].forEach(function(id) {
-      var lbl = document.getElementById(id);
-      if (!lbl) return;
-      var next = lbl.nextElementSibling;
-      var visible = false;
-      while (next && next.tagName !== 'DIV' || (next && !next.classList.contains('section-label') && !next.id.startsWith('lbl'))) {
-        if (next && next.getAttribute && next.getAttribute('data-urgency') && next.style.display !== 'none') visible = true;
-        if (!next || next.classList.contains('section-label') || (next.id && next.id.startsWith('lbl'))) break;
-        next = next.nextElementSibling;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adonis Intel — Sales Feed</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
-      lbl.style.display = visible ? '' : 'none';
-    });
-  }
 
-  function toggleFilter(btn, key) {
-    activeFilters[key] = !activeFilters[key];
-    btn.classList.toggle('on', activeFilters[key]);
-    applyFilters();
-  }
+      :root {
+        --ad-bg: #0d1117;
+        --ad-surface: #161c26;
+        --ad-surface2: #1e2633;
+        --ad-border: rgba(255, 255, 255, 0.08);
+        --ad-border2: rgba(255, 255, 255, 0.13);
+        --ad-green: #00c48c;
+        --ad-green-dim: rgba(0, 196, 140, 0.1);
+        --ad-green-border: rgba(0, 196, 140, 0.2);
+        --ad-text: #f0f4f8;
+        --ad-muted: #8896a8;
+        --ad-subtle: #bcc8d4;
+        --ad-danger: #ff5c5c;
+        --ad-danger-bg: rgba(255, 92, 92, 0.1);
+        --ad-warn: #f5a623;
+        --ad-warn-bg: rgba(245, 166, 35, 0.1);
+      }
 
-  function filterHosp(hosp, el) {
-    activeHosp = hosp;
-    document.querySelectorAll('.sb-item[onclick*="filterHosp"]').forEach(function(i) { i.classList.remove('active'); });
-    el.classList.add('active');
-    applyFilters();
-  }
+      html,
+      body {
+        height: 100%;
+        background: var(--ad-bg);
+        font-family: 'Inter', sans-serif;
+        color: var(--ad-text);
+        font-size: 13px;
+      }
 
-  function filterType(type, el) {
-    if (activeType === type) {
-      activeType = 'all';
-      el.classList.remove('active');
-    } else {
-      activeType = type;
-      document.querySelectorAll('.sb-item[onclick*="filterType"]').forEach(function(i) { i.classList.remove('active'); });
-      el.classList.add('active');
-    }
-    applyFilters();
-  }
+      /* ── LAYOUT ── */
+      .app {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
 
-  function setView(view, el) {
-    activeView = view;
-    document.querySelectorAll('.sb-item[onclick*="setView"]').forEach(function(i) { i.classList.remove('active'); });
-    el.classList.add('active');
-    applyFilters();
-  }
-</script>
-</body>
+      .topbar {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 0 20px;
+        height: 48px;
+        flex-shrink: 0;
+        background: var(--ad-surface);
+        border-bottom: 1px solid var(--ad-border);
+      }
+      .logo {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: var(--ad-green);
+      }
+      .logo-sep {
+        color: var(--ad-border2);
+        margin: 0 2px;
+      }
+      .logo-sub {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        color: var(--ad-muted);
+      }
+      .topbar-right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .tb-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 5px 11px;
+        border-radius: 6px;
+        border: 1px solid var(--ad-border2);
+        background: transparent;
+        cursor: pointer;
+        color: var(--ad-muted);
+        font-family: inherit;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
+      }
+      .tb-btn:hover {
+        border-color: var(--ad-green);
+        color: var(--ad-green);
+      }
+      .avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--ad-green-dim);
+        border: 1px solid var(--ad-green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--ad-green);
+        flex-shrink: 0;
+        letter-spacing: 0.04em;
+      }
+
+      .body {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* ── SIDEBAR ── */
+      .sidebar {
+        width: 196px;
+        flex-shrink: 0;
+        border-right: 1px solid var(--ad-border);
+        background: var(--ad-surface);
+        overflow-y: auto;
+        padding: 16px 0;
+      }
+      .sb-section {
+        padding: 0 12px;
+        margin-bottom: 22px;
+      }
+      .sb-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: var(--ad-muted);
+        margin-bottom: 8px;
+        padding: 0 6px;
+      }
+      .sb-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--ad-muted);
+        border: 1px solid transparent;
+        transition:
+          background 0.12s,
+          color 0.12s,
+          border-color 0.12s;
+        user-select: none;
+      }
+      .sb-item:hover {
+        background: var(--ad-surface2);
+        color: var(--ad-text);
+      }
+      .sb-item.active {
+        background: var(--ad-green-dim);
+        color: var(--ad-green);
+        border-color: var(--ad-green-border);
+        font-weight: 500;
+      }
+      .sb-item i {
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+      .sb-badge {
+        margin-left: auto;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 20px;
+        letter-spacing: 0.02em;
+      }
+      .sb-badge-danger {
+        background: var(--ad-danger-bg);
+        color: var(--ad-danger);
+      }
+      .sb-badge-muted {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--ad-muted);
+      }
+      .hosp-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      /* ── MAIN ── */
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .main-header {
+        padding: 14px 20px 12px;
+        background: var(--ad-surface);
+        border-bottom: 1px solid var(--ad-border);
+        flex-shrink: 0;
+      }
+      .main-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--ad-text);
+        margin-bottom: 3px;
+      }
+      .main-sub {
+        font-size: 12px;
+        color: var(--ad-muted);
+      }
+      .main-sub strong {
+        color: var(--ad-danger);
+        font-weight: 600;
+      }
+
+      .filter-row {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 20px;
+        background: var(--ad-surface);
+        border-bottom: 1px solid var(--ad-border);
+        flex-shrink: 0;
+        flex-wrap: wrap;
+      }
+      .filter-btn {
+        font-size: 11px;
+        font-weight: 500;
+        padding: 4px 11px;
+        border-radius: 20px;
+        border: 1px solid var(--ad-border2);
+        background: transparent;
+        cursor: pointer;
+        color: var(--ad-muted);
+        font-family: inherit;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.12s;
+      }
+      .filter-btn:hover {
+        color: var(--ad-text);
+        border-color: var(--ad-border2);
+      }
+      .filter-btn.on {
+        background: var(--ad-surface2);
+        color: var(--ad-text);
+        border-color: var(--ad-border2);
+      }
+      .filter-btn.on.danger {
+        background: var(--ad-danger-bg);
+        color: var(--ad-danger);
+        border-color: rgba(255, 92, 92, 0.28);
+      }
+      .filter-btn.on.warn {
+        background: var(--ad-warn-bg);
+        color: var(--ad-warn);
+        border-color: rgba(245, 166, 35, 0.28);
+      }
+      .filter-sep {
+        width: 1px;
+        height: 14px;
+        background: var(--ad-border2);
+        margin: 0 2px;
+        flex-shrink: 0;
+      }
+
+      /* ── FEED ── */
+      .feed {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .feed::-webkit-scrollbar {
+        width: 4px;
+      }
+      .feed::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .feed::-webkit-scrollbar-thumb {
+        background: var(--ad-surface2);
+        border-radius: 2px;
+      }
+
+      .section-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--ad-muted);
+        padding: 2px 0 2px;
+      }
+      .section-label + .section-label {
+        margin-top: 4px;
+      }
+
+      .card {
+        background: var(--ad-surface);
+        border: 1px solid var(--ad-border);
+        border-radius: 10px;
+        padding: 13px 15px;
+        cursor: pointer;
+        transition: border-color 0.15s;
+      }
+      .card:hover {
+        border-color: var(--ad-border2);
+      }
+      .card.urgent {
+        border-left: 2px solid var(--ad-danger);
+        border-radius: 0 10px 10px 0;
+      }
+
+      .card-top {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 9px;
+        flex-wrap: wrap;
+      }
+      .hosp-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ad-text);
+      }
+      .badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 20px;
+        letter-spacing: 0.02em;
+        flex-shrink: 0;
+      }
+      .badge-danger {
+        background: var(--ad-danger-bg);
+        color: var(--ad-danger);
+      }
+      .badge-warn {
+        background: var(--ad-warn-bg);
+        color: var(--ad-warn);
+      }
+      .badge-muted {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--ad-muted);
+      }
+      .badge-type {
+        background: var(--ad-green-dim);
+        color: var(--ad-green);
+      }
+      .card-time {
+        margin-left: auto;
+        font-size: 11px;
+        color: var(--ad-muted);
+        flex-shrink: 0;
+      }
+
+      .card-summary {
+        font-size: 12px;
+        color: var(--ad-subtle);
+        line-height: 1.6;
+        margin-bottom: 7px;
+      }
+      .card-why {
+        font-size: 11px;
+        font-weight: 500;
+        line-height: 1.55;
+        margin-bottom: 10px;
+        padding: 6px 10px;
+        background: var(--ad-green-dim);
+        border-left: 2px solid var(--ad-green);
+        border-radius: 0 5px 5px 0;
+        color: var(--ad-green);
+      }
+      .card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .card-meta {
+        font-size: 11px;
+        color: var(--ad-muted);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .card-meta i {
+        font-size: 11px;
+        vertical-align: -1px;
+        margin-right: 2px;
+      }
+      .card-actions {
+        display: flex;
+        gap: 5px;
+      }
+      .act-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        border: 1px solid var(--ad-border2);
+        background: transparent;
+        cursor: pointer;
+        color: var(--ad-muted);
+        transition: all 0.12s;
+        font-size: 13px;
+      }
+      .act-icon:hover {
+        border-color: var(--ad-green);
+        color: var(--ad-green);
+      }
+
+      /* ── CONNECTIONS CARD ── */
+      .conn-card {
+        background: var(--ad-surface);
+        border: 1px solid var(--ad-border);
+        border-radius: 10px;
+        padding: 13px 15px;
+      }
+      .conn-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--ad-muted);
+        margin-bottom: 10px;
+      }
+      .conn-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--ad-border);
+      }
+      .conn-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      .conn-av-group {
+        display: flex;
+        flex-shrink: 0;
+      }
+      .conn-av {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        font-weight: 700;
+        flex-shrink: 0;
+        border: 2px solid var(--ad-surface);
+      }
+      .conn-text {
+        font-size: 12px;
+        color: var(--ad-muted);
+        line-height: 1.5;
+      }
+      .conn-text strong {
+        color: var(--ad-text);
+        font-weight: 500;
+      }
+
+      /* ── EMPTY STATE ── */
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 24px;
+        color: var(--ad-muted);
+        text-align: center;
+        gap: 8px;
+      }
+      .empty-state i {
+        font-size: 28px;
+        opacity: 0.4;
+      }
+      .empty-state p {
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <!-- Top bar -->
+      <div class="topbar">
+        <span class="logo"
+          >ADONIS<span class="logo-sep"> · </span><span class="logo-sub">INTEL</span></span
+        >
+        <div class="topbar-right">
+          <button class="tb-btn"><i class="ti ti-bell" style="font-size: 13px"></i> Alerts</button>
+          <button class="tb-btn">
+            <i class="ti ti-settings" style="font-size: 13px"></i> Preferences
+          </button>
+          <div class="avatar">DF</div>
+        </div>
+      </div>
+
+      <div class="body">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <div class="sb-section">
+            <div class="sb-label">Views</div>
+            <div class="sb-item active" onclick="setView('all', this)">
+              <i class="ti ti-layout-list"></i> All signals
+              <span class="sb-badge sb-badge-danger">7</span>
+            </div>
+            <div class="sb-item" onclick="setView('urgent', this)">
+              <i class="ti ti-alert-circle"></i> Urgent
+              <span class="sb-badge sb-badge-danger">2</span>
+            </div>
+            <div class="sb-item" onclick="setView('connections', this)">
+              <i class="ti ti-network"></i> Connections
+              <span class="sb-badge sb-badge-muted">1</span>
+            </div>
+          </div>
+
+          <div class="sb-section">
+            <div class="sb-label">My accounts</div>
+            <div class="sb-item active" onclick="filterHosp('all', this)">
+              <i class="ti ti-building-hospital"></i> All accounts
+            </div>
+            <div class="sb-item" onclick="filterHosp('nyp', this)">
+              <span class="hosp-dot" style="background: #378add"></span> NY Presbyterian
+            </div>
+            <div class="sb-item" onclick="filterHosp('umass', this)">
+              <span class="hosp-dot" style="background: #00c48c"></span> UMass Memorial
+            </div>
+            <div class="sb-item" onclick="filterHosp('ascension', this)">
+              <span class="hosp-dot" style="background: #d85a30"></span> Ascension
+            </div>
+            <div class="sb-item" onclick="filterHosp('uams', this)">
+              <span class="hosp-dot" style="background: #f5a623"></span> Univ. of Arkansas
+            </div>
+          </div>
+
+          <div class="sb-section">
+            <div class="sb-label">Signal type</div>
+            <div class="sb-item" onclick="filterType('executive', this)">
+              <i class="ti ti-user-check"></i> Executive
+            </div>
+            <div class="sb-item" onclick="filterType('ma', this)">
+              <i class="ti ti-arrows-join"></i> M&A
+            </div>
+            <div class="sb-item" onclick="filterType('financial', this)">
+              <i class="ti ti-chart-bar"></i> Financial
+            </div>
+            <div class="sb-item" onclick="filterType('regulatory', this)">
+              <i class="ti ti-scale"></i> Regulatory
+            </div>
+            <div class="sb-item" onclick="filterType('strategy', this)">
+              <i class="ti ti-target"></i> Strategy
+            </div>
+          </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="main">
+          <div class="main-header">
+            <div class="main-title">My intel feed</div>
+            <div class="main-sub">
+              Week of May 11 &nbsp;·&nbsp; 4 accounts &nbsp;·&nbsp;
+              <strong>2 urgent signals</strong>
+            </div>
+          </div>
+
+          <div class="filter-row">
+            <button class="filter-btn on danger" onclick="toggleFilter(this, 'high')">
+              <i class="ti ti-alert-circle" style="font-size: 11px"></i> Urgent
+            </button>
+            <button class="filter-btn on warn" onclick="toggleFilter(this, 'medium')">
+              Medium
+            </button>
+            <button class="filter-btn on" onclick="toggleFilter(this, 'low')">Low</button>
+            <div class="filter-sep"></div>
+            <button class="filter-btn on" onclick="toggleFilter(this, 'unread')">Unread</button>
+            <button class="filter-btn" onclick="toggleFilter(this, 'saved')">
+              <i class="ti ti-bookmark" style="font-size: 11px"></i> Saved
+            </button>
+          </div>
+
+          <div class="feed" id="feed">
+            <div class="section-label" id="lbl-urgent">Urgent — act now</div>
+
+            <div class="card urgent" data-urgency="high" data-hosp="nyp" data-type="executive">
+              <div class="card-top">
+                <span class="hosp-dot" style="background: #378add"></span>
+                <span class="hosp-name">NY Presbyterian</span>
+                <span class="badge badge-danger">Urgent</span>
+                <span class="badge badge-type">Executive change</span>
+                <span class="card-time">2 days ago</span>
+              </div>
+              <p class="card-summary">
+                Sarah Chen named CFO, replacing David Ortiz who departed after 5 years. Chen joins
+                from Northwell Health where she led revenue cycle transformation. Effective March 1.
+              </p>
+              <p class="card-why">
+                Incoming CFOs from RCM backgrounds re-evaluate vendors in their first 90 days —
+                prime outreach window for Adonis.
+              </p>
+              <div class="card-footer">
+                <div class="card-meta">
+                  <span><i class="ti ti-user"></i>Sarah Chen, CFO</span>
+                  <span>Becker's</span>
+                </div>
+                <div class="card-actions">
+                  <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button>
+                  <button class="act-icon" title="Open article">
+                    <i class="ti ti-external-link"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card urgent" data-urgency="high" data-hosp="ascension" data-type="ma">
+              <div class="card-top">
+                <span class="hosp-dot" style="background: #d85a30"></span>
+                <span class="hosp-name">Ascension</span>
+                <span class="badge badge-danger">Urgent</span>
+                <span class="badge badge-type">M&amp;A</span>
+                <span class="card-time">3 days ago</span>
+              </div>
+              <p class="card-summary">
+                Ascension acquiring 3 Mercy Health Midwest facilities (~1,200 beds). Integration
+                expected over 18 months.
+              </p>
+              <p class="card-why">
+                System integrations surface revenue cycle gaps — strong opener during the
+                integration window.
+              </p>
+              <div class="card-footer">
+                <div class="card-meta"><span>Google News</span></div>
+                <div class="card-actions">
+                  <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button>
+                  <button class="act-icon" title="Open article">
+                    <i class="ti ti-external-link"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-label" id="lbl-week">This week</div>
+
+            <div class="card" data-urgency="medium" data-hosp="umass" data-type="financial">
+              <div class="card-top">
+                <span class="hosp-dot" style="background: #00c48c"></span>
+                <span class="hosp-name">UMass Memorial</span>
+                <span class="badge badge-warn">Medium</span>
+                <span class="badge badge-type">Financial</span>
+                <span class="card-time">4 days ago</span>
+              </div>
+              <p class="card-summary">
+                $34M Q1 operating loss — leadership cited adverse payer mix and increased prior auth
+                denials from commercial insurers.
+              </p>
+              <p class="card-why">
+                Prior auth denials explicitly named — direct pain point Adonis addresses. Reference
+                this in outreach.
+              </p>
+              <div class="card-footer">
+                <div class="card-meta"><span>Becker's</span></div>
+                <div class="card-actions">
+                  <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button>
+                  <button class="act-icon" title="Open article">
+                    <i class="ti ti-external-link"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" data-urgency="medium" data-hosp="uams" data-type="strategy">
+              <div class="card-top">
+                <span class="hosp-dot" style="background: #f5a623"></span>
+                <span class="hosp-name">University of Arkansas</span>
+                <span class="badge badge-warn">Medium</span>
+                <span class="badge badge-type">Strategy</span>
+                <span class="card-time">5 days ago</span>
+              </div>
+              <p class="card-summary">
+                CEO Dr. Cam Patterson named revenue cycle automation as a 2025 strategic priority in
+                Q1 earnings call, citing admin burden on clinical staff.
+              </p>
+              <p class="card-why">
+                Public CEO commitment to RCM automation signals organizational readiness — schedule
+                a call.
+              </p>
+              <div class="card-footer">
+                <div class="card-meta">
+                  <span><i class="ti ti-user"></i>Dr. Cam Patterson, CEO</span>
+                  <span>News API</span>
+                </div>
+                <div class="card-actions">
+                  <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button>
+                  <button class="act-icon" title="Open article">
+                    <i class="ti ti-external-link"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" data-urgency="low" data-hosp="nyp" data-type="regulatory">
+              <div class="card-top">
+                <span class="hosp-dot" style="background: #378add"></span>
+                <span class="hosp-name">NY Presbyterian</span>
+                <span class="badge badge-muted">Low</span>
+                <span class="badge badge-type">Regulatory</span>
+                <span class="card-time">6 days ago</span>
+              </div>
+              <p class="card-summary">
+                CMS proposed new prior auth transparency rules for Medicare Advantage — expected to
+                increase denial documentation burden for large academic centers.
+              </p>
+              <p class="card-why">
+                Regulatory pressure on prior auth creates near-term complexity — useful context for
+                an executive conversation.
+              </p>
+              <div class="card-footer">
+                <div class="card-meta"><span>Google News</span></div>
+                <div class="card-actions">
+                  <button class="act-icon" title="Save"><i class="ti ti-bookmark"></i></button>
+                  <button class="act-icon" title="Open article">
+                    <i class="ti ti-external-link"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-label" id="lbl-conn">Connections</div>
+
+            <div class="conn-card" id="conn-card">
+              <div class="conn-label">Warm paths this week</div>
+              <div class="conn-row">
+                <div class="conn-av-group">
+                  <div class="conn-av" style="background: rgba(0, 196, 140, 0.15); color: #00c48c">
+                    MW
+                  </div>
+                  <div
+                    class="conn-av"
+                    style="background: rgba(55, 138, 221, 0.15); color: #378add; margin-left: -8px"
+                  >
+                    SC
+                  </div>
+                </div>
+                <p class="conn-text">
+                  <strong>Marcus Webb</strong> (Adonis AE) and <strong>Sarah Chen</strong> (NYP, new
+                  CFO) both attended Wharton MBA '14. Consider asking Marcus for a warm intro before
+                  the 90-day window closes.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      var activeFilters = { high: true, medium: true, low: true, unread: true, saved: false };
+      var activeHosp = 'all';
+      var activeType = 'all';
+      var activeView = 'all';
+
+      function applyFilters() {
+        document.querySelectorAll('.card[data-urgency]').forEach(function (c) {
+          var u = c.getAttribute('data-urgency');
+          var h = c.getAttribute('data-hosp');
+          var t = c.getAttribute('data-type');
+          var show = true;
+          if (!activeFilters[u]) show = false;
+          if (activeHosp !== 'all' && h !== activeHosp) show = false;
+          if (activeType !== 'all' && t !== activeType) show = false;
+          if (activeView === 'urgent' && u !== 'high') show = false;
+          c.style.display = show ? '' : 'none';
+        });
+
+        var cc = document.getElementById('conn-card');
+        var lc = document.getElementById('lbl-conn');
+        var showConn = activeView === 'connections' || activeView === 'all';
+        if (cc) cc.style.display = showConn ? '' : 'none';
+        if (lc) lc.style.display = showConn ? '' : 'none';
+
+        ['lbl-urgent', 'lbl-week'].forEach(function (id) {
+          var lbl = document.getElementById(id);
+          if (!lbl) return;
+          var next = lbl.nextElementSibling;
+          var visible = false;
+          while (
+            (next && next.tagName !== 'DIV') ||
+            (next && !next.classList.contains('section-label') && !next.id.startsWith('lbl'))
+          ) {
+            if (
+              next &&
+              next.getAttribute &&
+              next.getAttribute('data-urgency') &&
+              next.style.display !== 'none'
+            )
+              visible = true;
+            if (
+              !next ||
+              next.classList.contains('section-label') ||
+              (next.id && next.id.startsWith('lbl'))
+            )
+              break;
+            next = next.nextElementSibling;
+          }
+          lbl.style.display = visible ? '' : 'none';
+        });
+      }
+
+      function toggleFilter(btn, key) {
+        activeFilters[key] = !activeFilters[key];
+        btn.classList.toggle('on', activeFilters[key]);
+        applyFilters();
+      }
+
+      function filterHosp(hosp, el) {
+        activeHosp = hosp;
+        document.querySelectorAll('.sb-item[onclick*="filterHosp"]').forEach(function (i) {
+          i.classList.remove('active');
+        });
+        el.classList.add('active');
+        applyFilters();
+      }
+
+      function filterType(type, el) {
+        if (activeType === type) {
+          activeType = 'all';
+          el.classList.remove('active');
+        } else {
+          activeType = type;
+          document.querySelectorAll('.sb-item[onclick*="filterType"]').forEach(function (i) {
+            i.classList.remove('active');
+          });
+          el.classList.add('active');
+        }
+        applyFilters();
+      }
+
+      function setView(view, el) {
+        activeView = view;
+        document.querySelectorAll('.sb-item[onclick*="setView"]').forEach(function (i) {
+          i.classList.remove('active');
+        });
+        el.classList.add('active');
+        applyFilters();
+      }
+    </script>
+  </body>
 </html>
