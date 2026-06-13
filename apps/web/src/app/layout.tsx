@@ -6,6 +6,7 @@ import CoPilot from '@/components/CoPilot';
 import MobileNav from '@/components/MobileNav';
 import DigestTracker from '@/components/DigestTracker';
 import UserProvider from '@/components/UserProvider';
+import SidebarUser from '@/components/SidebarUser';
 
 export const metadata: Metadata = {
   title: 'Adonis Account Intelligence',
@@ -77,6 +78,9 @@ function Sidebar() {
         </div>
       </div>
       <Nav />
+      <div className="mt-auto px-5 pt-4 border-t border-white/10">
+        <SidebarUser />
+      </div>
     </aside>
   );
 }
