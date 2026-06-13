@@ -284,6 +284,7 @@ async def test_run_monday_digest_sends_when_queue_clear():
     mock_sb.table.side_effect = table_side
 
     with patch("app.jobs.scraper_job.get_supabase", return_value=mock_sb), \
+         patch("app.services.digest_service.get_supabase", return_value=mock_sb), \
          patch("app.jobs.scraper_job.run_scraper_job", new_callable=AsyncMock) as mock_scraper:
         mock_scraper.return_value = FAKE_SCRAPER_RESULT
         result = await run_monday_digest()
