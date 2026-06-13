@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+supabase
+anthropic
+slack-bolt
+slack-sdk
+python-dotenv
+pydantic-settings
+pdfplumber
+httpx
+pytest
+pytest-asyncio
+apscheduler

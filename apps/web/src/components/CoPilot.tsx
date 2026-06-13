@@ -60,7 +60,14 @@ export default function CoPilot() {
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pillDismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const drag = useRef({ active: false, moved: false, startX: 0, startY: 0, startPosX: 0, startPosY: 0 });
+  const drag = useRef({
+    active: false,
+    moved: false,
+    startX: 0,
+    startY: 0,
+    startPosX: 0,
+    startPosY: 0,
+  });
 
   // Set initial position after mount and attach global drag listeners
   useEffect(() => {
@@ -71,8 +78,14 @@ export default function CoPilot() {
       const dx = e.clientX - drag.current.startX;
       const dy = e.clientY - drag.current.startY;
       if (Math.abs(dx) > 5 || Math.abs(dy) > 5) drag.current.moved = true;
-      const newX = Math.max(0, Math.min(window.innerWidth - BUBBLE_SIZE, drag.current.startPosX + dx));
-      const newY = Math.max(0, Math.min(window.innerHeight - BUBBLE_SIZE, drag.current.startPosY + dy));
+      const newX = Math.max(
+        0,
+        Math.min(window.innerWidth - BUBBLE_SIZE, drag.current.startPosX + dx)
+      );
+      const newY = Math.max(
+        0,
+        Math.min(window.innerHeight - BUBBLE_SIZE, drag.current.startPosY + dy)
+      );
       setPos({ x: newX, y: newY });
     }
     function onUp() {
@@ -178,7 +191,10 @@ export default function CoPilot() {
       const reply = data.reply ?? data.error ?? STUB_REPLY;
       setMessages((prev) => [...prev, { role: 'assistant' as const, text: reply }]);
     } catch (err) {
-      setMessages((prev) => [...prev, { role: 'assistant' as const, text: `Error: ${String(err)}` }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant' as const, text: `Error: ${String(err)}` },
+      ]);
     }
     setLoading(false);
   }
@@ -231,7 +247,9 @@ export default function CoPilot() {
               position: 'absolute',
               right: 'calc(100% + 12px)',
               top: '50%',
-              transform: pillSlideIn ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(12px)',
+              transform: pillSlideIn
+                ? 'translateY(-50%) translateX(0)'
+                : 'translateY(-50%) translateX(12px)',
               transition: 'opacity 300ms, transform 300ms',
               opacity: pillSlideIn ? 1 : 0,
               background: 'white',
@@ -261,7 +279,10 @@ export default function CoPilot() {
 
           {/* Unread dot */}
           {hasUnread && !open && (
-            <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-urgent z-10" style={{ outline: '2px solid #EFEFC8' }} />
+            <span
+              className="absolute top-0 right-0 w-2 h-2 rounded-full bg-urgent z-10"
+              style={{ outline: '2px solid #EFEFC8' }}
+            />
           )}
 
           <button
@@ -286,8 +307,18 @@ export default function CoPilot() {
             {open ? (
               <span style={{ fontSize: 24, lineHeight: 1 }}>×</span>
             ) : (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             )}
           </button>
@@ -339,7 +370,10 @@ export default function CoPilot() {
               </p>
             )}
             {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div
+                key={i}
+                className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
                 <div
                   className={`max-w-[85%] text-xs px-3 py-2 rounded-xl leading-relaxed ${
                     m.role === 'user'

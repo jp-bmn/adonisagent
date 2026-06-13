@@ -106,15 +106,7 @@ function formatDate(iso: string): string {
   });
 }
 
-function Kpi({
-  value,
-  label,
-  tone,
-}: {
-  value: string | number;
-  label: string;
-  tone?: 'urgent';
-}) {
+function Kpi({ value, label, tone }: { value: string | number; label: string; tone?: 'urgent' }) {
   return (
     <div className="bg-white border border-line rounded-xl p-4">
       <div

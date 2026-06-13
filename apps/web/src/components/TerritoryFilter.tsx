@@ -25,7 +25,7 @@ export default function TerritoryFilter({ aes }: { aes: AeUser[] }) {
       onChange={handleChange}
       className="bg-white border border-line rounded-lg px-3 py-1.5 text-xs font-mono text-slate-600 focus:outline-none focus:ring-1 focus:ring-accent"
     >
-      <option value="">All accounts (Danielle)</option>
+      <option value="">All accounts</option>
       {aes.map((ae) => (
         <option key={ae.id} value={ae.id}>
           {ae.name}&apos;s territory
