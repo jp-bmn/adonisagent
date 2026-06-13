@@ -107,6 +107,9 @@ an AI-powered account intelligence platform for RCM (Revenue Cycle Management) v
 Your job is to classify a hospital or health system news article and determine whether \
 it represents a sales signal for RCM solutions.
 
+CRITICAL: Hospital Attribution
+The hospital must be explicitly and centrally discussed in the article. If the hospital is only mentioned in passing, or is not the primary subject of the article, you MUST return a `confidence_score` of 0.20 or lower, or classify it as `filtered_out`. Apply a severe confidence penalty for weak attribution.
+
 Signal types and when they apply:
 - leadership_change: C-suite or VP-level hire/departure in revenue-touching roles (CRO, CFO, CIO, VP Revenue)
 - rcm_hiring_spike: Multiple RCM job postings indicating internal capacity gaps
@@ -178,6 +181,14 @@ async def classify_signal(
             f"Rules engine classified: {rules_result.signal_type} "
             f"(rule={rules_result.rule_name}, confidence={rules_result.confidence})"
         )
+        
+        summary = ""
+        try:
+            summary = await _generate_summary_with_claude(article_text, hospital_name)
+        except Exception as e:
+            logger.error(f"Failed to generate summary with Claude: {e}")
+            summary = article_text[:300].strip() or "Signal detected via rules engine."
+
         # Generate stub title/summary since rules engine doesn't produce text
         short_text = article_text[:150].strip()
         return ClassificationResult(
@@ -185,7 +196,7 @@ async def classify_signal(
             tier                  = rules_result.tier,
             confidence_score      = rules_result.confidence,
             title                 = short_text[:80] if short_text else f"{hospital_name} signal",
-            summary               = article_text[:300].strip() or "Signal detected via rules engine.",
+            summary               = summary,
             why_relevant          = f"Deterministic match: {rules_result.rule_name.replace('_', ' ').title()} pattern.",
             why_it_matters        = None,
             classification_source = "rules_engine",
@@ -293,6 +304,23 @@ async def _classify_with_claude(
     except Exception as e:
         logger.error(f"Unexpected classifier error: {e}")
         raise
+
+
+@with_retry(max_attempts=3, base_delay=2.0)
+async def _generate_summary_with_claude(article_text: str, hospital_name: str) -> str:
+    user_message = (
+        f"Hospital: {hospital_name}\n\n"
+        f"Article text:\n{article_text[:4000]}\n\n"
+        "Please provide a 2-sentence summary of what happened and why it matters."
+    )
+    client = get_anthropic_client()
+    response = client.messages.create(
+        model=CLAUDE_MODEL,
+        max_tokens=150,
+        system="You are an expert healthcare analyst. Return ONLY a concise 2-sentence summary of the provided text in relation to the hospital, no other text.",
+        messages=[{"role": "user", "content": user_message}],
+    )
+    return response.content[0].text.strip()
 
 
 def _parse_claude_response(raw_text: str) -> dict:
