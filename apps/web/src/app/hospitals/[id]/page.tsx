@@ -124,7 +124,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
             ) : (
               <div className="space-y-3">
                 {signals.map((signal) => (
-                  <SignalCard key={signal.id} signal={signal} />
+                  <SignalCard key={signal.id} signal={signal} hospitalName={hospital.name} />
                 ))}
               </div>
             )}
