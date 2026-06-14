@@ -56,7 +56,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
               </div>
             )}
           </div>
-          <div className="flex gap-4 flex-none text-right">
+          <div className="flex gap-4 flex-none text-right self-start">
             <div>
               <div className="font-serif text-2xl font-bold text-urgent">{urgentCount}</div>
               <div className="text-xs text-slate-500">Urgent</div>
@@ -70,7 +70,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
 
         {/* Body */}
         <div className="grid grid-cols-1 md:grid-cols-2">
-          <section className="p-6 border-r border-line">
+          <section className="p-4 md:p-6 border-b md:border-b-0 md:border-r border-line">
             <h2 className="text-xs font-mono uppercase tracking-widest text-slate-500 mb-4">
               Revenue &amp; finance leadership
             </h2>
@@ -108,7 +108,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
             )}
           </section>
 
-          <section className="p-6">
+          <section className="p-4 md:p-6">
             <h2 className="text-xs font-mono uppercase tracking-widest text-slate-500 mb-4">
               Signal history · {signals.length} total
             </h2>
