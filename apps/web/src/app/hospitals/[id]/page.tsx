@@ -82,26 +82,31 @@ export default async function HospitalProfilePage({ params }: PageProps) {
             ) : (
               <div className="space-y-4">
                 {contacts.map((c) => (
-                  <div key={c.id} className="flex flex-col gap-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-ink">{c.name}</span>
+                  <div key={c.id} className="flex flex-col gap-1">
+                    <div className="text-sm font-semibold text-ink">
+                      {c.name || 'Unknown contact'}
+                    </div>
+                    {c.title && <div className="text-xs text-slate-500">{c.title}</div>}
+                    <div className="flex items-center gap-3 flex-wrap">
                       {c.linkedin_url && (
                         <a
                           href={c.linkedin_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[10px] font-mono text-accent hover:underline"
+                          className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-accent hover:underline"
                         >
-                          LinkedIn
+                          ↗ LinkedIn
+                        </a>
+                      )}
+                      {c.email && (
+                        <a
+                          href={`mailto:${c.email}`}
+                          className="text-[10px] font-mono text-slate-400 hover:underline"
+                        >
+                          {c.email}
                         </a>
                       )}
                     </div>
-                    {c.title && <span className="text-xs text-slate-500">{c.title}</span>}
-                    {c.email && (
-                      <a href={`mailto:${c.email}`} className="text-xs text-brand hover:underline">
-                        {c.email}
-                      </a>
-                    )}
                   </div>
                 ))}
               </div>
