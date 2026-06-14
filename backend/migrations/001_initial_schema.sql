@@ -161,7 +161,8 @@ INSERT INTO hospitals (name, website_url, division_note) VALUES
     ('UMass Memorial',                          'https://umassmemorial.org',      NULL),
     ('Ascension',                               'https://ascension.org',          NULL),
     ('University of Arkansas Medical Sciences', 'https://uams.edu',               NULL),
-    ('CommonSpirit Health',                     'https://commonspirit.org',       'Specific division TBD — confirm with Danielle before expanding scraper scope');
+    ('CommonSpirit Health',                     'https://commonspirit.org',       'Specific division TBD — confirm with Danielle before expanding scraper scope'),
+    ('Jefferson Health',                        'https://www.jeffersonhealth.org', NULL);
 
 -- AE Users (slack_user_id values filled in via .env — stored here as references)
 INSERT INTO ae_users (name, slack_user_id, is_admin) VALUES
@@ -176,6 +177,7 @@ INSERT INTO ae_users (name, slack_user_id, is_admin) VALUES
 -- Ascension            → David
 -- University of AR     → David
 -- CommonSpirit         → David
+-- Jefferson Health     → Jeff
 INSERT INTO hospital_ae_assignments (hospital_id, ae_id)
 SELECT h.id, u.id
 FROM (VALUES
@@ -183,7 +185,8 @@ FROM (VALUES
     ('UMass Memorial',                          'Michael'),
     ('Ascension',                               'David'),
     ('University of Arkansas Medical Sciences', 'David'),
-    ('CommonSpirit Health',                     'David')
+    ('CommonSpirit Health',                     'David'),
+    ('Jefferson Health',                        'Jeff')
 ) AS mapping(hospital_name, user_name)
 JOIN hospitals h ON h.name = mapping.hospital_name
 JOIN ae_users  u ON u.name = mapping.user_name;
@@ -200,4 +203,4 @@ SELECT
     (SELECT count(*) FROM digests)                  AS digests,
     (SELECT count(*) FROM digest_views)             AS digest_views,
     (SELECT count(*) FROM agent_runs)               AS agent_runs;
--- Expected: 5, 4, 5, 0, 0, 0, 0, 0
+-- Expected: 6, 4, 6, 0, 0, 0, 0, 0

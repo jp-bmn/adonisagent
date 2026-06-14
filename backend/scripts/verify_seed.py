@@ -27,9 +27,9 @@ from supabase import create_client
 client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 CHECKS = [
-    ("hospitals",                5, "5 hospitals"),
+    ("hospitals",                6, "6 hospitals"),
     ("ae_users",                 4, "4 AE users (Danielle, Michael, David, Jeff)"),
-    ("hospital_ae_assignments",  5, "5 territory assignments"),
+    ("hospital_ae_assignments",  6, "6 territory assignments"),
 ]
 
 print("\n🔍  Adonis — Supabase seed verification\n" + "─" * 45)

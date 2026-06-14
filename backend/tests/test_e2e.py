@@ -309,7 +309,7 @@ async def test_full_pipeline():
             res_run = await client.get("/api/v1/runs/latest")
             assert res_run.status_code == 200
             run_data = res_run.json()
-            assert run_data["hospitals_checked"] == 5
+            assert run_data["hospitals_checked"] == 6
             assert run_data["duration_ms"] > 0
 
             # 9. Record digest view (UTM tracking)
