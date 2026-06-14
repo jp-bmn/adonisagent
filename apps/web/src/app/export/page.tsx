@@ -15,7 +15,7 @@ export default function ExportPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `adonis-signals-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `adonis-contacts-${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -30,15 +30,15 @@ export default function ExportPage() {
       <header className="mb-6">
         <h1 className="font-serif text-2xl font-semibold text-brand">Export</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Download all signals as a CSV for offline review or CRM import.
+          Download hospital contacts as a CSV for HubSpot import or offline review.
         </p>
       </header>
 
       <div className="bg-white border border-line rounded-xl p-8 max-w-md">
-        <h2 className="font-serif text-lg font-semibold text-brand mb-2">Signals CSV</h2>
+        <h2 className="font-serif text-lg font-semibold text-brand mb-2">Contacts CSV</h2>
         <p className="text-sm text-slate-500 mb-6">
-          Exports all approved signals with hospital name, signal type, tier, summary, source, and
-          date.
+          Exports all hospital revenue and finance leadership contacts — name, title, company,
+          website, and LinkedIn URL. HubSpot-ready format.
         </p>
         <button
           onClick={handleDownload}
