@@ -55,8 +55,20 @@ export default async function HospitalProfilePage({ params }: PageProps) {
                 <span className="font-medium text-ink">{aes.map((u) => u.name).join(', ')}</span>
               </div>
             )}
+            {/* Stats inline below name on mobile */}
+            <div className="flex gap-5 mt-3 md:hidden">
+              <div>
+                <div className="font-serif text-xl font-bold text-urgent">{urgentCount}</div>
+                <div className="text-xs text-slate-500">Urgent</div>
+              </div>
+              <div>
+                <div className="font-serif text-xl font-bold text-brand">{signals.length}</div>
+                <div className="text-xs text-slate-500">Total signals</div>
+              </div>
+            </div>
           </div>
-          <div className="flex gap-4 flex-none text-right self-start">
+          {/* Stats on right — desktop only */}
+          <div className="hidden md:flex gap-4 flex-none text-right self-start">
             <div>
               <div className="font-serif text-2xl font-bold text-urgent">{urgentCount}</div>
               <div className="text-xs text-slate-500">Urgent</div>
