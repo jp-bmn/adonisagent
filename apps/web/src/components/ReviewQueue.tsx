@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { ApiSignal, reviewSignal } from '@/lib/api';
+import { ApiSignal, reviewSignal, SIGNAL_TYPE_LABELS, SignalType } from '@/lib/api';
+
+function stripHtml(text: string): string {
+  return text.replace(/<[^>]*>/g, '').trim();
+}
 
 interface ReviewQueueProps {
   initialSignals: ApiSignal[];
@@ -43,10 +47,12 @@ export default function ReviewQueue({ initialSignals }: ReviewQueueProps) {
               <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
                 {Math.round(signal.confidence_score * 100)}% Match
               </span>
-              <span className="text-xs font-mono text-slate-400">{signal.signal_type}</span>
+              <span className="text-xs font-mono text-slate-400">
+                {SIGNAL_TYPE_LABELS[signal.signal_type as SignalType] ?? signal.signal_type}
+              </span>
             </div>
             <h3 className="font-semibold text-brand text-sm">
-              {signal.title || 'Untitled Signal'}
+              {signal.title ? stripHtml(signal.title) : 'Untitled Signal'}
             </h3>
             <p className="text-xs text-slate-500 mt-1 max-w-2xl">{signal.summary}</p>
           </div>
