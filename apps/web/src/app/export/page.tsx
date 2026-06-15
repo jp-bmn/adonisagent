@@ -30,14 +30,16 @@ export default function ExportPage() {
       <header className="mb-6">
         <h1 className="font-serif text-2xl font-semibold text-brand">Export</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Download active hospital contacts as a HubSpot-compatible CSV for offline review or CRM import.
+          Download active hospital contacts as a HubSpot-compatible CSV for offline review or CRM
+          import.
         </p>
       </header>
 
       <div className="bg-white border border-line rounded-xl p-8 max-w-md">
         <h2 className="font-serif text-lg font-semibold text-brand mb-2">Contacts CSV</h2>
         <p className="text-sm text-slate-500 mb-6">
-          Exports active hospital contacts with first/last name, job title, company name, website, verified LinkedIn URL, and recent signal notes.
+          Exports active hospital contacts with first/last name, job title, company name, website,
+          verified LinkedIn URL, and recent signal notes.
         </p>
         <button
           onClick={handleDownload}
