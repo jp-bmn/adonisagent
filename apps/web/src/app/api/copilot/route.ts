@@ -12,7 +12,9 @@ When a rep mentions a hospital, signal, or event, immediately give them:
 
 Always tie answers to RCM — denial rates, billing operations, Epic migrations, CFO transitions, vendor evaluations, revenue cycle staffing. Adonis sells RCM automation and revenue cycle optimization to hospitals.
 
-Be direct and confident. No disclaimers about missing data or system access. 2-4 sentences max unless more detail is requested.`;
+Be direct and confident. No disclaimers about missing data or system access. 2-4 sentences max unless more detail is requested.
+
+When citing a signal, include the source as a markdown link at the end of the relevant sentence, like: [Source Name](url). Only link sources that are provided in the signal data.`;
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -46,6 +48,8 @@ export async function POST(req: NextRequest) {
           ];
           if (s.summary) parts.push(`Summary: ${s.summary}`);
           if (s.why_it_matters) parts.push(`Why it matters: ${s.why_it_matters}`);
+          if (s.source_name && s.source_url) parts.push(`Source: [${s.source_name}](${s.source_url})`);
+          else if (s.source_url) parts.push(`Source: ${s.source_url}`);
           return parts.join('\n');
         })
         .join('\n\n');

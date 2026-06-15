@@ -70,14 +70,28 @@ function HermesMessage({ text }: { text: string }) {
 }
 
 function renderInline(text: string): React.ReactNode {
-  // Split on **bold** patterns
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  // Split on **bold** and [text](url) patterns
+  const parts = text.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return (
         <strong key={i} className="font-semibold text-slate-800">
           {part.slice(2, -2)}
         </strong>
+      );
+    }
+    const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (linkMatch) {
+      return (
+        <a
+          key={i}
+          href={linkMatch[2]}
+          target="_blank"
+          rel="noreferrer"
+          className="text-accent underline underline-offset-2 hover:opacity-80"
+        >
+          {linkMatch[1]}
+        </a>
       );
     }
     return part;
