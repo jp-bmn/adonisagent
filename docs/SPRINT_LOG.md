@@ -3,6 +3,9 @@
 Living record of what shipped, decisions made, and what's next.
 Updated at the end of every session.
 
+**Format:** Sprints are ordered newest → oldest. Each sprint header includes the full date and session time.
+`## Sprint N — Mon DD, YYYY · HH:MM AM/PM ET`
+
 **Demo Day:** June 24, 2026 at Blackstone
 **Build-complete deadline:** June 18, 2026
 **Repo:** ~/projects/adonisagent
@@ -41,7 +44,7 @@ Updated at the end of every session.
 
 ---
 
-## Sprint 13 — Jun 15, 2026
+## Sprint 13 — Jun 15, 2026 · 12:00 AM ET
 
 ### Juan (Frontend)
 
@@ -93,7 +96,7 @@ Updated at the end of every session.
 
 ---
 
-## Sprint 12 — Jun 13, 2026
+## Sprint 12 — Jun 13, 2026 · 12:00 AM ET
 
 ### Juan (Frontend)
 
