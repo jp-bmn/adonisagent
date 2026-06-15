@@ -247,14 +247,6 @@ async def ingest_signal_batch(
             logger.warning(f"Signal idx={idx} rejected — unknown hospital: '{hospital_name}'")
             continue
 
-        # --- Required fields ---
-        title = sig.get("title") or ""
-        if not title:
-            rejected += 1
-            detail.update(status="rejected", reason="title is required")
-            details.append(detail)
-            continue
-
         # --- Map fields ---
         matched_topics = sig.get("matched_topics") or []
         signal_type = _resolve_signal_type(matched_topics)
@@ -263,6 +255,31 @@ async def ingest_signal_batch(
         summary = sig.get("excerpt") or ""
         source_url = sig.get("source_url") or ""
         source_name = sig.get("source_name") or ""
+
+        # --- Required & Meaningful Title ---
+        title = sig.get("title") or ""
+        normalized_title = title.lower().replace("_", " ").replace("-", " ").strip()
+        is_generic = (
+            not title or
+            normalized_title in {t.replace("_", " ") for t in VALID_SIGNAL_TYPES} or
+            normalized_title in ("document", "signal", "pdf filing", "low confidence signal", "classification error")
+        )
+        if is_generic:
+            if summary:
+                words = summary.split()
+                fallback_title = " ".join(words[:10])
+                if len(fallback_title) > 80:
+                    fallback_title = fallback_title[:77] + "..."
+                title = fallback_title
+            else:
+                title = f"{hospital_name} {signal_type.replace('_', ' ').title()} Update"
+
+        if not title:
+            rejected += 1
+            detail.update(status="rejected", reason="title is required")
+            details.append(detail)
+            continue
+
 
         # Truncate to schema limits
         title   = title[:200]

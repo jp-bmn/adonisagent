@@ -191,17 +191,35 @@ async def classify_signal(
 
         # Generate stub title/summary since rules engine doesn't produce text
         short_text = article_text[:150].strip()
+        title = short_text[:80] if short_text else ""
+        normalized_title = title.lower().replace("_", " ").replace("-", " ").strip()
+        is_generic = (
+            not title or
+            normalized_title in {t.replace("_", " ") for t in VALID_SIGNAL_TYPES} or
+            normalized_title in ("document", "signal", "pdf filing", "low confidence signal", "classification error")
+        )
+        if is_generic:
+            if summary:
+                words = summary.split()
+                fallback_title = " ".join(words[:10])
+                if len(fallback_title) > 80:
+                    fallback_title = fallback_title[:77] + "..."
+                title = fallback_title
+            else:
+                title = f"{hospital_name} {rules_result.signal_type.replace('_', ' ').title()} Update"
+
         return ClassificationResult(
             signal_type           = rules_result.signal_type,
             tier                  = rules_result.tier,
             confidence_score      = rules_result.confidence,
-            title                 = short_text[:80] if short_text else f"{hospital_name} signal",
+            title                 = title,
             summary               = summary,
             why_relevant          = f"Deterministic match: {rules_result.rule_name.replace('_', ' ').title()} pattern.",
             why_it_matters        = None,
             classification_source = "rules_engine",
             rule_name             = rules_result.rule_name,
         )
+
 
     # ── Stage 2: Claude ──────────────────────────────────────────────────────
     logger.info(f"Rules engine: no match — escalating to Claude for '{hospital_name}'")

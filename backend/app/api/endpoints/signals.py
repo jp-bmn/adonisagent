@@ -174,13 +174,33 @@ async def create_signal(
     hospital_id = signal_data.get("hospital_id")
     if not hospital_id:
         raise HTTPException(status_code=422, detail="hospital_id is required")
-    hospital_check = supabase.table("hospitals").select("id").eq("id", hospital_id).single().execute()
+    hospital_check = supabase.table("hospitals").select("id, name").eq("id", hospital_id).single().execute()
     if not hospital_check.data:
         raise HTTPException(status_code=404, detail=f"Hospital {hospital_id} not found")
 
     # --- Confidence threshold → review_status ---
     confidence = float(signal_data.get("confidence_score", 0.0))
     review_status = "pending" if confidence < 0.70 else None
+
+    # --- Required & Meaningful Title ---
+    title = signal_data.get("title") or ""
+    summary = signal_data.get("summary") or ""
+    normalized_title = title.lower().replace("_", " ").replace("-", " ").strip()
+    is_generic = (
+        not title or
+        normalized_title in {t.replace("_", " ") for t in VALID_SIGNAL_TYPES} or
+        normalized_title in ("document", "signal", "pdf filing", "low confidence signal", "classification error")
+    )
+    if is_generic:
+        if summary:
+            words = summary.split()
+            fallback_title = " ".join(words[:10])
+            if len(fallback_title) > 80:
+                fallback_title = fallback_title[:77] + "..."
+            title = fallback_title
+        else:
+            hospital_name = hospital_check.data.get("name", "Hospital")
+            title = f"{hospital_name} {signal_type.replace('_', ' ').title()} Update"
 
     # --- Build insert payload ---
     insert_payload = {
@@ -189,14 +209,15 @@ async def create_signal(
         "tier":             tier,
         "confidence_score": confidence,
         "review_status":    review_status,
-        "title":            signal_data.get("title"),
-        "summary":          signal_data.get("summary"),
+        "title":            title or None,
+        "summary":          summary or None,
         "source_url":       str(signal_data.get("source_url")) if signal_data.get("source_url") else None,
         "source_name":      signal_data.get("source_name"),
         "published_date":   signal_data.get("published_date"),
     }
     # Remove None values so Supabase uses DB defaults
     insert_payload = {k: v for k, v in insert_payload.items() if v is not None}
+
 
     result = supabase.table("signals").insert(insert_payload).execute()
     if not result.data:
