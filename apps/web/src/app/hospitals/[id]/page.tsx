@@ -84,7 +84,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
                 {contacts.map((c) => (
                   <div key={c.id} className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-ink">{c.name}</span>
+                      <span className="text-sm font-semibold text-ink">{c.full_name}</span>
                       {c.linkedin_url && (
                         <a
                           href={c.linkedin_url}
@@ -96,7 +96,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
                         </a>
                       )}
                     </div>
-                    {c.title && <span className="text-xs text-slate-500">{c.title}</span>}
+                    {c.role && <span className="text-xs text-slate-500">{c.role}</span>}
                     {c.email && (
                       <a href={`mailto:${c.email}`} className="text-xs text-brand hover:underline">
                         {c.email}
@@ -119,7 +119,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
             ) : (
               <div className="space-y-3">
                 {signals.map((signal) => (
-                  <SignalCard key={signal.id} signal={signal} />
+                  <SignalCard key={signal.id} signal={signal} hospitalName={hospital.name} />
                 ))}
               </div>
             )}
