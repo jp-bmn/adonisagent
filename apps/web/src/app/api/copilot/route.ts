@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchSignals, fetchHospitals } from '@/lib/api';
+import { fetchSignals, fetchHospitals, fetchHospitalContacts } from '@/lib/api';
 
 const SYSTEM_PROMPT_BASE = `You are an AI co-pilot for Adonis Account Intelligence, a sales intelligence tool for the Adonis healthcare RCM (Revenue Cycle Management) sales team.
 
@@ -25,12 +25,34 @@ export async function POST(req: NextRequest) {
   const { message, history } = await req.json();
 
   let signalsContext = 'No live signals available.';
+  let contactsContext = 'No contacts available.';
   try {
     const [signals, hospitals] = await Promise.all([
       fetchSignals(),
       fetchHospitals(),
     ]);
     const hospitalMap = Object.fromEntries(hospitals.map((h) => [h.id, h.name]));
+
+    // Fetch contacts for all hospitals in parallel
+    const allContacts = await Promise.all(
+      hospitals.map((h) =>
+        fetchHospitalContacts(h.id)
+          .then((contacts) => contacts.map((c) => ({ ...c, hospitalName: h.name })))
+          .catch(() => [])
+      )
+    );
+    const contacts = allContacts.flat().filter((c) => c.name);
+    if (contacts.length > 0) {
+      contactsContext = contacts
+        .map((c) => {
+          const parts = [`${c.hospitalName} · ${c.name}`];
+          if (c.title) parts.push(c.title);
+          if (c.linkedin_url) parts.push(`LinkedIn: ${c.linkedin_url}`);
+          if (c.email) parts.push(`Email: ${c.email}`);
+          return parts.join(' · ');
+        })
+        .join('\n');
+    }
 
     const relevant = signals
       .filter((s) => s.tier !== 'filtered_out')
@@ -59,7 +81,10 @@ export async function POST(req: NextRequest) {
   }
 
   const systemPrompt = `${SYSTEM_PROMPT_BASE}
-  
+
+REVENUE & FINANCE LEADERSHIP CONTACTS (name · title · LinkedIn · email):
+${contactsContext}
+
 CURRENT LIVE SIGNALS IN THE SYSTEM:
 ${signalsContext}`;
 
