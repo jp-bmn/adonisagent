@@ -25,19 +25,30 @@ export async function POST(req: NextRequest) {
   let signalsContext = 'No live signals available.';
   try {
     const [signals, hospitals] = await Promise.all([
-      fetchSignals(undefined, { limit: 50 }),
+      fetchSignals(),
       fetchHospitals(),
     ]);
     const hospitalMap = Object.fromEntries(hospitals.map((h) => [h.id, h.name]));
 
-    if (signals.length > 0) {
-      signalsContext = signals
+    const relevant = signals
+      .filter((s) => s.tier !== 'filtered_out')
+      .slice(0, 60);
+
+    if (relevant.length > 0) {
+      signalsContext = relevant
         .map((s) => {
           const hospitalName = hospitalMap[s.hospital_id] || 'Unknown Hospital';
-          const date = s.published_date || s.created_at.split('T')[0];
-          return `[${date}] ${hospitalName} (${s.tier}) - ${s.title || s.signal_type}. Why it matters: ${s.why_it_matters || 'N/A'}`;
+          const date = (s.published_date || s.created_at).split('T')[0];
+          const tier = s.tier === 'urgent' ? 'URGENT' : 'UPDATE';
+          const parts = [
+            `[${date}] ${tier} · ${hospitalName} · ${s.signal_type.replace(/_/g, ' ')}`,
+            `Title: ${s.title || s.signal_type}`,
+          ];
+          if (s.summary) parts.push(`Summary: ${s.summary}`);
+          if (s.why_it_matters) parts.push(`Why it matters: ${s.why_it_matters}`);
+          return parts.join('\n');
         })
-        .join('\n');
+        .join('\n\n');
     }
   } catch (err) {
     console.error('Failed to fetch context for copilot:', err);
