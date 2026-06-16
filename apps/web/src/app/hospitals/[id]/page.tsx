@@ -99,6 +99,9 @@ export default async function HospitalProfilePage({ params }: PageProps) {
                       {c.full_name || 'Unknown contact'}
                     </div>
                     {c.role && <div className="text-xs text-slate-500">{c.role}</div>}
+                    {c.prior_employer && (
+                      <div className="text-xs text-slate-400">prev. {c.prior_employer}</div>
+                    )}
                     <div className="flex items-center gap-3 flex-wrap">
                       {c.linkedin_url && (
                         <a
