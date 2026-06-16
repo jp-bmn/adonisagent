@@ -61,12 +61,12 @@ export async function POST(req: NextRequest) {
           .catch(() => [])
       )
     );
-    const contacts = allContacts.flat().filter((c) => c.name);
+    const contacts = allContacts.flat().filter((c) => c.full_name);
     if (contacts.length > 0) {
       contactsContext = contacts
         .map((c) => {
-          const parts = [`${c.hospitalName} · ${c.name}`];
-          if (c.title) parts.push(c.title);
+          const parts = [`${c.hospitalName} · ${c.full_name}`];
+          if (c.role) parts.push(c.role);
           if (c.linkedin_url) parts.push(`LinkedIn: ${c.linkedin_url}`);
           if (c.email) parts.push(`Email: ${c.email}`);
           return parts.join(' · ');

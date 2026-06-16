@@ -185,8 +185,8 @@ export async function reviewSignal(
 
 export interface ApiContact {
   id: string;
-  name: string;
-  title: string | null;
+  full_name: string;
+  role: string | null;
   email: string | null;
   linkedin_url: string | null;
   department: string | null;

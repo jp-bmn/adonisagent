@@ -96,9 +96,9 @@ export default async function HospitalProfilePage({ params }: PageProps) {
                 {contacts.map((c) => (
                   <div key={c.id} className="flex flex-col gap-1">
                     <div className="text-sm font-semibold text-ink">
-                      {c.name || 'Unknown contact'}
+                      {c.full_name || 'Unknown contact'}
                     </div>
-                    {c.title && <div className="text-xs text-slate-500">{c.title}</div>}
+                    {c.role && <div className="text-xs text-slate-500">{c.role}</div>}
                     <div className="flex items-center gap-3 flex-wrap">
                       {c.linkedin_url && (
                         <a
