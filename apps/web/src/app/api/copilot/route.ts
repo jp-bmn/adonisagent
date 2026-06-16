@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchSignals, fetchHospitals, fetchHospitalContacts } from '@/lib/api';
 
-const SYSTEM_PROMPT_BASE = `You are an AI co-pilot for Adonis Account Intelligence, a sales intelligence tool for the Adonis healthcare RCM (Revenue Cycle Management) sales team.
+const SYSTEM_PROMPT_BASE = `You are Iris, an AI co-pilot for Adonis Account Intelligence — a sales intelligence tool for the Adonis healthcare RCM (Revenue Cycle Management) sales team.
 
-Your job is to help account executives interpret signals and decide how to act. You do NOT need live database access — the rep will describe the signal or account situation, and you provide strategic guidance.
-
-When a rep mentions a hospital, signal, or event, immediately give them:
-- What it means for their sales opportunity
-- The specific outreach angle to take
-- The timing window if relevant
+Your job is to help account executives interpret signals, prioritize outreach, and act fast on opportunities. You have access to live signals and revenue & finance leadership contacts for the rep's assigned hospitals.
 
 Always tie answers to RCM — denial rates, billing operations, Epic migrations, CFO transitions, vendor evaluations, revenue cycle staffing. Adonis sells RCM automation and revenue cycle optimization to hospitals.
 
-Be direct and confident. No disclaimers about missing data or system access. 2-4 sentences max unless more detail is requested.
+Be direct and confident. No disclaimers about missing data or system access.
 
-When citing a signal, include the source as a markdown link at the end of the relevant sentence, like: [Source Name](url). Only link sources that are provided in the signal data.`;
+When citing a signal, include the source as a markdown link: [Source Name](url). Only link sources provided in the signal data.
+
+SPECIAL BEHAVIORS:
+- When asked for a "briefing" or "brief me": give a structured morning brief with (1) urgent signals ranked by priority, (2) top 2-3 outreach opportunities with the contact name and why now, (3) one sentence on what to ignore this week. Use bold headers.
+- When asked "who should I call": rank the rep's accounts by urgency + timing window. For each, give the contact name, why now, and the pitch angle in one sentence.
+- When asked to "draft an email" or "write an outreach email": always start your response with "Subject:" on the first line, then a blank line, then the email body addressed to the specific contact if known. Keep it under 150 words. Make it specific to the signal — no generic language.`;
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -22,20 +22,40 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ reply: 'API key not configured.' }, { status: 200 });
   }
 
-  const { message, history } = await req.json();
+  const { message, history, userId, isAdmin } = await req.json();
 
   let signalsContext = 'No live signals available.';
   let contactsContext = 'No contacts available.';
+  let territoryContext = '';
+
   try {
     const [signals, hospitals] = await Promise.all([
       fetchSignals(),
       fetchHospitals(),
     ]);
+
+    // Determine this user's territory
+    const myHospitals = isAdmin
+      ? hospitals
+      : hospitals.filter((h) => h.ae_users.some((u) => u.id === userId));
+
+    const myHospitalIds = new Set(myHospitals.map((h) => h.id));
     const hospitalMap = Object.fromEntries(hospitals.map((h) => [h.id, h.name]));
 
-    // Fetch contacts for all hospitals in parallel
+    // Find the user's name
+    let userName = 'the rep';
+    for (const h of hospitals) {
+      const match = h.ae_users.find((u) => u.id === userId);
+      if (match) { userName = match.name; break; }
+    }
+
+    territoryContext = isAdmin
+      ? `You are speaking with ${userName} (Admin — sees all accounts).`
+      : `You are speaking with ${userName}. Their accounts: ${myHospitals.map((h) => h.name).join(', ')}.`;
+
+    // Contacts for this user's hospitals only
     const allContacts = await Promise.all(
-      hospitals.map((h) =>
+      myHospitals.map((h) =>
         fetchHospitalContacts(h.id)
           .then((contacts) => contacts.map((c) => ({ ...c, hospitalName: h.name })))
           .catch(() => [])
@@ -54,8 +74,9 @@ export async function POST(req: NextRequest) {
         .join('\n');
     }
 
+    // Signals for this user's hospitals only
     const relevant = signals
-      .filter((s) => s.tier !== 'filtered_out')
+      .filter((s) => s.tier !== 'filtered_out' && myHospitalIds.has(s.hospital_id))
       .slice(0, 60);
 
     if (relevant.length > 0) {
@@ -82,6 +103,8 @@ export async function POST(req: NextRequest) {
 
   const systemPrompt = `${SYSTEM_PROMPT_BASE}
 
+${territoryContext}
+
 REVENUE & FINANCE LEADERSHIP CONTACTS (name · title · LinkedIn · email):
 ${contactsContext}
 
@@ -105,7 +128,7 @@ ${signalsContext}`;
     },
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 512,
+      max_tokens: 1024,
       system: systemPrompt,
       messages,
     }),
