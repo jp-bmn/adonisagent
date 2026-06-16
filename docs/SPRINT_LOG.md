@@ -52,6 +52,17 @@ Updated at the end of every session.
 - **Hospital coverage** — signals per hospital, flag any with < 3 signals before demo
 - **Open GitHub issues** — pull from GitHub API, grouped by assignee
 
+### Self-Healing Agent (post-demo)
+
+Nightly Railway cron job that uses Claude to reason about what's broken and fix it automatically — making Adonis a true agentic system, not just a dashboard.
+
+- **Nightly health check** — runs at 2 AM ET, pulls all contacts + signals from the live API
+- **Contact integrity scan** — calls the LinkedIn verifier API for any URL that is null, a post URL (`/posts/`), or flagged as the wrong person; writes corrected URLs back via API
+- **Signal quality audit** — detects 404 source URLs, signals attributed to wrong hospitals, AI error messages saved as contact names
+- **Auto-escalation** — if the agent can't fix something itself (e.g. no LinkedIn profile found), it opens a GitHub issue with full context and assigns to the right owner (Michael = contacts, Joel = signals/API)
+- **Morning Slack summary** — posts at 7 AM ET: ✅ self-fixed / ❌ still broken + assignee tagged, so the team walks in knowing exactly what needs attention
+- **Why it matters** — eliminates the manual back-and-forth (e.g. Michael testing locally but not on prod, wrong people showing up in contact cards) that cost us time in Sprint 13
+
 ### Monitoring + Audit (for Adonis handoff)
 
 - **Audit log** — timestamped record of all signal adds/removals, contact updates, review queue actions (who approved/dismissed what and when)
