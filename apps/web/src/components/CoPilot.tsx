@@ -469,7 +469,11 @@ export default function CoPilot() {
             {messages.length === 0 && (
               <div className="space-y-2">
                 <button
-                  onClick={() => handleSend('Give me a morning briefing — urgent signals, top outreach opportunities, and key contacts to reach this week.')}
+                  onClick={() =>
+                    handleSend(
+                      'Give me a morning briefing — urgent signals, top outreach opportunities, and key contacts to reach this week.'
+                    )
+                  }
                   className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold transition hover:opacity-90"
                   style={{ background: '#0F3D3E', color: '#EFEFC8' }}
                 >
