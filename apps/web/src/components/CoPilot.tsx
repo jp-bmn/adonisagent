@@ -9,7 +9,7 @@ interface Message {
   text: string;
 }
 
-function HermesMessage({ text }: { text: string }) {
+function IrisMessage({ text }: { text: string }) {
   const lines = text.split('\n');
   const nodes: React.ReactNode[] = [];
   let i = 0;
@@ -70,8 +70,8 @@ function HermesMessage({ text }: { text: string }) {
 }
 
 function renderInline(text: string): React.ReactNode {
-  // Split on **bold** patterns
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  // Split on **bold** and [text](url) patterns
+  const parts = text.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return (
@@ -80,13 +80,27 @@ function renderInline(text: string): React.ReactNode {
         </strong>
       );
     }
+    const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (linkMatch) {
+      return (
+        <a
+          key={i}
+          href={linkMatch[2]}
+          target="_blank"
+          rel="noreferrer"
+          className="text-accent underline underline-offset-2 hover:opacity-80"
+        >
+          {linkMatch[1]}
+        </a>
+      );
+    }
     return part;
   });
 }
 
-const STORAGE_KEY = 'adonis-hermes-history';
-const PILL_KEY = 'adonis-hermes-pill-shown';
-const OPENED_KEY = 'adonis-hermes-opened';
+const STORAGE_KEY = 'adonis-iris-history';
+const PILL_KEY = 'adonis-iris-pill-shown';
+const OPENED_KEY = 'adonis-iris-opened';
 const MAX_STORED = 200;
 const MAX_CONTEXT = 40;
 const BUBBLE_SIZE = 56;
@@ -131,7 +145,7 @@ export default function CoPilot() {
   const [pulsing, setPulsing] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   // null = not yet mounted (SSR safe)
-  const { userId } = useUser();
+  const { userId, isAdmin } = useUser();
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pillDismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -257,8 +271,8 @@ export default function CoPilot() {
     localStorage.removeItem(STORAGE_KEY);
   }
 
-  async function handleSend() {
-    const text = input.trim();
+  async function handleSend(overrideText?: string) {
+    const text = (overrideText ?? input).trim();
     if (!text) return;
     setInput('');
     const updated = [...messages, { role: 'user' as const, text }];
@@ -271,6 +285,8 @@ export default function CoPilot() {
         body: JSON.stringify({
           message: text,
           history: updated.slice(-MAX_CONTEXT),
+          userId,
+          isAdmin,
         }),
       });
       const data = await res.json();
@@ -288,7 +304,7 @@ export default function CoPilot() {
   function handleKey(e: React.KeyboardEvent) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      handleSend(undefined);
     }
   }
 
@@ -349,7 +365,7 @@ export default function CoPilot() {
               pointerEvents: 'none',
             }}
           >
-            Ask Hermes
+            Ask Iris
           </div>
         )}
 
@@ -388,7 +404,7 @@ export default function CoPilot() {
               cursor: 'grab',
               transition: 'background 150ms',
             }}
-            title="Hermes — signal co-pilot (drag to move)"
+            title="Iris — signal co-pilot (drag to move)"
           >
             {open ? (
               <span style={{ fontSize: 24, lineHeight: 1 }}>×</span>
@@ -426,7 +442,7 @@ export default function CoPilot() {
             }}
           >
             <div>
-              <div className="text-white text-sm font-semibold">Hermes</div>
+              <div className="text-white text-sm font-semibold">Iris</div>
               <div className="text-slate-400 text-[10px] font-mono">for Adonis · beta</div>
             </div>
             <div className="flex items-center gap-3">
@@ -451,26 +467,62 @@ export default function CoPilot() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-72 min-h-[8rem]">
             {messages.length === 0 && (
-              <p className="text-xs text-slate-400 text-center">
-                Ask Hermes about your accounts, signals, or territory.
-              </p>
-            )}
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[85%] text-xs px-3 py-2 rounded-xl leading-relaxed ${
-                    m.role === 'user'
-                      ? 'bg-accent text-white rounded-br-none'
-                      : 'bg-paper text-slate-700 rounded-bl-none'
-                  }`}
+              <div className="space-y-2">
+                <button
+                  onClick={() => handleSend('Give me a morning briefing — urgent signals, top outreach opportunities, and key contacts to reach this week.')}
+                  className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold transition hover:opacity-90"
+                  style={{ background: '#0F3D3E', color: '#EFEFC8' }}
                 >
-                  {m.role === 'assistant' ? <HermesMessage text={m.text} /> : m.text}
-                </div>
+                  ⚡ Brief me on my territory
+                </button>
+                {[
+                  'Who should I call this week?',
+                  'Draft an outreach email for Ascension',
+                  "What's urgent across my accounts?",
+                ].map((prompt) => (
+                  <button
+                    key={prompt}
+                    onClick={() => handleSend(prompt)}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs text-slate-600 border border-line hover:bg-paper transition"
+                  >
+                    {prompt}
+                  </button>
+                ))}
               </div>
-            ))}
+            )}
+            {messages.map((m, i) => {
+              const isEmail = m.role === 'assistant' && /^Subject:/m.test(m.text);
+              return (
+                <div
+                  key={i}
+                  className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  {isEmail ? (
+                    <div className="w-full space-y-1.5">
+                      <div className="bg-paper border border-line rounded-xl px-3 py-2.5 text-xs text-slate-700 leading-relaxed">
+                        <IrisMessage text={m.text} />
+                      </div>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(m.text)}
+                        className="text-[10px] font-mono text-accent hover:underline"
+                      >
+                        📋 Copy to clipboard
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      className={`max-w-[85%] text-xs px-3 py-2 rounded-xl leading-relaxed ${
+                        m.role === 'user'
+                          ? 'bg-accent text-white rounded-br-none'
+                          : 'bg-paper text-slate-700 rounded-bl-none'
+                      }`}
+                    >
+                      {m.role === 'assistant' ? <IrisMessage text={m.text} /> : m.text}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
             {loading && (
               <div className="flex justify-start">
                 <div className="bg-paper text-slate-400 text-xs px-3 py-2 rounded-xl rounded-bl-none">
@@ -491,7 +543,7 @@ export default function CoPilot() {
               className="flex-1 text-xs border border-line rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-accent"
             />
             <button
-              onClick={handleSend}
+              onClick={() => handleSend(undefined)}
               disabled={!input.trim() || loading}
               className="px-3 py-2 rounded-lg transition hover:opacity-90 active:scale-95"
               style={{

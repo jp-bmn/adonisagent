@@ -6,8 +6,9 @@ import { usePathname } from 'next/navigation';
 const items = [
   { href: '/', label: 'Signal feed', glyph: '▦' },
   { href: '/hospitals', label: 'Hospitals', glyph: '▢' },
+  { href: '/review', label: 'Review', glyph: '◈' },
   { href: '/alerts', label: 'Alerts', glyph: '◷' },
-  { href: '/export', label: 'Export (CSV)', glyph: '↧' },
+  { href: '/export', label: 'Export', glyph: '↧' },
 ];
 
 export default function Nav() {

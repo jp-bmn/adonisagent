@@ -12,7 +12,28 @@ export default async function HospitalsPage() {
         <p className="text-sm text-slate-500 mt-1">{hospitals.length} accounts monitored</p>
       </header>
 
-      <div className="bg-white border border-line rounded-xl overflow-hidden">
+      {/* Mobile: stacked cards */}
+      <div className="md:hidden bg-white border border-line rounded-xl overflow-hidden divide-y divide-line">
+        {hospitals.map((h) => (
+          <Link
+            key={h.id}
+            href={`/hospitals/${h.id}`}
+            className="flex items-center gap-3 px-4 py-3.5 active:bg-paper"
+          >
+            <HospitalLogo name={h.name} websiteUrl={h.website_url} size="sm" />
+            <div className="min-w-0 flex-1">
+              <div className="font-serif font-semibold text-brand truncate">{h.name}</div>
+              {h.division_note && (
+                <div className="text-xs text-slate-500 truncate">{h.division_note}</div>
+              )}
+            </div>
+            <span className="text-slate-300 flex-none">›</span>
+          </Link>
+        ))}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="hidden md:block bg-white border border-line rounded-xl overflow-hidden">
         <table className="w-full">
           <thead className="bg-paper border-b border-line">
             <tr>
@@ -39,7 +60,6 @@ export default async function HospitalsPage() {
                   </Link>
                 </td>
                 <td className="px-5 py-4 text-sm text-slate-600">
-                  {/* Location is not returned by fetchHospitals currently, but website is */}
                   {h.website_url ? (
                     <a
                       href={h.website_url}

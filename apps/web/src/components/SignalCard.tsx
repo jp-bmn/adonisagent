@@ -11,7 +11,7 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
   const isUrgent = signal.tier === 'urgent';
   // worth_knowing = standard digest signal; filtered_out should not be rendered
   const label = SIGNAL_TYPE_LABELS[signal.signal_type] ?? signal.signal_type;
-  const headline = signal.title ?? label;
+  const headline = signal.title ? stripHtml(signal.title) : label;
   const date = signal.published_date ?? signal.created_at;
 
   if (isUrgent) {
@@ -165,6 +165,10 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
       </div>
     </div>
   );
+}
+
+function stripHtml(text: string): string {
+  return text.replace(/<[^>]*>/g, '').trim();
 }
 
 function sourceHostname(url: string): string {

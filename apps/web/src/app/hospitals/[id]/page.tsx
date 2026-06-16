@@ -55,8 +55,20 @@ export default async function HospitalProfilePage({ params }: PageProps) {
                 <span className="font-medium text-ink">{aes.map((u) => u.name).join(', ')}</span>
               </div>
             )}
+            {/* Stats inline below name on mobile */}
+            <div className="flex gap-5 mt-3 md:hidden">
+              <div>
+                <div className="font-serif text-xl font-bold text-urgent">{urgentCount}</div>
+                <div className="text-xs text-slate-500">Urgent</div>
+              </div>
+              <div>
+                <div className="font-serif text-xl font-bold text-brand">{signals.length}</div>
+                <div className="text-xs text-slate-500">Total signals</div>
+              </div>
+            </div>
           </div>
-          <div className="flex gap-4 flex-none text-right">
+          {/* Stats on right — desktop only */}
+          <div className="hidden md:flex gap-4 flex-none text-right self-start">
             <div>
               <div className="font-serif text-2xl font-bold text-urgent">{urgentCount}</div>
               <div className="text-xs text-slate-500">Urgent</div>
@@ -70,7 +82,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
 
         {/* Body */}
         <div className="grid grid-cols-1 md:grid-cols-2">
-          <section className="p-6 border-r border-line">
+          <section className="p-4 md:p-6 border-b md:border-b-0 md:border-r border-line">
             <h2 className="text-xs font-mono uppercase tracking-widest text-slate-500 mb-4">
               Revenue &amp; finance leadership
             </h2>
@@ -82,33 +94,38 @@ export default async function HospitalProfilePage({ params }: PageProps) {
             ) : (
               <div className="space-y-4">
                 {contacts.map((c) => (
-                  <div key={c.id} className="flex flex-col gap-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-ink">{c.name}</span>
+                  <div key={c.id} className="flex flex-col gap-1">
+                    <div className="text-sm font-semibold text-ink">
+                      {c.full_name || 'Unknown contact'}
+                    </div>
+                    {c.role && <div className="text-xs text-slate-500">{c.role}</div>}
+                    <div className="flex items-center gap-3 flex-wrap">
                       {c.linkedin_url && (
                         <a
                           href={c.linkedin_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[10px] font-mono text-accent hover:underline"
+                          className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-accent hover:underline"
                         >
-                          LinkedIn
+                          ↗ LinkedIn
+                        </a>
+                      )}
+                      {c.email && (
+                        <a
+                          href={`mailto:${c.email}`}
+                          className="text-[10px] font-mono text-slate-400 hover:underline"
+                        >
+                          {c.email}
                         </a>
                       )}
                     </div>
-                    {c.title && <span className="text-xs text-slate-500">{c.title}</span>}
-                    {c.email && (
-                      <a href={`mailto:${c.email}`} className="text-xs text-brand hover:underline">
-                        {c.email}
-                      </a>
-                    )}
                   </div>
                 ))}
               </div>
             )}
           </section>
 
-          <section className="p-6">
+          <section className="p-4 md:p-6">
             <h2 className="text-xs font-mono uppercase tracking-widest text-slate-500 mb-4">
               Signal history · {signals.length} total
             </h2>
@@ -119,7 +136,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
             ) : (
               <div className="space-y-3">
                 {signals.map((signal) => (
-                  <SignalCard key={signal.id} signal={signal} />
+                  <SignalCard key={signal.id} signal={signal} hospitalName={hospital.name} />
                 ))}
               </div>
             )}
