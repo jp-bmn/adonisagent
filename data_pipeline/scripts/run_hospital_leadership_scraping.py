@@ -101,11 +101,48 @@ Snippets:
             prior_employer = None
             
         if "unknown" not in extracted_name.lower():
+            
+            # Secondary search specifically for prior employer
+            pe_query = f'"{extracted_name}" "{hospital_name}" "prior to" OR "previously" OR "former"'
+            pe_results = serper.search_web(query=pe_query, num_results=5)
+            pe_snippets = "\\n\\n".join(
+                f"Title: {r.get('title')}\\nSnippet: {r.get('snippet')}" 
+                for r in pe_results
+            )
+            
+            pe_prompt = f"""
+You are an expert data extraction assistant. We are looking for the prior employer of {extracted_name}, who is the {role} at {hospital_name}.
+Based on the following search snippets, extract the name of their most recent prior employer before joining {hospital_name}.
+Return a JSON object with exactly one key: "prior_employer".
+If you cannot determine the prior employer from the snippets, set "prior_employer" to null.
+Do not wrap your response in markdown code blocks. Just output raw JSON.
+
+Snippets:
+{pe_snippets}
+"""
+            try:
+                pe_response = client.messages.create(
+                    model="claude-haiku-4-5-20251001",
+                    max_tokens=100,
+                    temperature=0.0,
+                    messages=[{"role": "user", "content": pe_prompt}]
+                )
+                pe_content = pe_response.content[0].text.strip()
+                if pe_content.startswith("```json"):
+                    pe_content = pe_content.split("```json")[1].split("```")[0].strip()
+                pe_data = json.loads(pe_content)
+                extracted_prior_employer = pe_data.get("prior_employer", prior_employer)
+                if not extracted_prior_employer:
+                    extracted_prior_employer = prior_employer # Fallback to the one extracted from news
+            except Exception as e:
+                print(f"Error calling Anthropic for prior employer: {e}")
+                extracted_prior_employer = prior_employer
+
             contacts.append({
                 "hospital": hospital_name,
                 "role": role,
                 "name": extracted_name,
-                "prior_employer": prior_employer,
+                "prior_employer": extracted_prior_employer,
                 "linkedin_url": "", # Left blank for the verifier agent
                 "source": str(results[0].get("link", ""))
             })
@@ -208,9 +245,11 @@ def run() -> Path:
                 if exact_match:
                     patch_payload = {
                         "role": role,
-                        "prior_employer": contact["prior_employer"],
-                        "linkedin_url": contact["linkedin_url"]
                     }
+                    if contact["prior_employer"]:
+                        patch_payload["prior_employer"] = contact["prior_employer"]
+                    if contact["linkedin_url"]:
+                        patch_payload["linkedin_url"] = contact["linkedin_url"]
                     res = patch_contact(
                         endpoint_url=contacts_endpoint,
                         contact_id=exact_match["id"],

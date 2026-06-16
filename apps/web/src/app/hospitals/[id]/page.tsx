@@ -85,7 +85,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
                   <div key={c.id} className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold text-ink">{c.full_name}</span>
-                      {c.linkedin_url && (
+                      {c.linkedin_url ? (
                         <a
                           href={c.linkedin_url}
                           target="_blank"
@@ -94,6 +94,10 @@ export default async function HospitalProfilePage({ params }: PageProps) {
                         >
                           LinkedIn
                         </a>
+                      ) : (
+                        <span className="text-[10px] font-mono text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                          Needs review
+                        </span>
                       )}
                     </div>
                     {c.role && <span className="text-xs text-slate-500">{c.role}</span>}
