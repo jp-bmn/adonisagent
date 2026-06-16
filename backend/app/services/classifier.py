@@ -107,25 +107,30 @@ an AI-powered account intelligence platform for RCM (Revenue Cycle Management) v
 Your job is to classify a hospital or health system news article and determine whether \
 it represents a sales signal for RCM solutions.
 
-CRITICAL: Hospital Attribution
-The hospital must be explicitly and centrally discussed in the article. If the hospital is only mentioned in passing, or is not the primary subject of the article, you MUST return a `confidence_score` of 0.20 or lower, or classify it as `filtered_out`. Apply a severe confidence penalty for weak attribution.
+CRITICAL: Hospital Attribution & Event Validation
+- The target hospital must be explicitly and centrally discussed in the article. If the hospital is only mentioned in passing, or is not the primary subject of the article, you MUST return a `confidence_score` of 0.20 or lower, or classify it as `filtered_out`.
+- STRICT EVENT VALIDATION: Do NOT match on keywords alone. The article MUST describe a specific, concrete, actual event of that signal type occurring at the target hospital. If the article merely discusses general industry trends, company business strategies (e.g. Epic Systems as a vendor), or broad tracker/list indices without focusing on a specific event at the target hospital, you MUST classify it as `filtered_out` or assign a `confidence_score` below 0.50.
 
 Signal types and when they apply:
-- leadership_change: C-suite or VP-level hire/departure in revenue-touching roles (CRO, CFO, CIO, VP Revenue)
-- rcm_hiring_spike: Multiple RCM job postings indicating internal capacity gaps
-- epic_go_live: EHR system go-live (Epic, Cerner, Meditech) — prime time for RCM support
-- post_golive_friction: Billing problems, denial spikes, AR issues after EHR launch
-- ma_acquisition: Hospital acquisition or merger — budget/vendor resets typically follow
-- vendor_change: Switching or terminating a billing/RCM vendor
-- vendor_dispute: Lawsuit or public dispute with a vendor
-- restructuring: Layoffs, department closures, workforce reductions
-- new_hospital_launch: New facility opening (expansion opportunity)
-- financial_event: Operating loss, budget cuts, credit downgrade
-- ai_adoption_outside_rcm: AI hiring or investment outside RCM (context signal)
-- automation_proof: Evidence hospital already automates revenue processes
-- named_automation_owner: Specific person named as leading automation/digital initiative
-- thought_leadership: Executive publishing on RCM or digital health topics
-- filtered_out: Not relevant to RCM sales (community events, unrelated news)
+- leadership_change: C-suite or VP-level hire/departure/appointment in revenue-touching roles (CRO, CFO, CIO, CEO, VP Revenue) at the target hospital.
+  * NEGATIVE EXAMPLES: Do NOT tag broad layoff tracker list pages or general industry updates as leadership_change.
+- rcm_hiring_spike: Multiple RCM job postings indicating capacity gaps at the target hospital.
+- epic_go_live: Concrete EHR system go-live, implementation, rollout, or launch event (Epic, Cerner, Meditech) occurring at the target hospital.
+  * NEGATIVE EXAMPLES: A general article about Epic Systems as a company, generic startup business strategies around Epic, generic industry-wide Epic discussions, or a lawsuit/privacy dispute involving patient records (even if Epic is mentioned). These are NOT go-lives and must be classified as `filtered_out` or `vendor_dispute`.
+- post_golive_friction: Billing problems, denial spikes, AR issues after EHR launch at the target hospital.
+- ma_acquisition: Hospital acquisition or merger event involving the target hospital.
+- vendor_change: Switching or terminating a billing/RCM vendor at the target hospital.
+- vendor_dispute: Lawsuit or public dispute with a vendor at the target hospital.
+- restructuring: Layoffs, unit closures, or workforce reductions at the target hospital.
+  * NEGATIVE EXAMPLES: Generic layoff tracker/list pages covering multiple industry players. These must be `filtered_out` unless focusing on a massive layoff event at the target hospital.
+- new_hospital_launch: New facility opening or expansion at the target hospital.
+- financial_event: Operating loss, budget cuts, credit downgrade at the target hospital.
+- ai_adoption_outside_rcm: AI hiring or investment outside RCM at the target hospital.
+  * NEGATIVE EXAMPLES: Generic discussion of CIO opinions on AI without specific target hospital adoption events.
+- automation_proof: Evidence hospital already automates revenue processes at the target hospital.
+- named_automation_owner: Specific person named as leading automation/digital initiative at the target hospital.
+- thought_leadership: Executive publishing on RCM or digital health topics at the target hospital.
+- filtered_out: Not relevant to RCM sales (community events, unrelated news, general industry roundups, generic company/vendor profile articles).
 
 Tiers:
 - urgent: Act this week — leadership change, EHR go-live, acquisition, friction, restructuring

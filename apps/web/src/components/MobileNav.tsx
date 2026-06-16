@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useUser } from '@/components/UserProvider';
 
 const items = [
   { href: '/', label: 'Feed', glyph: '▦' },
@@ -13,6 +14,15 @@ const items = [
 
 export default function MobileNav() {
   const pathname = usePathname();
+  const { userName } = useUser();
+  const initials = userName
+    ? userName
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase()
+    : null;
 
   return (
     <>
@@ -47,6 +57,14 @@ export default function MobileNav() {
         <span className="font-serif font-bold text-sm" style={{ color: '#EFEFC8' }}>
           Account Intel
         </span>
+        {initials && (
+          <div
+            className="ml-auto w-7 h-7 rounded-full flex items-center justify-center flex-none text-[10px] font-bold"
+            style={{ background: '#EFEFC8', color: '#0F3D3E' }}
+          >
+            {initials}
+          </div>
+        )}
       </header>
 
       {/* Bottom tab bar */}

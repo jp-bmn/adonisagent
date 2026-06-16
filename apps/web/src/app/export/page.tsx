@@ -39,7 +39,7 @@ export default function ExportPage() {
         <h2 className="font-serif text-lg font-semibold text-brand mb-2">Contacts CSV</h2>
         <p className="text-sm text-slate-500 mb-6">
           Exports active hospital contacts with first/last name, job title, company name, website,
-          verified LinkedIn URL, and recent signal notes.
+          verified LinkedIn URL, and recent signal notes. HubSpot-ready format.
         </p>
         <button
           onClick={handleDownload}

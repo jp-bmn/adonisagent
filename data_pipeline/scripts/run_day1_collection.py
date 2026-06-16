@@ -664,6 +664,12 @@ def _hospital_aliases(hospital: str) -> tuple[str, ...]:
             "new york presbyterian",
             "nyp",
         ),
+        "new york-presbyterian": (
+            "newyork-presbyterian",
+            "new york-presbyterian",
+            "new york presbyterian",
+            "nyp",
+        ),
         "umass memorial": (
             "umass memorial",
             "umass",
@@ -679,12 +685,45 @@ def _hospital_aliases(hospital: str) -> tuple[str, ...]:
             "uams health",
             "university of arkansas for medical sciences",
         ),
+        "university of arkansas medical sciences": (
+            "university of arkansas",
+            "uams",
+            "uams health",
+            "university of arkansas for medical sciences",
+        ),
+        "university of arkansas for medical sciences": (
+            "university of arkansas",
+            "uams",
+            "uams health",
+            "university of arkansas for medical sciences",
+        ),
         "commonspirit": (
             "commonspirit",
             "commonspirit health",
             "chi",
             "catholic health initiatives",
             "dignity health",
+        ),
+        "commonspirit health": (
+            "commonspirit",
+            "commonspirit health",
+            "chi",
+            "catholic health initiatives",
+            "dignity health",
+        ),
+        "jefferson health": (
+            "jefferson health",
+            "jefferson",
+            "jeff",
+            "thomas jefferson university",
+            "thomas jefferson university hospitals",
+        ),
+        "jefferson": (
+            "jefferson health",
+            "jefferson",
+            "jeff",
+            "thomas jefferson university",
+            "thomas jefferson university hospitals",
         ),
     }
     key = hospital.lower().strip()
@@ -846,8 +885,10 @@ def run(quality_mode_override: str | None = None) -> Path:
             )
             continue
 
-        # Even for trusted sources, broad tracker pages must mention the target hospital.
-        if _is_broad_update_page(signal) and not _mentions_target_hospital(signal):
+        # The agent should only attribute a signal to a hospital if the article directly references that specific health system.
+        # Broad tracker pages must always mention the target hospital, even if from an allowlisted source.
+        must_mention = not allowlisted or _is_broad_update_page(signal)
+        if must_mention and not _mentions_target_hospital(signal):
             skip_counter["noise_not_hospital_specific"] += 1
             skipped_signals.append(
                 {
