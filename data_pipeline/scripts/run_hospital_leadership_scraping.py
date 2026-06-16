@@ -47,55 +47,56 @@ def post_contact(
 
 
 def extract_leadership(hospital_name: str, serper: SerperClient) -> list[dict[str, str]]:
-    """Use serper to find leadership for the hospital."""
+    """Use serper and Claude to find current leadership for the hospital."""
+    import os
+    from anthropic import Anthropic
+    
+    anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not anthropic_api_key:
+        raise ValueError("Missing ANTHROPIC_API_KEY")
+        
+    client = Anthropic(api_key=anthropic_api_key)
     roles = ["CEO", "CFO", "CRO", "VP Revenue Cycle"]
     contacts: list[dict[str, str]] = []
 
     for role in roles:
         query = f"{hospital_name} {role} leadership team"
-        results = serper.search_news(query=query, num_results=3)
-
-        # Use a hardcoded dictionary of real leadership for these hospitals
-        real_leadership = {
-            "NewYork-Presbyterian": {"CEO": "Steven J. Corwin", "CFO": "Jacqueline Herd-Dunn", "CRO": "Brian Fullerton", "VP Revenue Cycle": "Robert Smith"},
-            "UMass Memorial": {"CEO": "Eric Dickson", "CFO": "Sergio Melgar", "CRO": "Michael Cimis", "VP Revenue Cycle": "Linda Davis"},
-            "Ascension": {"CEO": "Joseph Impicciche", "CFO": "Elizabeth Foshage", "CRO": "Carolyn Schneider", "VP Revenue Cycle": "Mark Brown"},
-            "University of Arkansas": {"CEO": "Cam Patterson", "CFO": "Amanda George", "CRO": "David Jones", "VP Revenue Cycle": "Sarah Chen"},
-            "CommonSpirit": {"CEO": "Wright L. Lassiter III", "CFO": "Daniel Morissette", "CRO": "Robert Polakoff", "VP Revenue Cycle": "Elena Johnson"}
-        }
-
-        real_urls = {
-            "Steven J. Corwin": "",
-            "Jacqueline Herd-Dunn": "",
-            "Brian Fullerton": "https://www.linkedin.com/in/brian-fullerton-44a33b160",
-            "Robert Smith": "https://www.linkedin.com/in/robert-smith-740614a",
-            "Eric Dickson": "https://www.linkedin.com/in/eric-dickson-md-80960420",
-            "Sergio Melgar": "https://www.linkedin.com/in/sergio-melgar-61b1877b",
-            "Michael Cimis": "",
-            "Linda Davis": "https://www.linkedin.com/in/linda-davis-63768b1",
-            "Joseph Impicciche": "https://www.linkedin.com/in/joseph-impicciche-0221b211",
-            "Elizabeth Foshage": "https://www.linkedin.com/in/liz-foshage-066b3b12",
-            "Carolyn Schneider": "https://www.linkedin.com/in/caroline-schneider-8900261b6",
-            "Mark Brown": "https://www.linkedin.com/in/ascensionbrown",
-            "Cam Patterson": "https://www.linkedin.com/in/cam-patterson-10900313",
-            "Amanda George": "https://www.linkedin.com/in/amanda-george-65358565",
-            "David Jones": "https://www.linkedin.com/in/david-jones-61a451a",
-            "Sarah Chen": "https://www.linkedin.com/in/sarah-x-chen",
-            "Wright L. Lassiter III": "https://www.linkedin.com/in/wright-lassiter-iii",
-            "Daniel Morissette": "https://www.linkedin.com/in/danielmorissette",
-            "Robert Polakoff": "",
-            "Elena Johnson": "https://www.linkedin.com/in/elena-johnson-01953834"
-        }
+        results = serper.search_news(query=query, num_results=5)
         
-        extracted_name = real_leadership.get(hospital_name, {}).get(role, "Unknown")
-        linkedin_url = real_urls.get(extracted_name, "")
+        if not results:
+            continue
+            
+        snippets = "\n\n".join(
+            f"Title: {r.get('title')}\nSnippet: {r.get('snippet')}" 
+            for r in results
+        )
         
-        if results:
+        prompt = f"""
+You are an expert data extraction assistant. Based on the following news snippets, extract the name of the CURRENT {role} of {hospital_name}.
+If the person has retired or stepped down, extract the name of the new or current {role}.
+Return ONLY the person's full name, and nothing else. If you cannot confidently determine the name, return 'Unknown'.
+
+Snippets:
+{snippets}
+"""
+        try:
+            response = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=50,
+                temperature=0.0,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            extracted_name = response.content[0].text.strip()
+        except Exception as e:
+            print(f"Error calling Anthropic: {e}")
+            extracted_name = "Unknown"
+            
+        if extracted_name != "Unknown":
             contacts.append({
                 "hospital": hospital_name,
                 "role": role,
                 "name": extracted_name,
-                "linkedin_url": linkedin_url,
+                "linkedin_url": "", # Left blank for the verifier agent
                 "source": str(results[0].get("link", ""))
             })
             
