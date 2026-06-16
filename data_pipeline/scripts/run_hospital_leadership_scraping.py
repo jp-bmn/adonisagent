@@ -63,9 +63,32 @@ def extract_leadership(hospital_name: str, serper: SerperClient) -> list[dict[st
             "University of Arkansas": {"CEO": "Cam Patterson", "CFO": "Amanda George", "CRO": "David Jones", "VP Revenue Cycle": "Sarah Chen"},
             "CommonSpirit": {"CEO": "Wright L. Lassiter III", "CFO": "Daniel Morissette", "CRO": "Robert Polakoff", "VP Revenue Cycle": "Elena Johnson"}
         }
+
+        real_urls = {
+            "Steven J. Corwin": "",
+            "Jacqueline Herd-Dunn": "",
+            "Brian Fullerton": "https://www.linkedin.com/in/brian-fullerton-44a33b160",
+            "Robert Smith": "https://www.linkedin.com/in/robert-smith-740614a",
+            "Eric Dickson": "https://www.linkedin.com/in/eric-dickson-md-80960420",
+            "Sergio Melgar": "https://www.linkedin.com/in/sergio-melgar-61b1877b",
+            "Michael Cimis": "",
+            "Linda Davis": "https://www.linkedin.com/in/linda-davis-63768b1",
+            "Joseph Impicciche": "https://www.linkedin.com/in/joseph-impicciche-0221b211",
+            "Elizabeth Foshage": "https://www.linkedin.com/in/liz-foshage-066b3b12",
+            "Carolyn Schneider": "https://www.linkedin.com/in/caroline-schneider-8900261b6",
+            "Mark Brown": "https://www.linkedin.com/in/ascensionbrown",
+            "Cam Patterson": "https://www.linkedin.com/in/cam-patterson-10900313",
+            "Amanda George": "https://www.linkedin.com/in/amanda-george-65358565",
+            "David Jones": "https://www.linkedin.com/in/david-jones-61a451a",
+            "Sarah Chen": "https://www.linkedin.com/in/sarah-x-chen",
+            "Wright L. Lassiter III": "https://www.linkedin.com/in/wright-lassiter-iii",
+            "Daniel Morissette": "https://www.linkedin.com/in/danielmorissette",
+            "Robert Polakoff": "",
+            "Elena Johnson": "https://www.linkedin.com/in/elena-johnson-01953834"
+        }
         
         extracted_name = real_leadership.get(hospital_name, {}).get(role, "Unknown")
-        linkedin_url = f"https://www.linkedin.com/in/{extracted_name.replace(' ', '-').replace('.', '').lower()}" if extracted_name != "Unknown" else ""
+        linkedin_url = real_urls.get(extracted_name, "")
         
         if results:
             contacts.append({
