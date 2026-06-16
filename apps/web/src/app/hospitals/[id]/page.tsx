@@ -119,6 +119,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
                         </a>
                       )}
                     </div>
+
                   </div>
                 ))}
               </div>
