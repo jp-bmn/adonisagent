@@ -72,9 +72,12 @@ def extract_leadership(hospital_name: str, serper: SerperClient) -> list[dict[st
         )
         
         prompt = f"""
-You are an expert data extraction assistant. Based on the following news snippets, extract the name of the CURRENT {role} of {hospital_name}.
+You are an expert data extraction assistant. Based on the following news snippets, extract the name of the CURRENT {role} of {hospital_name}, as well as their prior employer (if mentioned in the snippets).
 If the person has retired or stepped down, extract the name of the new or current {role}.
-Return ONLY the person's full name, and nothing else. If you cannot confidently determine the name, return 'Unknown'.
+Return a JSON object with exactly two keys: "name" and "prior_employer". 
+If you cannot confidently determine the name, set "name" to "Unknown". 
+If you cannot determine the prior employer, set "prior_employer" to null.
+Do not wrap your response in markdown code blocks. Just output raw JSON.
 
 Snippets:
 {snippets}
@@ -82,20 +85,27 @@ Snippets:
         try:
             response = client.messages.create(
                 model="claude-haiku-4-5-20251001",
-                max_tokens=50,
+                max_tokens=100,
                 temperature=0.0,
                 messages=[{"role": "user", "content": prompt}]
             )
-            extracted_name = response.content[0].text.strip()
+            content = response.content[0].text.strip()
+            if content.startswith("```json"):
+                content = content.split("```json")[1].split("```")[0].strip()
+            data = json.loads(content)
+            extracted_name = data.get("name", "Unknown")
+            prior_employer = data.get("prior_employer", None)
         except Exception as e:
             print(f"Error calling Anthropic: {e}")
             extracted_name = "Unknown"
+            prior_employer = None
             
         if extracted_name != "Unknown":
             contacts.append({
                 "hospital": hospital_name,
                 "role": role,
                 "name": extracted_name,
+                "prior_employer": prior_employer,
                 "linkedin_url": "", # Left blank for the verifier agent
                 "source": str(results[0].get("link", ""))
             })
@@ -182,6 +192,7 @@ def run() -> Path:
                 "hospital_id": hospital_id,
                 "full_name": full_name,
                 "role": contact["role"],
+                "prior_employer": contact["prior_employer"],
                 "linkedin_url": contact["linkedin_url"],
                 "source_url": contact["source"]
             }
@@ -191,6 +202,7 @@ def run() -> Path:
                 if full_name in existing_map:
                     patch_payload = {
                         "role": contact["role"],
+                        "prior_employer": contact["prior_employer"],
                         "linkedin_url": contact["linkedin_url"]
                     }
                     res = patch_contact(

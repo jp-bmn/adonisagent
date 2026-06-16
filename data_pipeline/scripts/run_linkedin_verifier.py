@@ -98,8 +98,14 @@ def run():
         query = f'"{full_name}" "{hospital_name}" "{role}" site:linkedin.com'
         results = serper.search_web(query=query, num_results=3)
         
-        if not results:
-            print("  No LinkedIn results found.")
+        top_result = None
+        for r in results:
+            if "/in/" in r.get("link", ""):
+                top_result = r
+                break
+                
+        if not top_result:
+            print("  No LinkedIn profile results found.")
             patch_contact(
                 contacts_endpoint,
                 contact_id,
@@ -109,7 +115,6 @@ def run():
             )
             continue
             
-        top_result = results[0]
         url = top_result.get("link", "")
         snippet = top_result.get("snippet", "")
         title = top_result.get("title", "")
