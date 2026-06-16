@@ -87,7 +87,8 @@ async function verifyWithFallback(contact) {
     return {
       status: 'invalid_name',
       suggestedUrl: null,
-      reasoning: 'Contact name appears to be an AI error message or is missing — pipeline needs to fix this contact.',
+      reasoning:
+        'Contact name appears to be an AI error message or is missing — pipeline needs to fix this contact.',
       model: null,
     };
   }
