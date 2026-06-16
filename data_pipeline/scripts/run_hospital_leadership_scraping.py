@@ -79,6 +79,59 @@ def extract_leadership(hospital_name: str, serper: SerperClient) -> list[dict[st
     return contacts
 
 
+def get_contacts(
+    endpoint_url: str,
+    hospital_id: str,
+    timeout_seconds: int,
+    bearer_token: str = "",
+) -> list[dict[str, Any]]:
+    headers = {
+        "Content-Type": "application/json",
+        "X-User-Id": "df7c14fd-cde3-4025-be00-ca42f4d31741"
+    }
+    if bearer_token:
+        headers["Authorization"] = f"Bearer {bearer_token}"
+        
+    url = f"{endpoint_url}?hospital_id={hospital_id}"
+    response = requests.get(url, headers=headers, timeout=timeout_seconds)
+    if response.ok:
+        return response.json()
+    return []
+
+def patch_contact(
+    endpoint_url: str,
+    contact_id: str,
+    payload: dict[str, Any],
+    timeout_seconds: int,
+    bearer_token: str = "",
+) -> dict[str, Any]:
+    headers = {
+        "Content-Type": "application/json",
+        "X-User-Id": "df7c14fd-cde3-4025-be00-ca42f4d31741"
+    }
+    if bearer_token:
+        headers["Authorization"] = f"Bearer {bearer_token}"
+
+    url = f"{endpoint_url}/{contact_id}"
+    response = requests.patch(
+        url,
+        json=payload,
+        headers=headers,
+        timeout=timeout_seconds,
+    )
+
+    result: dict[str, Any] = {
+        "ok": response.ok,
+        "status_code": response.status_code,
+    }
+
+    try:
+        result["response_json"] = response.json()
+    except ValueError:
+        result["response_text"] = response.text[:1000]
+
+    return result
+
 def run() -> Path:
     settings = load_settings()
     serper = SerperClient(api_key=settings.serper_api_key, timeout_seconds=settings.request_timeout_seconds)
@@ -93,10 +146,17 @@ def run() -> Path:
         hospital_id = settings.hospital_id_map.get(hospital, "") if settings.hospital_id_map else ""
         contacts = extract_leadership(hospital, serper)
         
+        existing_contacts = []
+        if settings.post_signals_enabled and contacts_endpoint and hospital_id:
+            existing_contacts = get_contacts(contacts_endpoint, hospital_id, settings.request_timeout_seconds, settings.signals_endpoint_token)
+            
+        existing_map = {c["full_name"]: c["id"] for c in existing_contacts if "full_name" in c and "id" in c}
+        
         for contact in contacts:
+            full_name = contact["name"]
             payload = {
                 "hospital_id": hospital_id,
-                "full_name": contact["name"],
+                "full_name": full_name,
                 "role": contact["role"],
                 "linkedin_url": contact["linkedin_url"],
                 "source_url": contact["source"]
@@ -104,12 +164,25 @@ def run() -> Path:
             all_contacts.append(payload)
             
             if settings.post_signals_enabled and contacts_endpoint:
-                res = post_contact(
-                    endpoint_url=contacts_endpoint,
-                    payload=payload,
-                    timeout_seconds=settings.request_timeout_seconds,
-                    bearer_token=settings.signals_endpoint_token
-                )
+                if full_name in existing_map:
+                    patch_payload = {
+                        "role": contact["role"],
+                        "linkedin_url": contact["linkedin_url"]
+                    }
+                    res = patch_contact(
+                        endpoint_url=contacts_endpoint,
+                        contact_id=existing_map[full_name],
+                        payload=patch_payload,
+                        timeout_seconds=settings.request_timeout_seconds,
+                        bearer_token=settings.signals_endpoint_token
+                    )
+                else:
+                    res = post_contact(
+                        endpoint_url=contacts_endpoint,
+                        payload=payload,
+                        timeout_seconds=settings.request_timeout_seconds,
+                        bearer_token=settings.signals_endpoint_token
+                    )
                 post_results.append({"payload": payload, "result": res})
 
     output_dir = Path("outputs")
