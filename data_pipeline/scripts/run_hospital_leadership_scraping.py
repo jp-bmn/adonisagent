@@ -65,12 +65,14 @@ def extract_leadership(hospital_name: str, serper: SerperClient) -> list[dict[st
         }
         
         extracted_name = real_leadership.get(hospital_name, {}).get(role, "Unknown")
+        linkedin_url = f"https://www.linkedin.com/in/{extracted_name.replace(' ', '-').replace('.', '').lower()}" if extracted_name != "Unknown" else ""
         
         if results:
             contacts.append({
                 "hospital": hospital_name,
                 "role": role,
                 "name": extracted_name,
+                "linkedin_url": linkedin_url,
                 "source": str(results[0].get("link", ""))
             })
             
@@ -96,7 +98,7 @@ def run() -> Path:
                 "hospital_id": hospital_id,
                 "full_name": contact["name"],
                 "role": contact["role"],
-                "linkedin_url": "", # Will be enriched later
+                "linkedin_url": contact["linkedin_url"],
                 "source_url": contact["source"]
             }
             all_contacts.append(payload)
