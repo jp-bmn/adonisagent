@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
-const DELAY_MS = 500; // rate limit buffer between contacts
+const DELAY_MS = 500;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -36,10 +36,12 @@ app.post('/verify', async (req, res) => {
     results.push({
       id: contact.id,
       name: contact.name,
+      hospital: contact.hospital,
       currentUrl: contact.currentUrl || null,
       ...result,
     });
-    await sleep(DELAY_MS);
+    // Skip delay for invalid_name contacts since no API call was made
+    if (result.status !== 'invalid_name') await sleep(DELAY_MS);
   }
 
   const summary = {
@@ -47,6 +49,7 @@ app.post('/verify', async (req, res) => {
     verified: results.filter((r) => r.status === 'verified').length,
     conflicts: results.filter((r) => r.status === 'conflict').length,
     failed: results.filter((r) => r.status === 'failed').length,
+    invalid_names: results.filter((r) => r.status === 'invalid_name').length,
   };
 
   return res.json({ results, summary });
