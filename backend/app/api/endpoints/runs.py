@@ -133,52 +133,58 @@ async def system_status():
         )
         pending_review_count = pending_count_res.count or 0
 
-        # 6. Calculate rolling 7-day stats for KPIs comparing this week vs last week
+        # 6. Calculate calendar week stats for KPIs comparing this week vs last week
         now = datetime.now(timezone.utc)
-        seven_days_ago = (now - timedelta(days=7)).isoformat()
-        fourteen_days_ago = (now - timedelta(days=14)).isoformat()
+        # Find Monday of this week (00:00:00 UTC)
+        monday_this_week = (now - timedelta(days=now.weekday())).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        last_monday = monday_this_week - timedelta(days=7)
 
-        # Count this week's urgent signals
+        monday_this_week_iso = monday_this_week.isoformat()
+        last_monday_iso = last_monday.isoformat()
+
+        # Count this week's urgent signals (since Monday of this week)
         urgent_this_week = (
             supabase.table("signals")
             .select("id", count="exact")
             .eq("tier", "urgent")
-            .gte("created_at", seven_days_ago)
+            .gte("created_at", monday_this_week_iso)
             .or_("review_status.is.null,review_status.neq.dismissed")
             .execute()
         )
         urgent_count = urgent_this_week.count or 0
 
-        # Count this week's worth_knowing signals
+        # Count this week's worth_knowing signals (since Monday of this week)
         worth_this_week = (
             supabase.table("signals")
             .select("id", count="exact")
             .eq("tier", "worth_knowing")
-            .gte("created_at", seven_days_ago)
+            .gte("created_at", monday_this_week_iso)
             .or_("review_status.is.null,review_status.neq.dismissed")
             .execute()
         )
         worth_knowing_count = worth_this_week.count or 0
 
-        # Count last week's urgent signals (between 14 and 7 days ago)
+        # Count last week's urgent signals (between last Monday and this Monday)
         urgent_last_week = (
             supabase.table("signals")
             .select("id", count="exact")
             .eq("tier", "urgent")
-            .gte("created_at", fourteen_days_ago)
-            .lt("created_at", seven_days_ago)
+            .gte("created_at", last_monday_iso)
+            .lt("created_at", monday_this_week_iso)
             .or_("review_status.is.null,review_status.neq.dismissed")
             .execute()
         )
         urgent_prev = urgent_last_week.count or 0
 
-        # Count last week's worth_knowing signals (between 14 and 7 days ago)
+        # Count last week's worth_knowing signals (between last Monday and this Monday)
         worth_last_week = (
             supabase.table("signals")
             .select("id", count="exact")
             .eq("tier", "worth_knowing")
-            .gte("created_at", fourteen_days_ago)
-            .lt("created_at", seven_days_ago)
+            .gte("created_at", last_monday_iso)
+            .lt("created_at", monday_this_week_iso)
             .or_("review_status.is.null,review_status.neq.dismissed")
             .execute()
         )

@@ -311,6 +311,25 @@ def _build_signal_batch_payload(
         source_url = str(signal.get("url", "")).strip()
         summary = str(signal.get("one_sentence_summary", "")).strip() or str(signal.get("excerpt", "")).strip()
         title = str(signal.get("title", "")).strip()
+        signal_type = str(signal.get("signal_type", "financial_event")).strip()
+        
+        # Check if title is empty or generic
+        normalized_title = title.lower().replace("_", " ").replace("-", " ").strip()
+        is_generic = (
+            not title or
+            normalized_title in {t.replace("_", " ") for t in ["leadership_change", "rcm_hiring_spike", "epic_go_live", "post_golive_friction", "ma_acquisition", "vendor_change", "vendor_dispute", "restructuring", "new_hospital_launch", "financial_event", "ai_adoption_outside_rcm", "automation_proof", "named_automation_owner", "thought_leadership", "filtered_out"]} or
+            normalized_title in ("document", "signal", "pdf filing", "low confidence signal", "classification error")
+        )
+        if is_generic:
+            if summary:
+                words = summary.split()
+                fallback_title = " ".join(words[:10])
+                if len(fallback_title) > 80:
+                    fallback_title = fallback_title[:77] + "..."
+                title = fallback_title
+            else:
+                title = f"{hospital_name} {signal_type.replace('_', ' ').title()} Update"
+
         published_raw = str(signal.get("published_at", "")).strip()
         hospital_id = resolved_hospital_ids.get(hospital_name, "")
 
@@ -318,7 +337,7 @@ def _build_signal_batch_payload(
             {
                 "hospital_id": hospital_id,
                 "hospital_name": hospital_name,
-                "signal_type": str(signal.get("signal_type", "financial_event")).strip(),
+                "signal_type": signal_type,
                 "tier": str(signal.get("tier", "worth_knowing")).strip(),
                 "confidence_score": float(signal.get("confidence_score", 0.0) or 0.0),
                 "title": _truncate_title_words(title),
@@ -335,6 +354,7 @@ def _build_signal_batch_payload(
                 "recency_applied": True,
             }
         )
+
 
     return {
         "run_context": {
@@ -644,6 +664,12 @@ def _hospital_aliases(hospital: str) -> tuple[str, ...]:
             "new york presbyterian",
             "nyp",
         ),
+        "new york-presbyterian": (
+            "newyork-presbyterian",
+            "new york-presbyterian",
+            "new york presbyterian",
+            "nyp",
+        ),
         "umass memorial": (
             "umass memorial",
             "umass",
@@ -659,12 +685,45 @@ def _hospital_aliases(hospital: str) -> tuple[str, ...]:
             "uams health",
             "university of arkansas for medical sciences",
         ),
+        "university of arkansas medical sciences": (
+            "university of arkansas",
+            "uams",
+            "uams health",
+            "university of arkansas for medical sciences",
+        ),
+        "university of arkansas for medical sciences": (
+            "university of arkansas",
+            "uams",
+            "uams health",
+            "university of arkansas for medical sciences",
+        ),
         "commonspirit": (
             "commonspirit",
             "commonspirit health",
             "chi",
             "catholic health initiatives",
             "dignity health",
+        ),
+        "commonspirit health": (
+            "commonspirit",
+            "commonspirit health",
+            "chi",
+            "catholic health initiatives",
+            "dignity health",
+        ),
+        "jefferson health": (
+            "jefferson health",
+            "jefferson",
+            "jeff",
+            "thomas jefferson university",
+            "thomas jefferson university hospitals",
+        ),
+        "jefferson": (
+            "jefferson health",
+            "jefferson",
+            "jeff",
+            "thomas jefferson university",
+            "thomas jefferson university hospitals",
         ),
     }
     key = hospital.lower().strip()
@@ -826,8 +885,10 @@ def run(quality_mode_override: str | None = None) -> Path:
             )
             continue
 
-        # Even for trusted sources, broad tracker pages must mention the target hospital.
-        if _is_broad_update_page(signal) and not _mentions_target_hospital(signal):
+        # The agent should only attribute a signal to a hospital if the article directly references that specific health system.
+        # Broad tracker pages must always mention the target hospital, even if from an allowlisted source.
+        must_mention = not allowlisted or _is_broad_update_page(signal)
+        if must_mention and not _mentions_target_hospital(signal):
             skip_counter["noise_not_hospital_specific"] += 1
             skipped_signals.append(
                 {

@@ -478,7 +478,7 @@ export default function CoPilot() {
                 {[
                   'Who should I call this week?',
                   'Draft an outreach email for Ascension',
-                  'What\'s urgent across my accounts?',
+                  "What's urgent across my accounts?",
                 ].map((prompt) => (
                   <button
                     key={prompt}

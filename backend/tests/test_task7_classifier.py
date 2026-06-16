@@ -286,3 +286,40 @@ async def test_classify_endpoint_empty_fields_returns_422():
         })
         assert response.status_code == 422
         assert "hospital_name must not be empty" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_classify_signal_strict_relevance_negative_cases():
+    # 1. Startup strategizing around Epic's push should be filtered_out
+    text1 = "How five AI startups are strategizing around Epic's big push"
+    mock_client = MagicMock()
+    mock_response1 = MagicMock()
+    mock_content1 = MagicMock()
+    mock_content1.text = '{"signal_type": "filtered_out", "tier": "filtered_out", "confidence_score": 0.35, "title": "Epic startup strategy", "summary": "Startups competing/working with Epic", "why_relevant": "Not a go-live"}'
+    mock_response1.content = [mock_content1]
+    mock_response1.usage.input_tokens = 100
+    mock_response1.usage.output_tokens = 50
+    mock_client.messages.create.return_value = mock_response1
+
+    with patch("app.services.classifier.get_anthropic_client", return_value=mock_client):
+        res1 = await classify_signal(article_text=text1, hospital_name="UMass Memorial")
+    assert res1.signal_type == "filtered_out"
+    assert res1.tier == "filtered_out"
+    assert res1.confidence_score < 0.50
+
+    # 2. Layoff tracker page should be filtered_out
+    text2 = "Fierce Healthcare Layoff Tracker"
+    mock_response2 = MagicMock()
+    mock_content2 = MagicMock()
+    mock_content2.text = '{"signal_type": "filtered_out", "tier": "filtered_out", "confidence_score": 0.20, "title": "Layoff Tracker", "summary": "Generic tracker of layoffs", "why_relevant": "Generic industry report"}'
+    mock_response2.content = [mock_content2]
+    mock_response2.usage.input_tokens = 100
+    mock_response2.usage.output_tokens = 50
+    mock_client.messages.create.return_value = mock_response2
+
+    with patch("app.services.classifier.get_anthropic_client", return_value=mock_client):
+        res2 = await classify_signal(article_text=text2, hospital_name="UMass Memorial")
+    assert res2.signal_type == "filtered_out"
+    assert res2.tier == "filtered_out"
+    assert res2.confidence_score < 0.50
+

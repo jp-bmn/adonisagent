@@ -41,6 +41,7 @@ def seed_hospitals():
             "website_url": "https://commonspirit.org",
             "division_note": "Specific division TBD — confirm with Danielle before expanding scraper scope",
         },
+        {"name": "Jefferson Health",                        "website_url": "https://www.jeffersonhealth.org"},
     ]
     result = client.table("hospitals").upsert(hospitals, on_conflict="name").execute()
     print(f"  ✅  Hospitals upserted: {len(result.data)}")
@@ -66,6 +67,7 @@ def seed_assignments(hospital_ids: dict, ae_ids: dict):
         ("Ascension",                               "David"),
         ("University of Arkansas Medical Sciences", "David"),
         ("CommonSpirit Health",                     "David"),
+        ("Jefferson Health",                        "Jeff"),
     ]
     assignments = [
         {"hospital_id": hospital_ids[h], "ae_id": ae_ids[u]}

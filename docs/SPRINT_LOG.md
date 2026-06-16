@@ -27,9 +27,9 @@ Updated at the end of every session.
 
 ## Future Enhancements (post-Demo Day)
 
-### Hermes
+### Iris (formerly Hermes)
 - **Proactive signal nudge** — notify rep when new signal arrives since last session
-- **Auto briefing on login** — Hermes opens with day's briefing automatically on first login
+- **Auto briefing on login** — Iris opens with day's briefing automatically on first login
 - **Conversation history panel** — tap history icon, see all past chats grouped by day/time, tap to reload, option to delete individual or all. Like ChatGPT sidebar.
 - **Email send integration** — draft goes straight to Gmail/Outlook via OAuth instead of copy-paste
 
@@ -61,22 +61,23 @@ Updated at the end of every session.
   - Review queue: snake_case → readable signal type labels
   - Hospital profile header: stats move below name on mobile (no more crowding)
   - Skeleton loader for hospital profile page (`/hospitals/[id]/loading.tsx`)
-  - Hermes signal context: add summary + source URL, exclude `filtered_out`, richer format
-  - Hermes: renders markdown links `[text](url)` as clickable `<a>` tags
-  - Hermes: passes contacts (name, title, LinkedIn, email) for all hospitals
-  - Hermes: territory-aware — filters signals + contacts to logged-in user's hospitals
-  - Hermes: starter prompts when chat is empty (Brief me, Who to call, Draft email, What's urgent)
-  - Hermes: "⚡ Brief me on my territory" auto-send button
-  - Hermes: email draft detection — styled box + "📋 Copy to clipboard" button
-  - Hermes: `isAdmin` passed from UserProvider so Danielle sees all 6 hospitals
-  - Hermes: system prompt updated with briefing/calling/email draft behaviors
-  - Hermes: max_tokens bumped to 1024 for richer briefings
+  - Iris signal context: add summary + source URL, exclude `filtered_out`, richer format
+  - Iris: renders markdown links `[text](url)` as clickable `<a>` tags
+  - Iris: passes contacts (name, title, LinkedIn, email) for all hospitals
+  - Iris: territory-aware — filters signals + contacts to logged-in user's hospitals
+  - Iris: starter prompts when chat is empty (Brief me, Who to call, Draft email, What's urgent)
+  - Iris: "⚡ Brief me on my territory" auto-send button
+  - Iris: email draft detection — styled box + "📋 Copy to clipboard" button
+  - Iris: `isAdmin` passed from UserProvider so Danielle sees all 6 hospitals
+  - Iris: system prompt updated with briefing/calling/email draft behaviors
+  - Iris: max_tokens bumped to 1024 for richer briefings
+  - Iris: renamed from Hermes throughout (storage keys, UI labels, system prompt)
 
 **Decisions Made**
 - Starter prompts auto-send on tap (don't just fill the input) — faster for demo
 - Email detection uses `Subject:` line presence — simple, reliable, no special API marker needed
 - Territory context uses `isAdmin` from UserProvider rather than detecting from `ae_users` — Danielle isn't in `ae_users` as an AE so detection was failing
-- `filtered_out` signals excluded from Hermes context — they're noise, not intel
+- `filtered_out` signals excluded from Iris context — they're noise, not intel
 
 **Open GitHub Issues (assigned)**
 | # | Issue | Owner |
@@ -129,7 +130,6 @@ Updated at the end of every session.
 
 ## Notes for Next Session
 
-- Commit PR #37 branch (all Hermes work + mobile polish — not yet pushed to PR)
 - Joel needs to merge PRs #35, #36, #37 before June 18
-- Once Michael fixes #38 (contact names), Hermes contact lookups become fully functional
+- Once Michael fixes #38 (contact names), Iris contact lookups become fully functional
 - Demo Day talking points: mention Review queue admin gate, AE territory default, proactive nudge as "what's next" answers

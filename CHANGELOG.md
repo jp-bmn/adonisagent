@@ -15,6 +15,8 @@ Week-by-week build notes. Not semver — this is a capstone, not a shipped produ
 - GitHub workflow for lint + typecheck
 - Issue + PR templates
 
-## Week 1 — TBD
+## Week 1 — Progress
 
-Add notes here as work lands.
+- Added KPI trend pill status delta fields (`urgent_delta`, `urgent_delta_direction`, `worth_knowing_delta`, `worth_knowing_delta_direction`) to backend `/status` endpoint and schemas.
+- Added AE user `Jeff` to the database and assigned him to `Jefferson Health` to resolve his missing territory filter view.
+- Synced database seeds, migrations (`001_initial_schema.sql`), and tests (`test_e2e.py`) to support the updated AE user roster.

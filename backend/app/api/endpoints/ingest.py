@@ -121,6 +121,86 @@ def _infer_tier(signal_type: str, matched_topics: list[str]) -> str:
     return "filtered_out"
 
 
+def _hospital_aliases(hospital: str) -> tuple[str, ...]:
+    mapping = {
+        "newyork-presbyterian": (
+            "newyork-presbyterian",
+            "new york-presbyterian",
+            "new york presbyterian",
+            "nyp",
+        ),
+        "new york-presbyterian": (
+            "newyork-presbyterian",
+            "new york-presbyterian",
+            "new york presbyterian",
+            "nyp",
+        ),
+        "umass memorial": (
+            "umass memorial",
+            "umass",
+            "u mass memorial",
+        ),
+        "ascension": (
+            "ascension",
+            "ascension health",
+        ),
+        "university of arkansas": (
+            "university of arkansas",
+            "uams",
+            "uams health",
+            "university of arkansas for medical sciences",
+        ),
+        "university of arkansas medical sciences": (
+            "university of arkansas",
+            "uams",
+            "uams health",
+            "university of arkansas for medical sciences",
+        ),
+        "university of arkansas for medical sciences": (
+            "university of arkansas",
+            "uams",
+            "uams health",
+            "university of arkansas for medical sciences",
+        ),
+        "commonspirit": (
+            "commonspirit",
+            "commonspirit health",
+            "chi",
+            "catholic health initiatives",
+            "dignity health",
+        ),
+        "commonspirit health": (
+            "commonspirit",
+            "commonspirit health",
+            "chi",
+            "catholic health initiatives",
+            "dignity health",
+        ),
+        "jefferson health": (
+            "jefferson health",
+            "jefferson",
+            "jeff",
+            "thomas jefferson university",
+            "thomas jefferson university hospitals",
+        ),
+        "jefferson": (
+            "jefferson health",
+            "jefferson",
+            "jeff",
+            "thomas jefferson university",
+            "thomas jefferson university hospitals",
+        ),
+    }
+    key = hospital.lower().strip()
+    return mapping.get(key, (key,))
+
+
+def _mentions_target_hospital(hospital_name: str, title: str, summary: str) -> bool:
+    blob = f"{title or ''} {summary or ''}".lower()
+    aliases = _hospital_aliases(hospital_name)
+    return any(alias in blob for alias in aliases)
+
+
 async def _verify_bearer(
     request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme),
@@ -204,11 +284,14 @@ async def ingest_signal_batch(
     # ------------------------------------------------------------------
     hospitals_res = supabase.table("hospitals").select("id, name").execute()
     hospital_name_map: dict[str, str] = {}
+    hospital_id_to_name: dict[str, str] = {}
     for h in (hospitals_res.data or []):
         # Normalize: lowercase, strip whitespace for fuzzy matching
         hospital_name_map[h["name"].lower().strip()] = h["id"]
         # Also map common abbreviations
         hospital_name_map[h["name"]] = h["id"]
+        # Map ID to official name
+        hospital_id_to_name[h["id"]] = h["name"]
 
     def _resolve_hospital_id(name: str) -> Optional[str]:
         if not name:
@@ -247,14 +330,6 @@ async def ingest_signal_batch(
             logger.warning(f"Signal idx={idx} rejected — unknown hospital: '{hospital_name}'")
             continue
 
-        # --- Required fields ---
-        title = sig.get("title") or ""
-        if not title:
-            rejected += 1
-            detail.update(status="rejected", reason="title is required")
-            details.append(detail)
-            continue
-
         # --- Map fields ---
         matched_topics = sig.get("matched_topics") or []
         signal_type = _resolve_signal_type(matched_topics)
@@ -263,6 +338,46 @@ async def ingest_signal_batch(
         summary = sig.get("excerpt") or ""
         source_url = sig.get("source_url") or ""
         source_name = sig.get("source_name") or ""
+
+        # --- Required & Meaningful Title ---
+        title = sig.get("title") or ""
+        normalized_title = title.lower().replace("_", " ").replace("-", " ").strip()
+        is_generic = (
+            not title or
+            normalized_title in {t.replace("_", " ") for t in VALID_SIGNAL_TYPES} or
+            normalized_title in ("document", "signal", "pdf filing", "low confidence signal", "classification error")
+        )
+        if is_generic:
+            if summary:
+                words = summary.split()
+                fallback_title = " ".join(words[:10])
+                if len(fallback_title) > 80:
+                    fallback_title = fallback_title[:77] + "..."
+                title = fallback_title
+            else:
+                title = f"{hospital_name} {signal_type.replace('_', ' ').title()} Update"
+
+        if not title:
+            rejected += 1
+            detail.update(status="rejected", reason="title is required")
+            details.append(detail)
+            continue
+
+        # --- Relevance check ---
+        # Only attribute/save if article references the specific health system.
+        official_hospital_name = hospital_id_to_name.get(hospital_id, hospital_name)
+        if not _mentions_target_hospital(official_hospital_name, title, summary) and not _mentions_target_hospital(hospital_name, title, summary):
+            rejected += 1
+            detail.update(
+                status="rejected",
+                reason=f"Signal does not reference target hospital '{official_hospital_name}'"
+            )
+            details.append(detail)
+            logger.warning(
+                f"Signal idx={idx} rejected — no reference to hospital '{official_hospital_name}' in title or summary."
+            )
+            continue
+
 
         # Truncate to schema limits
         title   = title[:200]

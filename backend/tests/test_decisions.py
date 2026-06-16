@@ -103,3 +103,75 @@ async def test_copilot_endpoint_success(mock_get_supabase):
     data = response.json()
     assert "Co-pilot stub" in data["reply"]
     assert data["sources"] == []
+
+
+@pytest.mark.asyncio
+@patch("app.api.endpoints.ingest.get_supabase")
+async def test_batch_ingest_relevance_check(mock_get_supabase):
+    """Verify batch ingestion relevance checks reject mismatched signals and accept matched ones."""
+    mock_sb = MagicMock()
+    mock_get_supabase.return_value = mock_sb
+
+    # Mock hospitals database lookup
+    hospitals_data = [
+        {"id": "hosp-1", "name": "UMass Memorial"},
+        {"id": "hosp-2", "name": "NewYork-Presbyterian"},
+    ]
+    mock_sb.table.return_value.select.return_value.execute.return_value.data = hospitals_data
+
+    # Mock signals table calls
+    # For deduplication check (select id) and insert (insert)
+    mock_sb.table.return_value.select.return_value.eq.return_value.eq.return_value.execute.return_value.data = []
+    mock_sb.table.return_value.insert.return_value.execute.return_value.data = [{"id": "sig-inserted"}]
+
+    payload = {
+        "run_context": {
+            "run_id": "test-run",
+            "run_date": "2026-06-15",
+            "scraper_version": "1.0",
+            "hospitals_scraped": 2,
+        },
+        "signals": [
+            {
+                "hospital_name": "UMass Memorial",
+                "title": "Deals tracker: Ohio hospital, OhioHealth drop merger plans",
+                "source_name": "News",
+                "source_url": "https://example.com/ohio-merger",
+                "published_at_raw": "2026-06-15",
+                "excerpt": "This article discusses OhioHealth, no connection to UMass.",
+                "matched_topics": ["merger"],
+            },
+            {
+                "hospital_name": "UMass Memorial",
+                "title": "New Chief Executive at UMass Memorial",
+                "source_name": "News",
+                "source_url": "https://example.com/umass-ceo",
+                "published_at_raw": "2026-06-15",
+                "excerpt": "UMass Memorial announces a new CEO to lead the system.",
+                "matched_topics": ["leadership"],
+            },
+        ],
+    }
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.post(
+            "/api/v1/signals/batch",
+            headers={"Authorization": "Bearer test-internal"},
+            json=payload,
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["received"] == 2
+    assert data["inserted"] == 1
+    assert data["rejected"] == 1
+
+    # Check details to see the rejection reason
+    rejected_detail = next(d for d in data["details"] if d["status"] == "rejected")
+    assert rejected_detail["index"] == 0
+    assert "does not reference target hospital" in rejected_detail["reason"]
+
+    inserted_detail = next(d for d in data["details"] if d["status"] == "inserted")
+    assert inserted_detail["index"] == 1
+    assert inserted_detail["signal_id"] == "sig-inserted"
+
