@@ -29,10 +29,7 @@ export async function POST(req: NextRequest) {
   let territoryContext = '';
 
   try {
-    const [signals, hospitals] = await Promise.all([
-      fetchSignals(),
-      fetchHospitals(),
-    ]);
+    const [signals, hospitals] = await Promise.all([fetchSignals(), fetchHospitals()]);
 
     // Determine this user's territory
     const myHospitals = isAdmin
@@ -46,7 +43,10 @@ export async function POST(req: NextRequest) {
     let userName = 'the rep';
     for (const h of hospitals) {
       const match = h.ae_users.find((u) => u.id === userId);
-      if (match) { userName = match.name; break; }
+      if (match) {
+        userName = match.name;
+        break;
+      }
     }
 
     territoryContext = isAdmin
@@ -91,7 +91,8 @@ export async function POST(req: NextRequest) {
           ];
           if (s.summary) parts.push(`Summary: ${s.summary}`);
           if (s.why_it_matters) parts.push(`Why it matters: ${s.why_it_matters}`);
-          if (s.source_name && s.source_url) parts.push(`Source: [${s.source_name}](${s.source_url})`);
+          if (s.source_name && s.source_url)
+            parts.push(`Source: [${s.source_name}](${s.source_url})`);
           else if (s.source_url) parts.push(`Source: ${s.source_url}`);
           return parts.join('\n');
         })

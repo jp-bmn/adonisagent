@@ -15,25 +15,27 @@ Updated at the end of every session.
 
 ## Backlog (prioritized — not yet built)
 
-| Priority | Item | Owner | Notes |
-|---|---|---|---|
-| 🔴 High | Hide `filtered_out` signals from main feed | Juan | One-line filter in page.tsx |
-| 🔴 High | Alerts page hospital filter | Juan | Dropdown same as territory filter |
-| 🟡 Medium | Make signal cards tap-to-open article on mobile | Juan | Wrap card in `<a>` |
-| 🟡 Medium | Jefferson Health visited-link style fix | Juan | CSS visited state leaking |
-| 🟡 Medium | Page `<title>` tags per route | Juan | Browser tab polish |
+| Priority  | Item                                            | Owner | Notes                             |
+| --------- | ----------------------------------------------- | ----- | --------------------------------- |
+| 🔴 High   | Hide `filtered_out` signals from main feed      | Juan  | One-line filter in page.tsx       |
+| 🔴 High   | Alerts page hospital filter                     | Juan  | Dropdown same as territory filter |
+| 🟡 Medium | Make signal cards tap-to-open article on mobile | Juan  | Wrap card in `<a>`                |
+| 🟡 Medium | Jefferson Health visited-link style fix         | Juan  | CSS visited state leaking         |
+| 🟡 Medium | Page `<title>` tags per route                   | Juan  | Browser tab polish                |
 
 ---
 
 ## Future Enhancements (post-Demo Day)
 
 ### Iris (formerly Hermes)
+
 - **Proactive signal nudge** — notify rep when new signal arrives since last session
 - **Auto briefing on login** — Iris opens with day's briefing automatically on first login
 - **Conversation history panel** — tap history icon, see all past chats grouped by day/time, tap to reload, option to delete individual or all. Like ChatGPT sidebar.
 - **Email send integration** — draft goes straight to Gmail/Outlook via OAuth instead of copy-paste
 
 ### Platform
+
 - **AE default territory view** — feed auto-filters to logged-in AE's hospitals on load
 - **Admin-only Review gate** — hide Review nav from AEs, only show to `isAdmin` users
 - **Expand monitoring** — provider groups + customer success (Reed's request)
@@ -49,6 +51,7 @@ Updated at the end of every session.
 ### Juan (Frontend)
 
 **Shipped**
+
 - PR #35 — Export page relabeled: "Signals CSV" → "Contacts CSV", filename fix, description updated
 - PR #36 — Mobile top bar: logged-in user initials (DF avatar) in mobile header
 - PR #37 — Mobile polish + bug sweep (merged multiple fixes):
@@ -74,6 +77,7 @@ Updated at the end of every session.
   - Iris: renamed from Hermes throughout (storage keys, UI labels, system prompt)
 
 **Decisions Made**
+
 - Starter prompts auto-send on tap (don't just fill the input) — faster for demo
 - Email detection uses `Subject:` line presence — simple, reliable, no special API marker needed
 - Territory context uses `isAdmin` from UserProvider rather than detecting from `ae_users` — Danielle isn't in `ae_users` as an AE so detection was failing
@@ -90,9 +94,11 @@ Updated at the end of every session.
 | #42 | Signal type miscategorization (Epic go-live on AI/lawsuit articles) | Joel |
 
 ### Joel (Backend)
+
 - Working on issues #31, #39, #40, #41, #42
 
 ### Michael (Data Pipeline)
+
 - Issue #38: contact names empty — pipeline not saving `name` field
 
 ---
@@ -102,6 +108,7 @@ Updated at the end of every session.
 ### Juan (Frontend)
 
 **Shipped (PRs #23–#30)**
+
 - F-01: Removed `@anthropic-ai/sdk` from lockfile
 - F-03: Renamed CoPilot → Hermes throughout
 - F-04: Category pills on signal cards
@@ -122,6 +129,7 @@ Updated at the end of every session.
 - Hospital logos via Logo.dev API
 
 **Decisions Made**
+
 - Raw fetch for Anthropic API — no SDK to keep bundle lean (per PRD)
 - URL search params for all filter state — shareable links, no React state needed
 - `loading.tsx` convention for skeleton loaders — Next.js handles it automatically
