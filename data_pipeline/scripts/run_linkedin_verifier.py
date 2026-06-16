@@ -131,29 +131,46 @@ Title: {title}
 Snippet: {snippet}
 URL: {url}
 
-Based on the title and snippet, does this LinkedIn profile confidently match the person we are looking for?
+Does this LinkedIn profile confidently match the person we are looking for?
 It should match the name and ideally indicate an affiliation with the hospital or role.
-Respond with exactly "YES" if it's a confident match, or "NO" if it's not.
+If it is a confident match, also extract their most recent prior employer before this hospital, if mentioned in the snippet.
+Return a JSON object with two keys:
+- "match": exactly "YES" or "NO"
+- "prior_employer": the name of their prior employer, or null if it cannot be determined from the snippet.
+Do not wrap your response in markdown blocks. Output only raw JSON.
 """
         
         try:
             response = claude.messages.create(
                 model="claude-haiku-4-5-20251001",
-                max_tokens=10,
+                max_tokens=200,
                 temperature=0.0,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[
+                    {"role": "user", "content": prompt},
+                    {"role": "assistant", "content": "{"}
+                ]
             )
-            answer = response.content[0].text.strip().upper()
+            content = "{" + response.content[0].text.strip()
+            if content.endswith("```"):
+                content = content.rsplit("```", 1)[0].strip()
+            data = json.loads(content)
+            answer = data.get("match", "NO").upper()
+            prior_employer = data.get("prior_employer")
         except Exception as e:
             print(f"  Error calling Anthropic: {e}")
             answer = "NO"
+            prior_employer = None
             
         if "YES" in answer:
             print(f"  Matched! URL: {url}")
+            payload = {"linkedin_url": url, "linkedin_verified": True}
+            if prior_employer:
+                payload["prior_employer"] = prior_employer
+            
             patch_contact(
                 contacts_endpoint,
                 contact_id,
-                {"linkedin_url": url, "linkedin_verified": True},
+                payload,
                 settings.request_timeout_seconds,
                 settings.signals_endpoint_token
             )

@@ -187,6 +187,7 @@ export interface ApiContact {
   id: string;
   full_name: string;
   role: string | null;
+  prior_employer: string | null;
   email: string | null;
   linkedin_url: string | null;
   department: string | null;

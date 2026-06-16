@@ -100,7 +100,7 @@ Snippets:
             extracted_name = "Unknown"
             prior_employer = None
             
-        if extracted_name != "Unknown":
+        if "unknown" not in extracted_name.lower():
             contacts.append({
                 "hospital": hospital_name,
                 "role": role,
@@ -180,18 +180,16 @@ def run() -> Path:
         hospital_id = settings.hospital_id_map.get(hospital, "") if settings.hospital_id_map else ""
         contacts = extract_leadership(hospital, serper)
         
-        existing_contacts = []
         if settings.post_signals_enabled and contacts_endpoint and hospital_id:
             existing_contacts = get_contacts(contacts_endpoint, hospital_id, settings.request_timeout_seconds, settings.signals_endpoint_token)
             
-        existing_map = {c["full_name"]: c["id"] for c in existing_contacts if "full_name" in c and "id" in c}
-        
         for contact in contacts:
             full_name = contact["name"]
+            role = contact["role"]
             payload = {
                 "hospital_id": hospital_id,
                 "full_name": full_name,
-                "role": contact["role"],
+                "role": role,
                 "prior_employer": contact["prior_employer"],
                 "linkedin_url": contact["linkedin_url"],
                 "source_url": contact["source"]
@@ -199,20 +197,45 @@ def run() -> Path:
             all_contacts.append(payload)
             
             if settings.post_signals_enabled and contacts_endpoint:
-                if full_name in existing_map:
+                existing_for_role = [c for c in existing_contacts if c.get("role") == role and c.get("is_active", True)]
+                
+                exact_match = None
+                for c in existing_for_role:
+                    if c.get("full_name") == full_name:
+                        exact_match = c
+                        break
+                        
+                if exact_match:
                     patch_payload = {
-                        "role": contact["role"],
+                        "role": role,
                         "prior_employer": contact["prior_employer"],
                         "linkedin_url": contact["linkedin_url"]
                     }
                     res = patch_contact(
                         endpoint_url=contacts_endpoint,
-                        contact_id=existing_map[full_name],
+                        contact_id=exact_match["id"],
                         payload=patch_payload,
                         timeout_seconds=settings.request_timeout_seconds,
                         bearer_token=settings.signals_endpoint_token
                     )
+                    for c in existing_for_role:
+                        if c["id"] != exact_match["id"]:
+                            patch_contact(
+                                endpoint_url=contacts_endpoint,
+                                contact_id=c["id"],
+                                payload={"is_active": False},
+                                timeout_seconds=settings.request_timeout_seconds,
+                                bearer_token=settings.signals_endpoint_token
+                            )
                 else:
+                    for c in existing_for_role:
+                        patch_contact(
+                            endpoint_url=contacts_endpoint,
+                            contact_id=c["id"],
+                            payload={"is_active": False},
+                            timeout_seconds=settings.request_timeout_seconds,
+                            bearer_token=settings.signals_endpoint_token
+                        )
                     res = post_contact(
                         endpoint_url=contacts_endpoint,
                         payload=payload,
