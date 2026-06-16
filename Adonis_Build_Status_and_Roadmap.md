@@ -1,6 +1,7 @@
 # Adonis Account Intelligence Tool — Build Status & Roadmap
-*Consolidated from BUILD_SUMMARY.md and Internal Build PRD v4 · June 14, 2026*
-*Owner: Joel Philip · Team: Juan Franco, Michael Chabler*
+
+_Consolidated from BUILD_SUMMARY.md and Internal Build PRD v4 · June 14, 2026_
+_Owner: Joel Philip · Team: Juan Franco, Michael Chabler_
 
 ---
 
@@ -16,11 +17,11 @@ Build an AI-powered sales intelligence tool for Adonis AI (RCM company, client c
 
 ## 2. Team & Roles
 
-| Person | Layer | Owns |
-|--------|-------|------|
-| **Joel Philip** (Project Lead) | Python FastAPI backend, agent orchestration, Slack delivery | `apps/api/**` (or `backend/**`), `app/services/**`, `app/routers/**`, `app/models/**`, Railway config, Supabase migrations |
-| **Juan Franco** | Next.js 14 frontend, dashboard UI, Hermes co-pilot UI | `apps/web/**`, `components/**`, `app/api/copilot/route.ts` |
-| **Michael Chabler** | Web scrapers, signal extraction, PDF ingestion, LinkedIn discovery | `scrapers/**` (or `apps/agents/**`), `scripts/ingestion/**`, data pipelines |
+| Person                         | Layer                                                              | Owns                                                                                                                       |
+| ------------------------------ | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| **Joel Philip** (Project Lead) | Python FastAPI backend, agent orchestration, Slack delivery        | `apps/api/**` (or `backend/**`), `app/services/**`, `app/routers/**`, `app/models/**`, Railway config, Supabase migrations |
+| **Juan Franco**                | Next.js 14 frontend, dashboard UI, Hermes co-pilot UI              | `apps/web/**`, `components/**`, `app/api/copilot/route.ts`                                                                 |
+| **Michael Chabler**            | Web scrapers, signal extraction, PDF ingestion, LinkedIn discovery | `scrapers/**` (or `apps/agents/**`), `scripts/ingestion/**`, data pipelines                                                |
 
 **Team rule:** No one writes or lets their IDE auto-generate code outside their own layer. Review every changed file in a branch before pushing — if it's not yours, revert it.
 
@@ -29,47 +30,54 @@ Build an AI-powered sales intelligence tool for Adonis AI (RCM company, client c
 ## 3. What's Built So Far (from BUILD_SUMMARY)
 
 ### Repository & Architecture
+
 - Monorepo set up with `pnpm` workspaces + Turborepo: `apps/web` (Next.js 14 dashboard), `apps/agents` (Trigger.dev/cron scraping workers), `backend` (FastAPI), `packages/db` and `packages/shared` (shared types, queries, taxonomy)
 - CI/CD pipeline (`.github/workflows/ci.yml`) running TypeScript compilation, Prettier formatting checks, and lint rules on every PR
 - Unified `.env` structure across backend, frontend, and worker packages
 
 ### Database (Supabase / PostgreSQL)
+
 - Schema and migrations (`001_initial_schema.sql`) covering `hospitals`, `ae_users`, `hospital_ae_assignments`, `signals`, `contacts`, `digests`, `digest_views`, `agent_runs`
-- Seed script (`seed_db.py`) and verification script (`verify_seed.py`) — seeded with 6 hospitals (NewYork-Presbyterian, UMass Memorial, Ascension, UAMS, CommonSpirit, Jefferson Health) mapped to Michael, David, and Jeff *(see flag #1 below — CommonSpirit and Jefferson Health scope status conflicts with PRD v4)*
+- Seed script (`seed_db.py`) and verification script (`verify_seed.py`) — seeded with 6 hospitals (NewYork-Presbyterian, UMass Memorial, Ascension, UAMS, CommonSpirit, Jefferson Health) mapped to Michael, David, and Jeff _(see flag #1 below — CommonSpirit and Jefferson Health scope status conflicts with PRD v4)_
 
 ### Ingestion & Classification Pipeline
+
 - Hospital scrapers using `serper.dev` and `NewsAPI`
 - Deterministic rules engine — 8 keyword pattern rules bypass Claude for high-confidence signals (CRO hires, Epic go-lives, restructuring, vendor disputes)
-- Claude classifier as fallback, returning `signal_type`, `tier`, `confidence_score`, and a one-sentence summary *(see flags #2 and #3 — model version and summary length)*
+- Claude classifier as fallback, returning `signal_type`, `tier`, `confidence_score`, and a one-sentence summary _(see flags #2 and #3 — model version and summary length)_
 - PDF ingestion via `pdfplumber` for SEC 8-K and IRS Form 990 filings
 - Deduplication across a rolling 30-day window
 
 ### FastAPI Backend
+
 - `GET /api/v1/hospitals` — hospital list filterable by AE territory
 - `GET /api/v1/hospitals/{id}/signals` — ordered signal feed
 - `GET /api/v1/status` — rolling weekly trend KPIs (`urgent_delta` / `worth_knowing_delta`, direction up/down/flat)
 - `POST /api/v1/digest-view` — UTM open-tracking webhook
 - `GET /api/v1/me` and `GET /api/v1/ae-users` — AE roster and individual open tracking
 - `POST /api/v1/copilot` — scaffolded LLM chat completions for territory insights
-- `GET /api/v1/export/csv` — bulk CSV export of signals *(distinct from the contacts CSV export described in PRD v4 — see flag #7)*
+- `GET /api/v1/export/csv` — bulk CSV export of signals _(distinct from the contacts CSV export described in PRD v4 — see flag #7)_
 - Response-level TTL caching (`@ttl_cache(60.0)`) and CORS preflight caching
 - Exponential backoff retry wrapper around Claude API calls
 - Global FastAPI exception handler that sends unhandled 500 errors to Danielle's Slack DM
 
 ### Next.js Frontend Dashboard
-- Sidebar/roster layout, filterable by Michael, David, or Jeff's territories *(see flag #5 — conflicts with PRD v4's description of a hardcoded territory chip)*
-- Signal feed with color-coded urgency badges (Urgent red, Worth Knowing blue, Low gray) and source links *(see flag #4 — tier naming)*
+
+- Sidebar/roster layout, filterable by Michael, David, or Jeff's territories _(see flag #5 — conflicts with PRD v4's description of a hardcoded territory chip)_
+- Signal feed with color-coded urgency badges (Urgent red, Worth Knowing blue, Low gray) and source links _(see flag #4 — tier naming)_
 - Admin review queue for Danielle: low-confidence signals (<0.70) with Approve/Dismiss hooks
 - UTM open-tracking: captures UTM params on page load, POSTs to `/digest-view`
 - Roster/activity feed showing open/read metrics per AE
-- "Hermes" chat bubble anchored to the viewport *(see flag #6 — naming)*
+- "Hermes" chat bubble anchored to the viewport _(see flag #6 — naming)_
 
 ### Slack Integration & Bot
+
 - Weekly digest DM, sent Mondays, grouped by hospital, with UTM-tagged links
 - Immediate urgent alert DMs when an Urgent signal is detected
 - Digest send guard — Monday digest only fires once Danielle's review queue is empty
 
 ### Testing
+
 - 190+ unit and integration tests covering rules engine matching, route auth/pagination, and the full pipeline: classification → review gate → admin review → digest dispatch → UTM logging
 
 ---
@@ -95,55 +103,55 @@ Status reflects what BUILD_SUMMARY confirms as built vs. what PRD v4 still lists
 
 ### Joel — Backend
 
-| ID | Task | Status | Notes |
-|----|------|--------|-------|
-| B-01 | Fix `null` `review_status` filter on `/signals` | Done | Verified working in Supabase. |
-| B-02 | Add `ANTHROPIC_API_KEY` to Railway env | Done | Added to env; redeploying main will activate it. |
-| B-03 | AI-generated 2-sentence summaries (currently 1 sentence) | Done | Prompt in `classifier.py` already requests 2-sentence summaries. |
-| B-04 | Tighter hospital attribution in classifier | Done | Severe confidence penalty for weak attribution is prompted in `classifier.py`. |
+| ID   | Task                                                     | Status       | Notes                                                                                                              |
+| ---- | -------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------ |
+| B-01 | Fix `null` `review_status` filter on `/signals`          | Done         | Verified working in Supabase.                                                                                      |
+| B-02 | Add `ANTHROPIC_API_KEY` to Railway env                   | Done         | Added to env; redeploying main will activate it.                                                                   |
+| B-03 | AI-generated 2-sentence summaries (currently 1 sentence) | Done         | Prompt in `classifier.py` already requests 2-sentence summaries.                                                   |
+| B-04 | Tighter hospital attribution in classifier               | Done         | Severe confidence penalty for weak attribution is prompted in `classifier.py`.                                     |
 | B-05 | Hospital staff profiles — `GET /hospitals/{id}/contacts` | Needs Fixing | Backend endpoint `/contacts?hospital_id={id}` and fields (`full_name`, `role`) do not match frontend expectations. |
-| B-06 | Review queue feedback loop (thumbs up/down → training) | Leave Alone | Approve/Dismiss updates `review_status` in DB. No ML training loop is requested in PRD. |
-| B-07 | Scraper usefulness range toggles | Leave Alone | Hardcoded defaults are functional. |
-| B-08 | Urgent alert Slack DM | Done | Implemented via BackgroundTasks in `alert_service.py`. |
-| B-09 | Contacts CSV export endpoint | Done | HubSpot format contacts CSV export is fully built at `GET /api/v1/export/csv`. |
-| B-10 | `agent_runs` logging on every scraper run | Done | Verified `run_logger` inserts and updates `agent_runs` on every run. |
+| B-06 | Review queue feedback loop (thumbs up/down → training)   | Leave Alone  | Approve/Dismiss updates `review_status` in DB. No ML training loop is requested in PRD.                            |
+| B-07 | Scraper usefulness range toggles                         | Leave Alone  | Hardcoded defaults are functional.                                                                                 |
+| B-08 | Urgent alert Slack DM                                    | Done         | Implemented via BackgroundTasks in `alert_service.py`.                                                             |
+| B-09 | Contacts CSV export endpoint                             | Done         | HubSpot format contacts CSV export is fully built at `GET /api/v1/export/csv`.                                     |
+| B-10 | `agent_runs` logging on every scraper run                | Done         | Verified `run_logger` inserts and updates `agent_runs` on every run.                                               |
 
 ### Juan — Frontend
 
-| ID | Task | Status | Notes |
-|----|------|--------|-------|
-| F-01 | Remove `@anthropic-ai/sdk`, fix pnpm lockfile | Done | Removed from package.json and lockfile is clean. |
-| F-02 | Investigate/fix "AMS" label in upper-right | Resolved | No "AMS" label exists in the active code. |
-| F-03 | Rename CoPilot → Hermes everywhere | Done | Hermes branding and titles fully updated in `CoPilot.tsx`. |
-| F-04 | Category tags on signal cards | Done | Signal cards render category badges correctly. |
-| F-05 | Sort toggle (urgency default, recent/hospital name) | Done | Dynamic sorting options wired and functional in Signal Feed. |
-| F-06 | Category filter on signal feed | Done | Category selection filter is fully integrated and functional. |
-| F-07 | Dynamic `TerritorySelector` component | Done | Dynamic `TerritoryFilter` component maps over real AEs. |
-| F-08 | Hermes: inject latest 50 signals into system prompt | Open | Copilot backend is a mock stub and needs prompt integration. |
-| F-09 | Review queue UI — thumbs up/down | Done | Approve/Dismiss hooks fully wire to the backend review endpoint. |
-| F-10 | Hospital staff profiles view | Needs Fixing | Needs to align path and property names with B-05. |
-| F-11 | Contacts CSV export button | Needs Fixing | Labeled as "Signals CSV" in UI, but calls contacts downloader. |
-| F-12 | UTM tracking — digest view capture | Done | Captures UTM parameters and registers opens to `/digest-view`. |
+| ID   | Task                                                | Status       | Notes                                                            |
+| ---- | --------------------------------------------------- | ------------ | ---------------------------------------------------------------- |
+| F-01 | Remove `@anthropic-ai/sdk`, fix pnpm lockfile       | Done         | Removed from package.json and lockfile is clean.                 |
+| F-02 | Investigate/fix "AMS" label in upper-right          | Resolved     | No "AMS" label exists in the active code.                        |
+| F-03 | Rename CoPilot → Hermes everywhere                  | Done         | Hermes branding and titles fully updated in `CoPilot.tsx`.       |
+| F-04 | Category tags on signal cards                       | Done         | Signal cards render category badges correctly.                   |
+| F-05 | Sort toggle (urgency default, recent/hospital name) | Done         | Dynamic sorting options wired and functional in Signal Feed.     |
+| F-06 | Category filter on signal feed                      | Done         | Category selection filter is fully integrated and functional.    |
+| F-07 | Dynamic `TerritorySelector` component               | Done         | Dynamic `TerritoryFilter` component maps over real AEs.          |
+| F-08 | Hermes: inject latest 50 signals into system prompt | Open         | Copilot backend is a mock stub and needs prompt integration.     |
+| F-09 | Review queue UI — thumbs up/down                    | Done         | Approve/Dismiss hooks fully wire to the backend review endpoint. |
+| F-10 | Hospital staff profiles view                        | Needs Fixing | Needs to align path and property names with B-05.                |
+| F-11 | Contacts CSV export button                          | Needs Fixing | Labeled as "Signals CSV" in UI, but calls contacts downloader.   |
+| F-12 | UTM tracking — digest view capture                  | Done         | Captures UTM parameters and registers opens to `/digest-view`.   |
 
 ### Michael — Data
 
-| ID | Task | Status | Notes |
-|----|------|--------|-------|
-| D-01 | 3+ validated signals per hospital, all confirmed hospitals | Verify | Scrapers seed data, but volume is to be confirmed. |
-| D-02 | Stricter attribution — hospital must be central subject | Done | Handled via classifier prompt updates. |
-| D-03 | LinkedIn URL discovery for contacts | Open | LinkedIn lookup automation is open. |
-| D-04 | PDF ingestion (SEC 8-K, IRS 990) | Done | Fully implemented using `pdfplumber`. |
-| D-05 | Vendor change / AI adoption signal coverage | Verify | Taxonomy supports it; volume is to be confirmed. |
-| D-06 | Signal quality validation — remove misattributed signals | Open | Verification of scraper output accuracy is ongoing. |
-| D-07 | CommonSpirit — hold until Danielle confirms division | Leave Alone | Completed and seeded to David's territory. |
+| ID   | Task                                                       | Status      | Notes                                               |
+| ---- | ---------------------------------------------------------- | ----------- | --------------------------------------------------- |
+| D-01 | 3+ validated signals per hospital, all confirmed hospitals | Verify      | Scrapers seed data, but volume is to be confirmed.  |
+| D-02 | Stricter attribution — hospital must be central subject    | Done        | Handled via classifier prompt updates.              |
+| D-03 | LinkedIn URL discovery for contacts                        | Open        | LinkedIn lookup automation is open.                 |
+| D-04 | PDF ingestion (SEC 8-K, IRS 990)                           | Done        | Fully implemented using `pdfplumber`.               |
+| D-05 | Vendor change / AI adoption signal coverage                | Verify      | Taxonomy supports it; volume is to be confirmed.    |
+| D-06 | Signal quality validation — remove misattributed signals   | Open        | Verification of scraper output accuracy is ongoing. |
+| D-07 | CommonSpirit — hold until Danielle confirms division       | Leave Alone | Completed and seeded to David's territory.          |
 
 ---
 
 ## 6. Key Dates
 
-| Date | Milestone |
-|------|-----------|
-| June 14, 2026 | This status doc compiled. Flags above to be resolved this week. |
-| June 18, 2026 | **Build complete** — all open items above resolved, `main` stable |
-| June 18–23, 2026 | Debug week — bug fixes, load testing, demo rehearsal |
-| June 24, 2026 | **Demo Day** |
+| Date             | Milestone                                                         |
+| ---------------- | ----------------------------------------------------------------- |
+| June 14, 2026    | This status doc compiled. Flags above to be resolved this week.   |
+| June 18, 2026    | **Build complete** — all open items above resolved, `main` stable |
+| June 18–23, 2026 | Debug week — bug fixes, load testing, demo rehearsal              |
+| June 24, 2026    | **Demo Day**                                                      |
