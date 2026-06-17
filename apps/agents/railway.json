@@ -1,0 +1,9 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "buildCommand": "pnpm --filter @adonis/agents build"
+  },
+  "deploy": {
+    "startCommand": "pnpm --filter @adonis/agents start"
+  }
+}
