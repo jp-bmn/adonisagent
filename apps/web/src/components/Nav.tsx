@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useUser } from './UserProvider';
 
 const items = [
   { href: '/', label: 'Signal feed', glyph: '▦' },
@@ -13,6 +14,7 @@ const items = [
 
 export default function Nav() {
   const pathname = usePathname();
+  const { isAdmin } = useUser();
 
   return (
     <nav className="space-y-0.5">
@@ -33,6 +35,19 @@ export default function Nav() {
           </Link>
         );
       })}
+      {isAdmin && (
+        <Link
+          href="/dev"
+          className={`flex items-center gap-3 px-5 py-2.5 text-sm transition ${
+            pathname.startsWith('/dev')
+              ? 'bg-white/10 text-white'
+              : 'text-slate-400 hover:bg-white/5 hover:text-white'
+          }`}
+        >
+          <span className="w-4 text-center opacity-80">⚙</span>
+          Dev
+        </Link>
+      )}
     </nav>
   );
 }
