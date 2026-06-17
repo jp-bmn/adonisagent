@@ -44,6 +44,34 @@ Updated at the end of every session.
 - **Deployment + operating runbook** — for Adonis handoff post-demo
 - **End-to-end test** — all 4 real users (Danielle, David, Michael, Jeff)
 
+### Dev Dashboard (admin-only `/dev` route)
+
+- **Pipeline health** — last/next scraper run, signals stored, pending review count
+- **Contact verification status** — LinkedIn verified vs unverified per hospital, run verifier inline
+- **Signal quality monitor** — flag 404 source URLs, miscategorized signals, wrong hospital attribution
+- **KPI trend view** — urgent delta + worth-knowing delta live from `/status`
+- **Hospital coverage** — signals per hospital, flag any with < 3 signals before demo
+- **Open GitHub issues** — pull from GitHub API, grouped by assignee
+
+### Self-Healing Agent (post-demo)
+
+Nightly Railway cron job that uses Claude to reason about what's broken and fix it automatically — making Adonis a true agentic system, not just a dashboard.
+
+- **Nightly health check** — runs at 2 AM ET, pulls all contacts + signals from the live API
+- **Contact integrity scan** — calls the LinkedIn verifier API for any URL that is null, a post URL (`/posts/`), or flagged as the wrong person; writes corrected URLs back via API
+- **Signal quality audit** — detects 404 source URLs, signals attributed to wrong hospitals, AI error messages saved as contact names
+- **Auto-escalation** — if the agent can't fix something itself (e.g. no LinkedIn profile found), it opens a GitHub issue with full context and assigns to the right owner (Michael = contacts, Joel = signals/API)
+- **Morning Slack summary** — posts at 7 AM ET: ✅ self-fixed / ❌ still broken + assignee tagged, so the team walks in knowing exactly what needs attention
+- **Why it matters** — eliminates the manual back-and-forth (e.g. Michael testing locally but not on prod, wrong people showing up in contact cards) that cost us time in Sprint 13
+
+### Monitoring + Audit (for Adonis handoff)
+
+- **Audit log** — timestamped record of all signal adds/removals, contact updates, review queue actions (who approved/dismissed what and when)
+- **Breakdown alerts** — Slack/email notification when API goes down, pipeline misses a scheduled run, Iris returns errors, or signals are miscategorized
+- **Iris conversation logs** — visibility into what reps are asking and where answers go wrong
+- **Uptime monitoring** — UptimeRobot or similar pinging `/health` every 5 min, SMS alert on failure
+- **Error tracking** — Sentry integration on both frontend and Railway backend
+
 ---
 
 ## Sprint 13 — Jun 15, 2026 · 12:00 AM ET
