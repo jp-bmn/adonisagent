@@ -1,9 +1,11 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useUser } from '@/components/UserProvider';
 
 export default function SidebarUser() {
   const { userName, isAdmin } = useUser();
+  const router = useRouter();
 
   if (!userName) return null;
 
@@ -17,8 +19,10 @@ export default function SidebarUser() {
   return (
     <div className="flex items-center gap-2.5 py-3">
       <div
-        className="w-7 h-7 rounded-full flex items-center justify-center flex-none text-[10px] font-bold"
+        className="w-7 h-7 rounded-full flex items-center justify-center flex-none text-[10px] font-bold cursor-default select-none"
         style={{ background: '#EFEFC8', color: '#0F3D3E' }}
+        onDoubleClick={() => router.push('/dev')}
+        title=""
       >
         {initials}
       </div>
