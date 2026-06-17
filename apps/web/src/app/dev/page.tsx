@@ -58,7 +58,7 @@ function fmt(d: Date) {
 }
 
 export default function DevDashboardPage() {
-  const { isAdmin, userId } = useUser();
+  const { userId } = useUser();
   const [dark, setDark] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
@@ -184,18 +184,6 @@ export default function DevDashboardPage() {
   const text = dark ? 'text-gray-100' : 'text-ink';
   const sub = dark ? 'text-gray-400' : 'text-slate-500';
   const border = dark ? 'border-gray-800' : 'border-line';
-
-  if (!isAdmin) {
-    return (
-      <div className={`${bg} ${text} min-h-screen flex items-center justify-center`}>
-        <div className="text-center">
-          <div className="text-4xl mb-3">🔒</div>
-          <div className="font-semibold">Admin access only</div>
-          <div className={`text-sm ${sub} mt-1`}>This page is restricted to admin users.</div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={`${bg} ${text} min-h-screen`}>
