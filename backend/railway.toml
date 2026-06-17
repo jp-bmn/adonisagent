@@ -2,5 +2,5 @@
 builder = "dockerfile"
 
 [deploy]
-startCommand = "pnpm --filter @adonis/web start'"
+startCommand = "/bin/sh -c 'uvicorn app.main:app --host 0.0.0.0 --port $PORT'"
 healthcheckPath = "/"
