@@ -101,7 +101,7 @@ export default async function HospitalProfilePage({ params }: PageProps) {
                       )}
                     </div>
                     {c.role && <span className="text-xs text-slate-500">{c.role}</span>}
-                    {c.prior_employer && <span className="text-[11px] text-slate-400">Prior: {c.prior_employer}</span>}
+                    {c.prior_employer && <span className="text-[11px] text-slate-400">prev. {c.prior_employer}</span>}
                     {c.email && (
                       <a href={`mailto:${c.email}`} className="text-xs text-brand hover:underline">
                         {c.email}
