@@ -138,7 +138,7 @@ async def test_batch_ingest_relevance_check(mock_get_supabase):
                 "source_name": "News",
                 "source_url": "https://example.com/ohio-merger",
                 "published_at_raw": "2026-06-15",
-                "excerpt": "This article discusses OhioHealth, no connection to UMass.",
+                "excerpt": "This article discusses OhioHealth, no connection to the target hospital.",
                 "matched_topics": ["merger"],
             },
             {

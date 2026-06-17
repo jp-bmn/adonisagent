@@ -194,6 +194,7 @@ RULES: list[Rule] = [
         ],
         negative_patterns = [
             r"(restructur).{0,20}(loan|debt|bond|financ)",
+            r"\btracker\b",
         ],
     ),
 
