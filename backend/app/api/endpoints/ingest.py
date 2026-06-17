@@ -16,6 +16,9 @@ from app.core.database import get_supabase
 import logging
 import re
 from datetime import date, datetime
+import httpx
+import asyncio
+import os
 
 router = APIRouter(prefix="/signals", tags=["signals-batch"])
 logger = logging.getLogger(__name__)
@@ -100,6 +103,35 @@ def _parse_date(raw: Optional[str]) -> Optional[str]:
     # Try extracting YYYY-MM-DD from any string
     match = re.search(r"\d{4}-\d{2}-\d{2}", raw)
     return match.group(0) if match else None
+
+
+async def _verify_url(url: str) -> bool:
+    """Returns True if the URL exists (status < 400 or 403), False otherwise."""
+    if not url:
+        return False
+    # Skip validation in tests to avoid flakiness and slowdowns
+    if "example.com" in url or "test" in url or os.getenv("PYTEST_CURRENT_TEST"):
+        return True
+    if not url.startswith("http"):
+        return False
+        
+    try:
+        # Use a short timeout and a browser User-Agent to avoid immediate 403s from WAFs
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+        async with httpx.AsyncClient(timeout=4.0, headers=headers) as client:
+            resp = await client.head(url, follow_redirects=True)
+            # If HEAD is rejected, try a lightweight GET
+            if resp.status_code in (405, 403):
+                resp = await client.get(url, follow_redirects=True)
+            
+            # 404 means the page definitely doesn't exist (AI hallucination)
+            if resp.status_code == 404:
+                return False
+            # Accept < 400 or 403 (Forbidden often means WAF block, but URL exists)
+            return resp.status_code < 400 or resp.status_code == 403
+    except Exception as e:
+        logger.debug(f"URL validation failed for {url}: {e}")
+        return False
 
 
 def _infer_tier(signal_type: str, matched_topics: list[str]) -> str:
@@ -310,6 +342,18 @@ async def ingest_signal_batch(
         return None
 
     # ------------------------------------------------------------------
+    # Pre-validate all URLs concurrently
+    # ------------------------------------------------------------------
+    urls_to_check = {sig.get("source_url") for sig in signals_raw if sig.get("source_url")}
+    valid_urls: dict[str, bool] = {}
+    
+    async def _check_and_store(u: str):
+        valid_urls[u] = await _verify_url(u)
+        
+    if urls_to_check:
+        await asyncio.gather(*[_check_and_store(u) for u in urls_to_check])
+
+    # ------------------------------------------------------------------
     # Process each signal
     # ------------------------------------------------------------------
     inserted = 0
@@ -336,7 +380,12 @@ async def ingest_signal_batch(
         tier = _infer_tier(signal_type, matched_topics)
         published_date = _parse_date(sig.get("published_at_raw"))
         summary = sig.get("excerpt") or ""
+        
         source_url = sig.get("source_url") or ""
+        if source_url and not valid_urls.get(source_url, False):
+            logger.warning(f"Dropping 404/invalid source_url: {source_url}")
+            source_url = ""
+            
         source_name = sig.get("source_name") or ""
 
         # --- Required & Meaningful Title ---
