@@ -1,0 +1,5 @@
+[setup]
+pkgs = ["pnpm-9_x", "nodejs_20"]
+
+[phases.install]
+cmds = ["pnpm install"]
