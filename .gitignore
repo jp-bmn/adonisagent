@@ -79,3 +79,5 @@ ngrok
 
 # TypeScript build info
 *.tsbuildinfo
+
+.venv_backend/
