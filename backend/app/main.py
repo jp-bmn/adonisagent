@@ -16,7 +16,6 @@ from app.api.endpoints import (
     admin,
     classify,
     contacts,
-    copilot,
     digests,
     export,
     hospitals,
@@ -143,4 +142,3 @@ app.include_router(runs.router, prefix=PREFIX)
 app.include_router(admin.router, prefix=PREFIX)
 app.include_router(classify.router, prefix=PREFIX)
 app.include_router(users.router, prefix=PREFIX)
-app.include_router(copilot.router, prefix=PREFIX)

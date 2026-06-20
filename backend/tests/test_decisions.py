@@ -62,47 +62,7 @@ def test_batch_ingest_promoted_tiers():
     assert _infer_tier("leadership_change", []) == "urgent"
 
 
-@pytest.mark.asyncio
-async def test_copilot_endpoint_requires_auth():
-    """POST /api/v1/copilot without X-User-Id returns 401."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.post(
-            "/api/v1/copilot",
-            json={
-                "user_id": str(uuid.uuid4()),
-                "message": "Hello Co-pilot",
-            }
-        )
-    assert response.status_code == 401
 
-
-@pytest.mark.asyncio
-@patch("app.core.auth.get_supabase")
-async def test_copilot_endpoint_success(mock_get_supabase):
-    """POST /api/v1/copilot returns the mocked response when authorized."""
-    # Mock database lookup for AE user auth check
-    mock_sb = MagicMock()
-    mock_get_supabase.return_value = mock_sb
-    mock_sb.table.return_value.select.return_value.eq.return_value.single.return_value = FluentChain(FAKE_AE)
-
-    user_uuid = uuid.uuid4()
-    hospital_uuid = uuid.uuid4()
-
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        response = await client.post(
-            "/api/v1/copilot",
-            headers={"X-User-Id": FAKE_AE["id"]},
-            json={
-                "user_id": str(user_uuid),
-                "message": "What is the status of Ascension?",
-                "context_hospital_id": str(hospital_uuid),
-            }
-        )
-
-    assert response.status_code == 200
-    data = response.json()
-    assert "Co-pilot stub" in data["reply"]
-    assert data["sources"] == []
 
 
 @pytest.mark.asyncio
