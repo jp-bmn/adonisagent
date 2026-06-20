@@ -95,10 +95,27 @@ export default async function HospitalProfilePage({ params }: PageProps) {
               <div className="space-y-4">
                 {contacts.map((c) => (
                   <div key={c.id} className="flex flex-col gap-1">
-                    <div className="text-sm font-semibold text-ink">
-                      {c.full_name || 'Unknown contact'}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="text-sm font-semibold text-ink">
+                        {c.full_name || 'Unknown contact'}
+                      </div>
+                      {c.role && (
+                        <span
+                          className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                          style={
+                            c.role.toLowerCase().includes('ceo')
+                              ? { background: '#FBEDEB', color: '#C44A2C' }
+                              : c.role.toLowerCase().includes('cfo')
+                                ? { background: '#EBF0FB', color: '#1F4FA8' }
+                                : c.role.toLowerCase().includes('cro')
+                                  ? { background: '#E9F4ED', color: '#1F7A3E' }
+                                  : { background: '#F0EBF8', color: '#6B3FA0' }
+                          }
+                        >
+                          {c.role}
+                        </span>
+                      )}
                     </div>
-                    {c.role && <div className="text-xs text-slate-500">{c.role}</div>}
                     {c.prior_employer && (
                       <div className="text-xs text-slate-400">prev. {c.prior_employer}</div>
                     )}

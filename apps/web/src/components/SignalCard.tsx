@@ -16,7 +16,12 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
 
   if (isUrgent) {
     return (
-      <div className="bg-white border border-line rounded-xl p-5 space-y-3">
+      <a
+        href={signal.source_url}
+        target="_blank"
+        rel="noreferrer"
+        className="block bg-white border border-line rounded-xl p-5 space-y-3 hover:shadow-md transition-shadow cursor-pointer"
+      >
         {/* Urgent header row: pill + date */}
         <div className="flex items-center gap-2 flex-wrap">
           <span
@@ -76,24 +81,24 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
 
         {/* Footer: source left · hospital right — mirrors UPDATE card pattern */}
         <div className="flex items-center justify-between gap-3 pt-1">
-          <a
-            href={signal.source_url}
-            target="_blank"
-            rel="noreferrer"
-            className="text-sm font-semibold text-ink hover:underline truncate max-w-[60%]"
-          >
+          <span className="text-sm font-semibold text-ink truncate max-w-[60%]">
             {signal.source_name ?? sourceHostname(signal.source_url)}
-          </a>
+          </span>
           <span className="text-xs font-mono text-slate-400 flex-none">
             {hospitalName ?? signal.hospital_id}
           </span>
         </div>
-      </div>
+      </a>
     );
   }
 
   return (
-    <div className="bg-white border border-line rounded-xl p-5 space-y-3">
+    <a
+      href={signal.source_url}
+      target="_blank"
+      rel="noreferrer"
+      className="block bg-white border border-line rounded-xl p-5 space-y-3 hover:shadow-md transition-shadow cursor-pointer"
+    >
       {/* Update header row: pill + date */}
       <div className="flex items-center gap-2 flex-wrap">
         <span
@@ -151,19 +156,14 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
 
       {/* Footer: source left · hospital right — same as URGENT */}
       <div className="flex items-center justify-between gap-3 pt-1">
-        <a
-          href={signal.source_url}
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs text-brand hover:underline truncate max-w-[60%]"
-        >
+        <span className="text-xs text-brand truncate max-w-[60%]">
           {signal.source_name ?? sourceHostname(signal.source_url)}
-        </a>
+        </span>
         <span className="text-xs font-mono text-slate-400 flex-none">
           {hospitalName ?? signal.hospital_id}
         </span>
       </div>
-    </div>
+    </a>
   );
 }
 
