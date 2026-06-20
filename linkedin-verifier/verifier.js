@@ -27,6 +27,18 @@ function isValidProfileUrl(url) {
   return /^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9\-_%]+\/?$/.test(url);
 }
 
+async function checkUrlExists(url) {
+  try {
+    const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    // 404 means the profile definitely doesn't exist (hallucinated)
+    // 999 means LinkedIn blocked our bot, but the URL format is valid and it exists
+    if (res.status === 404) return false;
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 function buildPrompt(contact) {
   return `You are a data verification assistant. Find the correct LinkedIn profile URL for this hospital executive.
 
@@ -76,6 +88,14 @@ async function verifyContact(contact, model = MODELS.default) {
     result.suggestedUrl = null;
     result.status = 'failed';
     result.reasoning = `Found a URL but it was not a linkedin.com/in/ profile link — ${result.reasoning}`;
+  } else if (result.suggestedUrl) {
+    // Prevent LLM hallucinations by actually checking if the URL returns a 404
+    const exists = await checkUrlExists(result.suggestedUrl);
+    if (!exists) {
+      result.suggestedUrl = null;
+      result.status = 'failed';
+      result.reasoning = `The model hallucinated a LinkedIn URL that does not exist (404) — ${result.reasoning}`;
+    }
   }
 
   return { ...result, model };
