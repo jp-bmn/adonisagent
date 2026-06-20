@@ -11,6 +11,28 @@ from adonis_data.clients.serper import SerperClient
 from adonis_data.config import load_settings
 from adonis_data.constants import HOSPITAL_QUERIES
 import requests
+import re
+
+ERROR_PATTERNS = [
+    re.compile(r"^the provided snippets", re.IGNORECASE),
+    re.compile(r"^unknown$", re.IGNORECASE),
+    re.compile(r"^i (could not|cannot|don't|do not)", re.IGNORECASE),
+    re.compile(r"^no information", re.IGNORECASE),
+    re.compile(r"^based on the (provided|given)", re.IGNORECASE),
+    re.compile(r"obsidian security", re.IGNORECASE),
+    re.compile(r"chutes &", re.IGNORECASE),
+    re.compile(r"deals tracker:", re.IGNORECASE),
+    re.compile(r"meet walmart's", re.IGNORECASE),
+    re.compile(r"schomburger to", re.IGNORECASE),
+    re.compile(r"fifteen thousand", re.IGNORECASE),
+    re.compile(r"health systems", re.IGNORECASE),
+    re.compile(r"\n"),
+]
+
+def is_valid_contact_name(name):
+    if not name or len(name.strip()) < 2:
+        return False
+    return not any(p.search(name.strip()) for p in ERROR_PATTERNS)
 
 
 def post_contact(
@@ -217,6 +239,45 @@ def run() -> Path:
         hospital_id = settings.hospital_id_map.get(hospital, "") if settings.hospital_id_map else ""
         contacts = extract_leadership(hospital, serper)
         
+        # Validation
+        valid_contacts = []
+        for contact in contacts:
+            if is_valid_contact_name(contact["name"]):
+                valid_contacts.append(contact)
+            else:
+                print(f"Skipping invalid contact name: {contact['name']}")
+        contacts = valid_contacts
+        
+        # Verify via API
+        if contacts:
+            verifier_url = "https://adonisagents-production.up.railway.app/verify"
+            payload = {
+                "contacts": [
+                    {
+                        "id": str(i),
+                        "name": c["name"],
+                        "role": c["role"],
+                        "hospital": c["hospital"]
+                    }
+                    for i, c in enumerate(contacts)
+                ]
+            }
+            try:
+                print("Calling LinkedIn Verifier API...")
+                v_res = requests.post(verifier_url, json=payload, timeout=60)
+                if v_res.ok:
+                    v_results = v_res.json().get("results", [])
+                    for v_item in v_results:
+                        for c in contacts:
+                            if c["name"] == v_item["name"] and c["role"] == v_item["role"]:
+                                if v_item.get("status") == "verified" and v_item.get("suggestedUrl"):
+                                    c["linkedin_url"] = v_item["suggestedUrl"]
+                                break
+                else:
+                    print(f"Verifier API error: {v_res.status_code}")
+            except Exception as e:
+                print(f"Failed to call verifier API: {e}")
+
         if settings.post_signals_enabled and contacts_endpoint and hospital_id:
             existing_contacts = get_contacts(contacts_endpoint, hospital_id, settings.request_timeout_seconds, settings.signals_endpoint_token)
             
