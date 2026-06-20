@@ -16,6 +16,9 @@ HOSPITAL_QUERIES = {
     "CommonSpirit": (
         "CommonSpirit revenue cycle OR leadership OR Epic OR acquisition OR restructuring OR vendor dispute OR AI adoption"
     ),
+    "Jefferson Health": (
+        "Jefferson Health revenue cycle OR leadership OR Epic OR acquisition OR restructuring OR vendor dispute OR AI adoption"
+    ),
 }
 
 RSS_FEEDS = {
