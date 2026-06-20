@@ -271,7 +271,7 @@ def run() -> Path:
             }
             try:
                 print("Calling LinkedIn Verifier API...")
-                v_res = requests.post(verifier_url, json=payload, timeout=60)
+                v_res = requests.post(verifier_url, json=payload, timeout=300)
                 if v_res.ok:
                     v_results = v_res.json().get("results", [])
                     for v_item in v_results:

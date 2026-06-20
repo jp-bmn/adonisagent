@@ -29,20 +29,20 @@ app.post('/verify', async (req, res) => {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
   }
 
-  const results = [];
-
-  for (const contact of contacts) {
+  const promises = contacts.map(async (contact, index) => {
+    // Stagger start times to avoid hitting Anthropic API limits all at the exact same millisecond
+    await sleep(index * 1500);
     const result = await verifyWithFallback(contact);
-    results.push({
+    return {
       id: contact.id,
       name: contact.name,
       hospital: contact.hospital,
       currentUrl: contact.currentUrl || null,
       ...result,
-    });
-    // Skip delay for invalid_name contacts since no API call was made
-    if (result.status !== 'invalid_name') await sleep(DELAY_MS);
-  }
+    };
+  });
+
+  const results = await Promise.all(promises);
 
   const summary = {
     total: results.length,
