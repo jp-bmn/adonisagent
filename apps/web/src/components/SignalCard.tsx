@@ -81,7 +81,20 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
 
         {/* Footer: source left · hospital right — mirrors UPDATE card pattern */}
         <div className="flex items-center justify-between gap-3 pt-1">
-          <span className="text-sm font-semibold text-ink truncate max-w-[60%]">
+          <span className="flex items-center gap-1.5 text-sm font-semibold text-ink truncate max-w-[60%]">
+            {publicationLogoUrl(signal.source_url) && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={publicationLogoUrl(signal.source_url)}
+                alt=""
+                width={16}
+                height={16}
+                className="rounded-sm flex-none"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            )}
             {signal.source_name ?? sourceHostname(signal.source_url)}
           </span>
           <span className="text-xs font-mono text-slate-400 flex-none">
@@ -156,7 +169,20 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
 
       {/* Footer: source left · hospital right — same as URGENT */}
       <div className="flex items-center justify-between gap-3 pt-1">
-        <span className="text-xs text-brand truncate max-w-[60%]">
+        <span className="flex items-center gap-1.5 text-xs text-brand truncate max-w-[60%]">
+          {publicationLogoUrl(signal.source_url) && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={publicationLogoUrl(signal.source_url)}
+              alt=""
+              width={14}
+              height={14}
+              className="rounded-sm flex-none"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          )}
           {signal.source_name ?? sourceHostname(signal.source_url)}
         </span>
         <span className="text-xs font-mono text-slate-400 flex-none">
@@ -165,6 +191,17 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
       </div>
     </a>
   );
+}
+
+function publicationLogoUrl(sourceUrl: string): string {
+  const token = process.env.NEXT_PUBLIC_LOGODEV_TOKEN;
+  if (!token) return '';
+  try {
+    const domain = new URL(sourceUrl).hostname.replace(/^www\./, '');
+    return `https://img.logo.dev/${domain}?token=${token}&size=32`;
+  } catch {
+    return '';
+  }
 }
 
 function stripHtml(text: string): string {
