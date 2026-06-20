@@ -9,3 +9,7 @@ body {
   color: theme('colors.ink');
   font-feature-settings: 'cv11';
 }
+
+a:visited {
+  color: inherit;
+}
