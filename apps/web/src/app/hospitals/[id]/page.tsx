@@ -136,9 +136,21 @@ export default async function HospitalProfilePage({ params }: PageProps) {
                       {c.email && (
                         <a
                           href={`mailto:${c.email}`}
-                          className="text-[10px] font-mono text-slate-400 hover:underline"
+                          className="inline-flex items-center justify-center w-6 h-6 rounded hover:opacity-80 transition"
+                          title={c.email}
                         >
-                          {c.email}
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="#64748b"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <rect x="2" y="4" width="20" height="16" rx="2" />
+                            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                          </svg>
                         </a>
                       )}
                     </div>
