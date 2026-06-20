@@ -9,10 +9,10 @@ interface SignalCardProps {
 
 export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
   const isUrgent = signal.tier === 'urgent';
-  // worth_knowing = standard digest signal; filtered_out should not be rendered
   const label = SIGNAL_TYPE_LABELS[signal.signal_type] ?? signal.signal_type;
   const headline = signal.title ? stripHtml(signal.title) : label;
   const date = signal.published_date ?? signal.created_at;
+  const logoUrl = publicationLogoUrl(signal.source_url);
 
   if (isUrgent) {
     return (
@@ -82,10 +82,11 @@ export default function SignalCard({ signal, hospitalName }: SignalCardProps) {
         {/* Footer: source left · hospital right — mirrors UPDATE card pattern */}
         <div className="flex items-center justify-between gap-3 pt-1">
           <span className="flex items-center gap-1.5 text-sm font-semibold text-ink truncate max-w-[60%]">
-            {publicationLogoUrl(signal.source_url) && (
+            {logoUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={publicationLogoUrl(signal.source_url)}
+                src={logoUrl}
+                loading="lazy"
                 alt=""
                 width={16}
                 height={16}
