@@ -149,25 +149,11 @@ export default async function HomePage({ searchParams }: PageProps) {
         <Link href="/hospitals" className="text-xs text-accent hover:underline">
           View all hospitals →
         </Link>
-        <div className="flex items-center gap-5 text-xs font-mono text-slate-400 flex-wrap">
-          {status.pending_review_count > 0 && (
-            <Link href="/review" className="text-urgent font-semibold hover:underline">
-              {status.pending_review_count} pending review
-            </Link>
-          )}
-          <span>
-            <span className="text-slate-500">last run:</span>{' '}
-            {status.last_scraper_run ? formatDate(status.last_scraper_run) : 'never'}
-          </span>
-          <span>
-            <span className="text-slate-500">next run:</span>{' '}
-            {status.next_scraper_run ? formatDate(status.next_scraper_run) : 'scheduled'}
-          </span>
-          <span>
-            <span className="text-slate-500">stored:</span> {status.total_signals_stored}
-          </span>
-          <span className="text-slate-300">v{status.api_version}</span>
-        </div>
+        {status.pending_review_count > 0 && (
+          <Link href="/review" className="text-xs text-urgent font-semibold hover:underline">
+            {status.pending_review_count} pending review
+          </Link>
+        )}
       </footer>
     </div>
   );
