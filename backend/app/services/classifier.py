@@ -35,7 +35,7 @@ from app.services.rules_engine import classify_with_rules
 logger = logging.getLogger(__name__)
 
 # Model used for all Claude calls
-CLAUDE_MODEL = "claude-sonnet-4-20250514"
+CLAUDE_MODEL = "claude-3-5-sonnet-20241022"
 
 # Confidence threshold below which we filter out the signal entirely
 CONFIDENCE_FILTER_THRESHOLD = 0.50

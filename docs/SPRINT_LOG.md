@@ -28,6 +28,7 @@ Updated at the end of every session.
 ## Future Enhancements (post-Demo Day)
 
 ### Iris (formerly Hermes)
+
 - **Proactive signal nudge** — notify rep when new signal arrives since last session
 - **Auto briefing on login** — Iris opens with day's briefing automatically on first login
 - **Conversation history panel** — tap history icon, see all past chats grouped by day/time, tap to reload, option to delete individual or all. Like ChatGPT sidebar.

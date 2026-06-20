@@ -127,7 +127,7 @@ async def test_classify_signal_claude_match():
     assert res.tier == "worth_knowing"
     assert res.confidence_score == 0.75
     assert res.tokens_used == 300
-    assert res.model_used == "claude-sonnet-4-20250514"
+    assert res.model_used == "claude-3-5-sonnet-20241022"
     mock_client.messages.create.assert_called_once()
 
 
