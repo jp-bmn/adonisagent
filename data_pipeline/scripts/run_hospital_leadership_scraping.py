@@ -257,7 +257,7 @@ def run() -> Path:
         
         # Verify via API
         if contacts:
-            verifier_url = "https://adonisagents-production.up.railway.app/verify"
+            verifier_url = "http://localhost:3001/verify"
             payload = {
                 "contacts": [
                     {
@@ -276,7 +276,7 @@ def run() -> Path:
                     v_results = v_res.json().get("results", [])
                     for v_item in v_results:
                         for c in contacts:
-                            if c["name"] == v_item["name"] and c["role"] == v_item["role"]:
+                            if c["name"] == v_item.get("name"):
                                 if v_item.get("status") == "verified" and v_item.get("suggestedUrl"):
                                     c["linkedin_url"] = v_item["suggestedUrl"]
                                 break
