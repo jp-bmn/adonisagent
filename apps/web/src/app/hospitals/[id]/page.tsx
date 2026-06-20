@@ -94,7 +94,10 @@ export default async function HospitalProfilePage({ params }: PageProps) {
             ) : (
               <div className="space-y-4">
                 {contacts.map((c) => (
-                  <div key={c.id} className="flex flex-col gap-1">
+                  <div
+                    key={c.id}
+                    className="flex flex-col gap-1 rounded-lg px-3 py-2 -mx-3 hover:bg-paper transition-colors cursor-default"
+                  >
                     <div className="flex items-center gap-2 flex-wrap">
                       <div className="text-sm font-semibold text-ink">
                         {c.full_name || 'Unknown contact'}
