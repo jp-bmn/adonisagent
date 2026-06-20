@@ -313,18 +313,20 @@ export default function CoPilot() {
   function panelStyle(): React.CSSProperties {
     if (!pos) return { display: 'none' };
     const mobile = window.innerWidth < 640;
-    if (mobile && expanded) {
+
+    if (expanded) {
       return {
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        top: mobile ? 0 : 16,
+        left: mobile ? 0 : 'auto',
+        right: mobile ? 0 : 16,
+        bottom: mobile ? 0 : 16,
         zIndex: 50,
-        width: 'auto',
-        borderRadius: 0,
+        width: mobile ? 'auto' : 640,
+        borderRadius: mobile ? 0 : undefined,
       };
     }
+
     if (mobile) {
       return {
         position: 'fixed',
@@ -335,6 +337,7 @@ export default function CoPilot() {
         width: 'auto',
       };
     }
+
     const gap = 8;
     let top = pos.y - PANEL_HEIGHT - gap;
     if (top < 8) top = pos.y + BUBBLE_SIZE + gap;
@@ -479,7 +482,7 @@ export default function CoPilot() {
               )}
               <button
                 onClick={() => setExpanded((e) => !e)}
-                className="text-slate-400 hover:text-white transition leading-none sm:hidden"
+                className="text-slate-400 hover:text-white transition leading-none"
                 title={expanded ? 'Collapse' : 'Expand'}
               >
                 {expanded ? (
