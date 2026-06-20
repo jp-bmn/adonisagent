@@ -38,21 +38,6 @@ def is_valid_contact_name(name):
         return False
     return not any(p.search(name.strip()) for p in ERROR_PATTERNS)
 
-def fetch_verified_linkedin(name: str, role: str, hospital: str) -> str:
-    try:
-        base_url = "https://adonisagents-production.up.railway.app"
-        payload = {"name": name, "role": role, "hospital": hospital}
-        resp = requests.post(f"{base_url}/verify", json=payload, timeout=15)
-        if resp.status_code == 404:
-            resp = requests.post(f"{base_url}/api/v1/verify", json=payload, timeout=15)
-        if resp.ok:
-            data = resp.json()
-            if data.get("status") == "verified" and data.get("url"):
-                return data["url"]
-    except Exception as e:
-        print(f"Error fetching verified LinkedIn for {name}: {e}")
-    return ""
-
 
 def post_contact(
     endpoint_url: str,
@@ -180,15 +165,12 @@ Snippets:
                 extracted_prior_employer = prior_employer
 
             if is_valid_contact_name(extracted_name):
-                # Only call verifier and append if the name is valid
-                verified_url = fetch_verified_linkedin(extracted_name, role, hospital_name)
-                
                 contacts.append({
                     "hospital": hospital_name,
                     "role": role,
                     "name": extracted_name,
                     "prior_employer": extracted_prior_employer,
-                    "linkedin_url": verified_url,
+                    "linkedin_url": "",
                     "source": str(results[0].get("link", ""))
                 })
             else:
