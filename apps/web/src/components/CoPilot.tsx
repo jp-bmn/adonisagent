@@ -543,7 +543,7 @@ export default function CoPilot() {
                   className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold transition hover:opacity-90"
                   style={{ background: '#0F3D3E', color: '#EFEFC8' }}
                 >
-                  ⚡ Brief me on my territory
+                  Brief me on my territory
                 </button>
                 {[
                   'Who should I call this week?',
