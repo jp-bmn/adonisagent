@@ -137,6 +137,7 @@ function defaultPos() {
 
 export default function CoPilot() {
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -312,6 +313,18 @@ export default function CoPilot() {
   function panelStyle(): React.CSSProperties {
     if (!pos) return { display: 'none' };
     const mobile = window.innerWidth < 640;
+    if (mobile && expanded) {
+      return {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 50,
+        width: 'auto',
+        borderRadius: 0,
+      };
+    }
     if (mobile) {
       return {
         position: 'fixed',
@@ -465,6 +478,45 @@ export default function CoPilot() {
                 </button>
               )}
               <button
+                onClick={() => setExpanded((e) => !e)}
+                className="text-slate-400 hover:text-white transition leading-none sm:hidden"
+                title={expanded ? 'Collapse' : 'Expand'}
+              >
+                {expanded ? (
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="4 14 10 14 10 20" />
+                    <polyline points="20 10 14 10 14 4" />
+                    <line x1="10" y1="14" x2="3" y2="21" />
+                    <line x1="21" y1="3" x2="14" y2="10" />
+                  </svg>
+                ) : (
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="15 3 21 3 21 9" />
+                    <polyline points="9 21 3 21 3 15" />
+                    <line x1="21" y1="3" x2="14" y2="10" />
+                    <line x1="3" y1="21" x2="10" y2="14" />
+                  </svg>
+                )}
+              </button>
+              <button
                 onClick={() => setOpen(false)}
                 className="text-slate-400 hover:text-white transition text-lg leading-none"
               >
@@ -474,7 +526,9 @@ export default function CoPilot() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-[28rem] min-h-[12rem]">
+          <div
+            className={`flex-1 overflow-y-auto p-4 space-y-3 ${expanded ? 'max-h-none' : 'max-h-[28rem] min-h-[12rem]'}`}
+          >
             {messages.length === 0 && (
               <div className="space-y-2">
                 <button
