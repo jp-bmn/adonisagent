@@ -13,7 +13,6 @@ from adonis_data.constants import HOSPITAL_QUERIES
 import requests
 import re
 
-<<<<<<< HEAD
 ERROR_PATTERNS = [
     re.compile(r"^the provided snippets", re.IGNORECASE),
     re.compile(r"^unknown$", re.IGNORECASE),
@@ -33,51 +32,26 @@ ERROR_PATTERNS = [
 def is_valid_contact_name(name):
     if not name or len(name.strip()) < 2:
         return False
-    return not any(p.search(name.strip()) for p in ERROR_PATTERNS)
-=======
-def is_valid_contact_name(name: str) -> bool:
-    if not name or name.lower() == "unknown":
+    if re.search(r'[<>{}!@#$%^*_+\\[\\]\\\\]', name):
         return False
-        
-    garbage_keywords = [
-        "health systems", "obsidian security", "chutes &", 
-        "meet walmart's", "schomburger to", "fifteen thousand"
-    ]
-    name_lower = name.lower()
-    
-    if any(kw in name_lower for kw in garbage_keywords):
-        return False
-        
-    if re.search(r'[<>{}!@#$%^*_+\[\]\\]', name):
-        return False
-        
     if len(name) > 40:
         return False
-        
-    return True
+    return not any(p.search(name.strip()) for p in ERROR_PATTERNS)
 
 def fetch_verified_linkedin(name: str, role: str, hospital: str) -> str:
     try:
-        # Based on the prompt, the verifier agent is at adonisagents-production.up.railway.app
-        # We will try both /verify and /api/v1/verify
         base_url = "https://adonisagents-production.up.railway.app"
         payload = {"name": name, "role": role, "hospital": hospital}
-        
-        # Try /verify first (as per the prompt)
         resp = requests.post(f"{base_url}/verify", json=payload, timeout=15)
         if resp.status_code == 404:
-            # Fallback to standard API path if /verify doesn't exist
             resp = requests.post(f"{base_url}/api/v1/verify", json=payload, timeout=15)
-            
         if resp.ok:
             data = resp.json()
             if data.get("status") == "verified" and data.get("url"):
                 return data["url"]
     except Exception as e:
         print(f"Error fetching verified LinkedIn for {name}: {e}")
-        
     return ""
->>>>>>> 67f496d (feat: add validation and linkedin verifier to data pipeline, clean supabase contacts)
 
 
 def post_contact(
