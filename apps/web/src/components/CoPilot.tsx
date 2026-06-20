@@ -104,8 +104,8 @@ const OPENED_KEY = 'adonis-iris-opened';
 const MAX_STORED = 200;
 const MAX_CONTEXT = 40;
 const BUBBLE_SIZE = 56;
-const PANEL_WIDTH = 320;
-const PANEL_HEIGHT = 420; // approximate — used for initial placement only
+const PANEL_WIDTH = 480;
+const PANEL_HEIGHT = 560; // approximate — used for initial placement only
 
 const STUB_REPLY =
   "I can answer questions about your accounts and recent signals. Try asking: 'What happened with NYP this week?' or 'Summarize urgent signals.'";
@@ -465,7 +465,7 @@ export default function CoPilot() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-72 min-h-[8rem]">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-[28rem] min-h-[12rem]">
             {messages.length === 0 && (
               <div className="space-y-2">
                 <button
