@@ -103,7 +103,7 @@ const PILL_KEY = 'adonis-iris-pill-shown';
 const OPENED_KEY = 'adonis-iris-opened';
 const MAX_STORED = 200;
 const MAX_CONTEXT = 40;
-const BUBBLE_SIZE = 56;
+const BUBBLE_SIZE = typeof window !== 'undefined' && window.innerWidth < 640 ? 44 : 56;
 const PANEL_WIDTH = 480;
 const PANEL_HEIGHT = 560; // approximate — used for initial placement only
 
@@ -311,11 +311,20 @@ export default function CoPilot() {
   // Panel position: appear above/left of bubble, clamped to viewport
   function panelStyle(): React.CSSProperties {
     if (!pos) return { display: 'none' };
+    const mobile = window.innerWidth < 640;
+    if (mobile) {
+      return {
+        position: 'fixed',
+        bottom: 80,
+        left: 8,
+        right: 8,
+        zIndex: 50,
+        width: 'auto',
+      };
+    }
     const gap = 8;
-    // Prefer opening upward
     let top = pos.y - PANEL_HEIGHT - gap;
-    if (top < 8) top = pos.y + BUBBLE_SIZE + gap; // flip below if near top
-    // Align right edge of panel with right edge of bubble, clamp to viewport
+    if (top < 8) top = pos.y + BUBBLE_SIZE + gap;
     let left = pos.x + BUBBLE_SIZE - PANEL_WIDTH;
     left = Math.max(8, Math.min(window.innerWidth - PANEL_WIDTH - 8, left));
     return { position: 'fixed', top, left, zIndex: 50, width: PANEL_WIDTH };
