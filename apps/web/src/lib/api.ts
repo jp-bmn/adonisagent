@@ -180,7 +180,7 @@ export async function reviewSignal(
 ): Promise<ApiSignal> {
   return apiFetch<ApiSignal>(`/signals/${id}/review`, userId, {
     method: 'POST',
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ action: status, reviewer_id: userId ?? 'danielle' }),
   });
 }
 
