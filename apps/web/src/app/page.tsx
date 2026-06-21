@@ -27,10 +27,15 @@ export default async function HomePage({ searchParams }: PageProps) {
 
   const hospitalMap = Object.fromEntries(hospitals.map((h) => [h.id, h.name]));
 
+  // Strip garbage — filtered_out signals should never appear in the feed
+  const cleanSignals = allSignals.filter(
+    (s) => s.tier !== 'filtered_out' && s.signal_type !== 'filtered_out'
+  );
+
   // Filter by category
   let signals = category
-    ? allSignals.filter((s) => s.signal_type === (category as SignalType))
-    : allSignals;
+    ? cleanSignals.filter((s) => s.signal_type === (category as SignalType))
+    : cleanSignals;
 
   // Sort
   signals = [...signals].sort((a, b) => {
