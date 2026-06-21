@@ -72,7 +72,7 @@ export default function MobileNav() {
         className="md:hidden fixed bottom-0 inset-x-0 border-t border-white/10 z-40 flex"
         style={{
           background:
-            'radial-gradient(circle at 0% -50%, rgba(63, 215, 190, 0.35) 0%, transparent 60%), linear-gradient(90deg, #155959 0%, #0F3D3E 50%, #0A2A2B 100%)',
+            'linear-gradient(90deg, #0F3D3E 0%, #0F3D3E 100%)',
         }}
       >
         {items.map((item) => {
@@ -81,9 +81,8 @@ export default function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-mono transition ${
-                isActive ? 'text-cream font-semibold' : 'text-slate-400'
-              }`}
+              className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-mono transition"
+              style={{ color: isActive ? '#EFEFC8' : 'rgba(255,255,255,0.85)' }}
             >
               <span className="text-base leading-none">{item.glyph}</span>
               {item.label}
