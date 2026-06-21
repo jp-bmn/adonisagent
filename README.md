@@ -40,7 +40,7 @@ The tool replaces **Glean** (the internal AI tool the team uses reactively, only
 
 ## Team
 
-- **Juan Franco** — frontend, design system, dashboard UX
+- **Juan Franco** — frontend, design system, dashboard UX, Iris AI chatbot
 - **Michael Chabler** — partner communications
 - **Joel Philip** — backend, agent pipeline, scoping, project management
 
