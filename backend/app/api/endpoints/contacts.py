@@ -93,7 +93,18 @@ async def create_contact(payload: ContactCreate, user: dict = Depends(get_requir
             )
 
     # 3. Duplicate checks
-    # By LinkedIn URL (if provided)
+    # Check for existing contact by name + hospital first
+    dup_name = (
+        supabase.table("contacts")
+        .select("*")
+        .eq("hospital_id", hosp_id_str)
+        .eq("full_name", payload.full_name)
+        .execute()
+    )
+    
+    existing_contact = dup_name.data[0] if dup_name.data else None
+
+    # Ensure URL uniqueness if provided
     if payload.linkedin_url:
         dup_url = (
             supabase.table("contacts")
@@ -102,24 +113,38 @@ async def create_contact(payload: ContactCreate, user: dict = Depends(get_requir
             .execute()
         )
         if dup_url.data:
+            if not existing_contact or dup_url.data[0]["id"] != existing_contact["id"]:
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"Contact with LinkedIn URL '{payload.linkedin_url}' already exists"
+                )
+
+    if existing_contact:
+        if existing_contact["is_active"]:
             raise HTTPException(
                 status_code=409,
-                detail=f"Contact with LinkedIn URL '{payload.linkedin_url}' already exists"
+                detail=f"Contact '{payload.full_name}' already exists for this hospital"
             )
-
-    # By name + hospital
-    dup_name = (
-        supabase.table("contacts")
-        .select("*")
-        .eq("hospital_id", hosp_id_str)
-        .eq("full_name", payload.full_name)
-        .execute()
-    )
-    if dup_name.data:
-        raise HTTPException(
-            status_code=409,
-            detail=f"Contact '{payload.full_name}' already exists for this hospital"
-        )
+        else:
+            # Reactivate contact
+            update_payload = {
+                "is_active": True,
+                "role": payload.role,
+                "prior_employer": payload.prior_employer,
+                "linkedin_verified": payload.linkedin_verified
+            }
+            if payload.linkedin_url:
+                update_payload["linkedin_url"] = str(payload.linkedin_url)
+            
+            # Strip Nones
+            update_payload = {k: v for k, v in update_payload.items() if v is not None}
+            
+            update_res = supabase.table("contacts").update(update_payload).eq("id", existing_contact["id"]).execute()
+            if not update_res.data:
+                raise HTTPException(status_code=500, detail="Failed to reactivate contact")
+                
+            logger.info(f"Contact reactivated: {existing_contact['id']} ({payload.full_name})")
+            return update_res.data[0]
 
     # 4. Insert contact
     insert_payload = {
