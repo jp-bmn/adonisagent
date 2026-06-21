@@ -72,6 +72,10 @@ export default function DevDashboardPage() {
   const [githubIssues, setGithubIssues] = useState<GithubIssue[]>([]);
   const [allSignals, setAllSignals] = useState<Signal[]>([]);
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
+  const [restoring, setRestoring] = useState(false);
+  const [restoreResults, setRestoreResults] = useState<
+    { hospital: string; role: string; name: string; action: string; confidence: number }[] | null
+  >(null);
   const [prevApiHealth, setPrevApiHealth] = useState<'loading' | 'ok' | 'down'>('loading');
 
   const addAudit = useCallback((entry: AuditEntry) => {
@@ -474,10 +478,81 @@ export default function DevDashboardPage() {
         </div>
 
         {/* Row 4 — Contact Verification */}
-        <div className={`${card} border rounded-xl p-5`}>
-          <div className={`text-xs font-mono uppercase tracking-widest ${sub} mb-4`}>
-            Contact Verification · Pending Review
+        <div className={`${card} border rounded-xl p-5 space-y-4`}>
+          <div className="flex items-center justify-between">
+            <div className={`text-xs font-mono uppercase tracking-widest ${sub}`}>
+              Contact Verification · Pending Review
+            </div>
+            <button
+              disabled={restoring}
+              onClick={async () => {
+                setRestoring(true);
+                setRestoreResults(null);
+                try {
+                  const res = await fetch('/api/contacts/restore', { method: 'POST' });
+                  const data = await res.json();
+                  setRestoreResults(data.results ?? []);
+                } finally {
+                  setRestoring(false);
+                }
+              }}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-line text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition flex items-center gap-1.5"
+            >
+              {restoring ? (
+                <>
+                  <span className="inline-block w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                  Searching... (2–3 min)
+                </>
+              ) : (
+                'Run contact search'
+              )}
+            </button>
           </div>
+
+          {restoreResults && (
+            <div className="space-y-1.5">
+              <p className={`text-xs font-mono ${sub}`}>
+                {
+                  restoreResults.filter((r) => r.action === 'inserted' || r.action === 'updated')
+                    .length
+                }{' '}
+                inserted/updated · {restoreResults.filter((r) => r.action === 'pending').length}{' '}
+                pending review ·{' '}
+                {
+                  restoreResults.filter(
+                    (r) => r.action.includes('skipped') || r.action === 'no results'
+                  ).length
+                }{' '}
+                skipped
+              </p>
+              <div className="space-y-1">
+                {restoreResults.map((r, i) => (
+                  <div key={i} className="flex items-center gap-3 text-xs">
+                    <span
+                      className={`font-mono w-4 ${r.action === 'inserted' || r.action === 'updated' ? 'text-green-600' : r.action === 'pending' ? 'text-yellow-600' : 'text-slate-400'}`}
+                    >
+                      {r.action === 'inserted' || r.action === 'updated'
+                        ? '✓'
+                        : r.action === 'pending'
+                          ? '?'
+                          : '–'}
+                    </span>
+                    <span className="text-slate-500 w-40 truncate">{r.hospital}</span>
+                    <span className="text-slate-400 w-24">{r.role}</span>
+                    <span
+                      className={`font-semibold ${r.action.includes('skipped') || r.action === 'no results' ? 'text-slate-400' : 'text-ink'}`}
+                    >
+                      {r.name}
+                    </span>
+                    <span className="text-slate-400 ml-auto">
+                      {r.action} {r.confidence > 0 ? `(${(r.confidence * 100).toFixed(0)}%)` : ''}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <ContactReviewQueue />
         </div>
 
