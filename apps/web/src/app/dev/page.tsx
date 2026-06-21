@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useUser } from '@/components/UserProvider';
 import ContactReviewQueue from '@/components/ContactReviewQueue';
+import ContactCoverage from '@/components/ContactCoverage';
 
 const BASE_URL = 'https://adonisagents-production.up.railway.app/api/v1';
 const HEADERS = (userId: string) => ({ 'X-User-Id': userId });
@@ -553,7 +554,19 @@ export default function DevDashboardPage() {
             </div>
           )}
 
-          <ContactReviewQueue />
+          <div className={`border-t ${border} pt-4`}>
+            <div className={`text-xs font-mono uppercase tracking-widest ${sub} mb-3`}>
+              Coverage by Hospital
+            </div>
+            <ContactCoverage />
+          </div>
+
+          <div className={`border-t ${border} pt-4`}>
+            <div className={`text-xs font-mono uppercase tracking-widest ${sub} mb-3`}>
+              Pending Approval
+            </div>
+            <ContactReviewQueue />
+          </div>
         </div>
 
         {/* Row 5 — Audit Log */}
