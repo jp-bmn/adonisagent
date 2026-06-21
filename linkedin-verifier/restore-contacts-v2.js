@@ -27,11 +27,27 @@ const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
 const HOSPITALS = [
   { id: 'a4725891-7354-4187-a6c1-93d7ea9a078f', name: 'Ascension', domain: 'ascension.org' },
-  { id: '7b836e62-3ee8-4d10-b30e-028734a5f812', name: 'CommonSpirit Health', domain: 'commonspirithealth.org' },
-  { id: 'a17f653f-8479-4159-9149-63e65d2d50a2', name: 'Jefferson Health', domain: 'jeffersonhealth.org' },
+  {
+    id: '7b836e62-3ee8-4d10-b30e-028734a5f812',
+    name: 'CommonSpirit Health',
+    domain: 'commonspirithealth.org',
+  },
+  {
+    id: 'a17f653f-8479-4159-9149-63e65d2d50a2',
+    name: 'Jefferson Health',
+    domain: 'jeffersonhealth.org',
+  },
   { id: 'f0f6b915-3e9d-4040-ba4d-c89339a1e134', name: 'NewYork-Presbyterian', domain: 'nyp.org' },
-  { id: 'f3ab9c05-4b2b-42e9-9653-2e9dc8f98476', name: 'UMass Memorial', domain: 'umassmemorial.org' },
-  { id: '3aebd89a-1d2c-465c-a22b-08ced9613027', name: 'University of Arkansas Medical Sciences', domain: 'uams.edu' },
+  {
+    id: 'f3ab9c05-4b2b-42e9-9653-2e9dc8f98476',
+    name: 'UMass Memorial',
+    domain: 'umassmemorial.org',
+  },
+  {
+    id: '3aebd89a-1d2c-465c-a22b-08ced9613027',
+    name: 'University of Arkansas Medical Sciences',
+    domain: 'uams.edu',
+  },
 ];
 
 const ROLES = [
@@ -45,7 +61,10 @@ const ROLES = [
 const TARGETS = [
   { hospitalName: 'Ascension', roles: ['CFO', 'CRO'] },
   { hospitalName: 'NewYork-Presbyterian', roles: ['CEO', 'CFO', 'CRO', 'VP Revenue Cycle'] },
-  { hospitalName: 'University of Arkansas Medical Sciences', roles: ['CEO', 'CFO', 'CRO', 'VP Revenue Cycle'] },
+  {
+    hospitalName: 'University of Arkansas Medical Sciences',
+    roles: ['CEO', 'CFO', 'CRO', 'VP Revenue Cycle'],
+  },
   { hospitalName: 'UMass Memorial', roles: ['VP Revenue Cycle'] },
   { hospitalName: 'CommonSpirit Health', roles: ['CRO'] },
   { hospitalName: 'Jefferson Health', roles: ['CEO', 'CRO'] },
@@ -78,7 +97,9 @@ async function multiLaneSearch(hospital, role) {
   await sleep(300);
 
   // Lane 2: Press releases / appointment announcements
-  const lane2 = await searchSerper(`"${hospital.name}" "appoints" OR "names" "${keywords}" OR "${title}"`);
+  const lane2 = await searchSerper(
+    `"${hospital.name}" "appoints" OR "names" "${keywords}" OR "${title}"`
+  );
   if (lane2.length) allResults.push({ lane: 'Press Release', results: lane2 });
   await sleep(300);
 
@@ -90,7 +111,9 @@ async function multiLaneSearch(hospital, role) {
   await sleep(300);
 
   // Lane 4: Hospital website leadership page
-  const lane4 = await searchSerper(`site:${hospital.domain} leadership OR "executive team" "${title}" OR "${keywords}"`);
+  const lane4 = await searchSerper(
+    `site:${hospital.domain} leadership OR "executive team" "${title}" OR "${keywords}"`
+  );
   if (lane4.length) allResults.push({ lane: 'Hospital Website', results: lane4 });
   await sleep(300);
 
@@ -102,13 +125,15 @@ async function multiLaneSearch(hospital, role) {
 }
 
 async function verifyWithClaude(hospital, role, laneResults) {
-  const formatted = laneResults.map(({ lane, results }) => {
-    const snippets = results
-      .slice(0, 3)
-      .map((r) => `  - ${r.title} | ${r.link}\n    ${r.snippet || ''}`)
-      .join('\n');
-    return `[${lane}]\n${snippets}`;
-  }).join('\n\n');
+  const formatted = laneResults
+    .map(({ lane, results }) => {
+      const snippets = results
+        .slice(0, 3)
+        .map((r) => `  - ${r.title} | ${r.link}\n    ${r.snippet || ''}`)
+        .join('\n');
+      return `[${lane}]\n${snippets}`;
+    })
+    .join('\n\n');
 
   const msg = await client.messages.create({
     model: 'claude-sonnet-4-6',
@@ -157,9 +182,9 @@ Rules:
   }
 }
 
-async function upsertContact(hospitalId, contact) {
+async function upsertContact(hospitalId, contact, pending = false) {
   const checkRes = await fetch(
-    `${SUPABASE_URL}/rest/v1/contacts?hospital_id=eq.${hospitalId}&role=eq.${encodeURIComponent(contact.role)}&select=id`,
+    `${SUPABASE_URL}/rest/v1/contacts?hospital_id=eq.${hospitalId}&role=eq.${encodeURIComponent(contact.role)}&select=id,is_active`,
     {
       headers: {
         apikey: SUPABASE_KEY,
@@ -168,6 +193,11 @@ async function upsertContact(hospitalId, contact) {
     }
   );
   const existing = await checkRes.json();
+
+  // Don't overwrite an already-approved active contact with a pending one
+  if (existing.length > 0 && existing[0].is_active && pending) {
+    return 'skipped (already approved)';
+  }
 
   if (existing.length > 0) {
     const id = existing[0].id;
@@ -183,10 +213,12 @@ async function upsertContact(hospitalId, contact) {
         linkedin_url: contact.linkedin_url,
         prior_employer: contact.prior_employer,
         linkedin_verified: !!contact.linkedin_url,
+        is_active: !pending,
+        review_note: contact.reasoning ?? null,
         updated_at: new Date().toISOString(),
       }),
     });
-    return 'updated';
+    return pending ? 'pending (needs review)' : 'updated';
   } else {
     await fetch(`${SUPABASE_URL}/rest/v1/contacts`, {
       method: 'POST',
@@ -202,10 +234,11 @@ async function upsertContact(hospitalId, contact) {
         linkedin_url: contact.linkedin_url,
         prior_employer: contact.prior_employer,
         linkedin_verified: !!contact.linkedin_url,
-        is_active: true,
+        is_active: !pending,
+        review_note: contact.reasoning ?? null,
       }),
     });
-    return 'inserted';
+    return pending ? 'pending (needs review)' : 'inserted';
   }
 }
 
@@ -223,6 +256,7 @@ async function main() {
 
   let inserted = 0;
   let updated = 0;
+  let pending = 0;
   let skipped = 0;
 
   for (const target of TARGETS) {
@@ -247,31 +281,40 @@ async function main() {
 
       const contact = await verifyWithClaude(hospital, role, laneResults);
 
-      if (!contact || contact.confidence < 0.55) {
-        console.log(`skipped (confidence: ${contact?.confidence?.toFixed(2) ?? 'n/a'} — ${contact?.reasoning ?? 'no match'})`);
+      if (!contact || contact.confidence < 0.3) {
+        console.log(`skipped (confidence too low: ${contact?.confidence?.toFixed(2) ?? 'n/a'})`);
         skipped++;
         await sleep(500);
         continue;
       }
 
-      const action = await upsertContact(hospital.id, contact);
+      // 0.3–0.55 = save as pending for human review
+      const isPending = contact.confidence < 0.55;
+      const action = await upsertContact(hospital.id, contact, isPending);
       const linkedinTag = contact.linkedin_url ? ' + LinkedIn' : '';
       const sourcesTag = contact.sources_agreed > 1 ? ` [${contact.sources_agreed} sources]` : '';
-      console.log(`${action}: ${contact.full_name}${linkedinTag}${sourcesTag} (${(contact.confidence * 100).toFixed(0)}% confident)`);
+      console.log(
+        `${action}: ${contact.full_name}${linkedinTag}${sourcesTag} (${(contact.confidence * 100).toFixed(0)}% confident)`
+      );
       console.log(`    reason: ${contact.reasoning}`);
 
       if (action === 'inserted') inserted++;
-      else updated++;
+      else if (action === 'updated') updated++;
+      else if (action.startsWith('pending')) pending++;
 
       await sleep(800);
     }
   }
 
   console.log('\n========================================');
-  console.log(`Inserted: ${inserted}`);
-  console.log(`Updated:  ${updated}`);
-  console.log(`Skipped:  ${skipped}`);
+  console.log(`Inserted:      ${inserted}`);
+  console.log(`Updated:       ${updated}`);
+  console.log(`Pending review:${pending}`);
+  console.log(`Skipped:       ${skipped}`);
   console.log('========================================');
+  if (pending > 0) {
+    console.log('\nPending contacts need review at /review in the dashboard.');
+  }
 }
 
 main().catch(console.error);

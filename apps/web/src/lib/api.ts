@@ -201,6 +201,18 @@ export async function fetchHospitalContacts(
   return apiFetch<ApiContact[]>(`/hospitals/${hospitalId}/contacts`, userId);
 }
 
+export interface PendingContact {
+  id: string;
+  hospital_id: string;
+  hospital_name?: string;
+  full_name: string;
+  role: string | null;
+  prior_employer: string | null;
+  linkedin_url: string | null;
+  review_note: string | null;
+  created_at: string;
+}
+
 export async function exportCsv(userId?: string): Promise<Blob> {
   const res = await fetch(`${BASE_URL}/export/csv`, {
     headers: { 'X-User-Id': userId ?? DEFAULT_USER_ID },
