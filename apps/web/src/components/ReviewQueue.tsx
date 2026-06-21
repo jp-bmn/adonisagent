@@ -67,13 +67,12 @@ function SignalCard({
               {SIGNAL_TYPE_LABELS[signal.signal_type as SignalType] ?? signal.signal_type}
             </span>
             {signal.hospital_name && (
-              <span className="text-xs font-mono text-slate-400 ml-auto">{signal.hospital_name}</span>
+              <span className="text-xs font-mono text-slate-400 ml-auto">
+                {signal.hospital_name}
+              </span>
             )}
           </div>
-          <h3
-            className="font-semibold text-sm"
-            style={{ color: garbage ? '#94A3B8' : '#0F172A' }}
-          >
+          <h3 className="font-semibold text-sm" style={{ color: garbage ? '#94A3B8' : '#0F172A' }}>
             {signal.title ? stripHtml(signal.title) : 'Untitled Signal'}
           </h3>
           <p className="text-xs text-slate-500 mt-1 max-w-2xl">{signal.summary}</p>
@@ -144,7 +143,9 @@ function SignalCard({
                 rel="noreferrer"
                 className="block p-3 rounded-lg border border-line hover:bg-paper transition-colors"
               >
-                <span className="text-[10px] font-mono text-slate-400 block mb-0.5">{item.source}</span>
+                <span className="text-[10px] font-mono text-slate-400 block mb-0.5">
+                  {item.source}
+                </span>
                 <p className="text-xs font-semibold text-ink">{item.title}</p>
                 {item.snippet && (
                   <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{item.snippet}</p>
@@ -187,7 +188,9 @@ export default function ReviewQueue({ initialSignals }: ReviewQueueProps) {
   function rescueSignal(id: string) {
     setSignals((prev) =>
       prev.map((s) =>
-        s.id === id ? { ...s, signal_type: 'leadership_change' as SignalType, tier: 'worth_knowing' as const } : s
+        s.id === id
+          ? { ...s, signal_type: 'leadership_change' as SignalType, tier: 'worth_knowing' as const }
+          : s
       )
     );
   }
@@ -218,7 +221,14 @@ export default function ReviewQueue({ initialSignals }: ReviewQueueProps) {
     );
   }
 
-  const cardProps = { loadingId, searching, coverage, onReview: handleReview, onFindCoverage: findCoverage, onRescue: rescueSignal };
+  const cardProps = {
+    loadingId,
+    searching,
+    coverage,
+    onReview: handleReview,
+    onFindCoverage: findCoverage,
+    onRescue: rescueSignal,
+  };
 
   return (
     <div className="space-y-8">

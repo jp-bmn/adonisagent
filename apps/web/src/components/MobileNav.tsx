@@ -71,8 +71,7 @@ export default function MobileNav() {
       <nav
         className="md:hidden fixed bottom-0 inset-x-0 border-t border-white/10 z-40 flex"
         style={{
-          background:
-            'linear-gradient(90deg, #0F3D3E 0%, #0F3D3E 100%)',
+          background: 'linear-gradient(90deg, #0F3D3E 0%, #0F3D3E 100%)',
         }}
       >
         {items.map((item) => {

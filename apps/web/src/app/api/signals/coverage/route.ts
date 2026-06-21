@@ -27,7 +27,9 @@ export async function POST(req: NextRequest) {
     search(
       `"${hospital_name}" ${title} site:beckershospitalreview.com OR site:modernhealthcare.com OR site:fiercehealthcare.com`
     ),
-    search(`"${hospital_name}" ${title} site:healthcarefinancenews.com OR site:healthsystemcio.com OR site:healthcareitnews.com`),
+    search(
+      `"${hospital_name}" ${title} site:healthcarefinancenews.com OR site:healthsystemcio.com OR site:healthcareitnews.com`
+    ),
     search(`"${hospital_name}" ${title} -site:linkedin.com -site:facebook.com`),
   ]);
 
