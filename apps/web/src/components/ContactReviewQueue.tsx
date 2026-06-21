@@ -29,6 +29,7 @@ export default function ContactReviewQueue() {
   const [acting, setActing] = useState<string | null>(null);
   const [searching, setSearching] = useState<string | null>(null);
   const [alternatives, setAlternatives] = useState<Record<string, Candidate[]>>({});
+  const [linkedinInputs, setLinkedinInputs] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetch('/api/contacts')
@@ -42,11 +43,17 @@ export default function ContactReviewQueue() {
 
   async function handleAction(id: string, action: 'approve' | 'reject') {
     setActing(id);
+    const manualUrl = linkedinInputs[id]?.trim() || null;
     try {
       await fetch(`/api/contacts/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({
+          action,
+          ...(action === 'approve' && manualUrl
+            ? { overrides: { linkedin_url: manualUrl, linkedin_verified: true } }
+            : {}),
+        }),
       });
       setContacts((prev) => prev.filter((c) => c.id !== id));
       setAlternatives((prev) => {
@@ -195,6 +202,19 @@ export default function ContactReviewQueue() {
                   </div>
                 ))
               )}
+            </div>
+          )}
+
+          {/* Manual LinkedIn input */}
+          {!c.linkedin_url && (
+            <div className="flex items-center gap-2">
+              <input
+                type="url"
+                placeholder="Paste LinkedIn URL (optional)"
+                value={linkedinInputs[c.id] ?? ''}
+                onChange={(e) => setLinkedinInputs((prev) => ({ ...prev, [c.id]: e.target.value }))}
+                className="flex-1 text-xs border border-line rounded-lg px-3 py-1.5 text-ink placeholder:text-slate-400 focus:outline-none focus:border-slate-400"
+              />
             </div>
           )}
 
