@@ -149,15 +149,15 @@ export default function ContactReviewQueue() {
           )}
 
           {/* Alternatives */}
-          {alternatives[c.id] && (
+          {alternatives[c.id] != null && (
             <div className="space-y-2 pt-1">
               <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
                 Alternative candidates
               </p>
-              {alternatives[c.id].length === 0 ? (
+              {alternatives[c.id]!.length === 0 ? (
                 <p className="text-xs text-slate-400">No other candidates found.</p>
               ) : (
-                alternatives[c.id].map((candidate, i) => (
+                alternatives[c.id]!.map((candidate, i) => (
                   <div
                     key={i}
                     className="flex items-start justify-between gap-3 p-3 rounded-lg border border-line hover:bg-paper transition-colors"

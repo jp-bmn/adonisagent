@@ -39,6 +39,7 @@ export type ReviewStatus = 'pending' | 'approved' | 'dismissed';
 export interface ApiSignal {
   id: string;
   hospital_id: string;
+  hospital_name?: string;
   signal_type: SignalType;
   tier: SignalTier;
   confidence_score: number;
