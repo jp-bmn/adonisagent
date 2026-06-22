@@ -9,6 +9,7 @@ import {
 } from '@/lib/api';
 import { SignalCard, TerritoryFilter } from '@/components';
 import SignalFilters from '@/components/SignalFilters';
+import DigestRoster from '@/components/DigestRoster';
 
 interface PageProps {
   searchParams: Promise<{ ae_id?: string; category?: string; sort?: string }>;
@@ -147,6 +148,12 @@ export default async function HomePage({ searchParams }: PageProps) {
               hospitalName={hospitalMap[signal.hospital_id]}
             />
           ))}
+        </div>
+      )}
+
+      {!ae_id && aes.length > 0 && (
+        <div className="mt-8">
+          <DigestRoster aes={aes} />
         </div>
       )}
 
