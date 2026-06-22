@@ -103,9 +103,9 @@ const PILL_KEY = 'adonis-iris-pill-shown';
 const OPENED_KEY = 'adonis-iris-opened';
 const MAX_STORED = 200;
 const MAX_CONTEXT = 40;
-const BUBBLE_SIZE = 56;
-const PANEL_WIDTH = 320;
-const PANEL_HEIGHT = 420; // approximate — used for initial placement only
+const BUBBLE_SIZE = typeof window !== 'undefined' && window.innerWidth < 640 ? 44 : 56;
+const PANEL_WIDTH = 480;
+const PANEL_HEIGHT = 560; // approximate — used for initial placement only
 
 const STUB_REPLY =
   "I can answer questions about your accounts and recent signals. Try asking: 'What happened with NYP this week?' or 'Summarize urgent signals.'";
@@ -137,6 +137,7 @@ function defaultPos() {
 
 export default function CoPilot() {
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -311,11 +312,35 @@ export default function CoPilot() {
   // Panel position: appear above/left of bubble, clamped to viewport
   function panelStyle(): React.CSSProperties {
     if (!pos) return { display: 'none' };
+    const mobile = window.innerWidth < 640;
+
+    if (expanded) {
+      return {
+        position: 'fixed',
+        top: mobile ? 0 : 16,
+        left: mobile ? 0 : 'auto',
+        right: mobile ? 0 : 16,
+        bottom: mobile ? 0 : 16,
+        zIndex: 50,
+        width: mobile ? 'auto' : 640,
+        borderRadius: mobile ? 0 : undefined,
+      };
+    }
+
+    if (mobile) {
+      return {
+        position: 'fixed',
+        bottom: 80,
+        left: 8,
+        right: 8,
+        zIndex: 50,
+        width: 'auto',
+      };
+    }
+
     const gap = 8;
-    // Prefer opening upward
     let top = pos.y - PANEL_HEIGHT - gap;
-    if (top < 8) top = pos.y + BUBBLE_SIZE + gap; // flip below if near top
-    // Align right edge of panel with right edge of bubble, clamp to viewport
+    if (top < 8) top = pos.y + BUBBLE_SIZE + gap;
     let left = pos.x + BUBBLE_SIZE - PANEL_WIDTH;
     left = Math.max(8, Math.min(window.innerWidth - PANEL_WIDTH - 8, left));
     return { position: 'fixed', top, left, zIndex: 50, width: PANEL_WIDTH };
@@ -456,6 +481,45 @@ export default function CoPilot() {
                 </button>
               )}
               <button
+                onClick={() => setExpanded((e) => !e)}
+                className="text-slate-400 hover:text-white transition leading-none"
+                title={expanded ? 'Collapse' : 'Expand'}
+              >
+                {expanded ? (
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="4 14 10 14 10 20" />
+                    <polyline points="20 10 14 10 14 4" />
+                    <line x1="10" y1="14" x2="3" y2="21" />
+                    <line x1="21" y1="3" x2="14" y2="10" />
+                  </svg>
+                ) : (
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="15 3 21 3 21 9" />
+                    <polyline points="9 21 3 21 3 15" />
+                    <line x1="21" y1="3" x2="14" y2="10" />
+                    <line x1="3" y1="21" x2="10" y2="14" />
+                  </svg>
+                )}
+              </button>
+              <button
                 onClick={() => setOpen(false)}
                 className="text-slate-400 hover:text-white transition text-lg leading-none"
               >
@@ -465,7 +529,9 @@ export default function CoPilot() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-72 min-h-[8rem]">
+          <div
+            className={`flex-1 overflow-y-auto p-4 space-y-3 ${expanded ? 'max-h-none' : 'max-h-[28rem] min-h-[12rem]'}`}
+          >
             {messages.length === 0 && (
               <div className="space-y-2">
                 <button
@@ -477,7 +543,7 @@ export default function CoPilot() {
                   className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold transition hover:opacity-90"
                   style={{ background: '#0F3D3E', color: '#EFEFC8' }}
                 >
-                  ⚡ Brief me on my territory
+                  Brief me on my territory
                 </button>
                 {[
                   'Who should I call this week?',

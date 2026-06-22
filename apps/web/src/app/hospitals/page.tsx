@@ -65,7 +65,7 @@ export default async function HospitalsPage() {
                       href={h.website_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-accent hover:underline"
+                      className="text-accent visited:text-accent hover:underline"
                     >
                       {h.website_url.replace(/^https?:\/\//, '')}
                     </a>

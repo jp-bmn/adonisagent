@@ -39,6 +39,7 @@ export type ReviewStatus = 'pending' | 'approved' | 'dismissed';
 export interface ApiSignal {
   id: string;
   hospital_id: string;
+  hospital_name?: string;
   signal_type: SignalType;
   tier: SignalTier;
   confidence_score: number;
@@ -179,7 +180,7 @@ export async function reviewSignal(
 ): Promise<ApiSignal> {
   return apiFetch<ApiSignal>(`/signals/${id}/review`, userId, {
     method: 'POST',
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ action: status, reviewer_id: userId ?? 'danielle' }),
   });
 }
 
@@ -199,6 +200,18 @@ export async function fetchHospitalContacts(
   userId?: string
 ): Promise<ApiContact[]> {
   return apiFetch<ApiContact[]>(`/hospitals/${hospitalId}/contacts`, userId);
+}
+
+export interface PendingContact {
+  id: string;
+  hospital_id: string;
+  hospital_name?: string;
+  full_name: string;
+  role: string | null;
+  prior_employer: string | null;
+  linkedin_url: string | null;
+  review_note: string | null;
+  created_at: string;
 }
 
 export async function exportCsv(userId?: string): Promise<Blob> {

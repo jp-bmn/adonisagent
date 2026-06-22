@@ -9,6 +9,7 @@ import {
 } from '@/lib/api';
 import { SignalCard, TerritoryFilter } from '@/components';
 import SignalFilters from '@/components/SignalFilters';
+import DigestRoster from '@/components/DigestRoster';
 
 interface PageProps {
   searchParams: Promise<{ ae_id?: string; category?: string; sort?: string }>;
@@ -27,10 +28,15 @@ export default async function HomePage({ searchParams }: PageProps) {
 
   const hospitalMap = Object.fromEntries(hospitals.map((h) => [h.id, h.name]));
 
+  // Strip garbage — filtered_out signals should never appear in the feed
+  const cleanSignals = allSignals.filter(
+    (s) => s.tier !== 'filtered_out' && s.signal_type !== 'filtered_out'
+  );
+
   // Filter by category
   let signals = category
-    ? allSignals.filter((s) => s.signal_type === (category as SignalType))
-    : allSignals;
+    ? cleanSignals.filter((s) => s.signal_type === (category as SignalType))
+    : cleanSignals;
 
   // Sort
   signals = [...signals].sort((a, b) => {
@@ -145,29 +151,21 @@ export default async function HomePage({ searchParams }: PageProps) {
         </div>
       )}
 
+      {!ae_id && aes.length > 0 && (
+        <div className="mt-8">
+          <DigestRoster aes={aes} />
+        </div>
+      )}
+
       <footer className="mt-8 pt-5 border-t border-line flex items-center justify-between flex-wrap gap-4">
         <Link href="/hospitals" className="text-xs text-accent hover:underline">
           View all hospitals →
         </Link>
-        <div className="flex items-center gap-5 text-xs font-mono text-slate-400 flex-wrap">
-          {status.pending_review_count > 0 && (
-            <Link href="/review" className="text-urgent font-semibold hover:underline">
-              {status.pending_review_count} pending review
-            </Link>
-          )}
-          <span>
-            <span className="text-slate-500">last run:</span>{' '}
-            {status.last_scraper_run ? formatDate(status.last_scraper_run) : 'never'}
-          </span>
-          <span>
-            <span className="text-slate-500">next run:</span>{' '}
-            {status.next_scraper_run ? formatDate(status.next_scraper_run) : 'scheduled'}
-          </span>
-          <span>
-            <span className="text-slate-500">stored:</span> {status.total_signals_stored}
-          </span>
-          <span className="text-slate-300">v{status.api_version}</span>
-        </div>
+        {status.pending_review_count > 0 && (
+          <Link href="/review" className="text-xs text-urgent font-semibold hover:underline">
+            {status.pending_review_count} pending review
+          </Link>
+        )}
       </footer>
     </div>
   );
