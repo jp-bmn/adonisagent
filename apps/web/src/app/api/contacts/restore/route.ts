@@ -267,21 +267,39 @@ export async function POST() {
 
           const laneResults = await multiLaneSearch(hospital, role);
           if (!laneResults.length) {
-            const res = { hospital: hospital.name, role: role.title, name: '—', action: 'no results', confidence: 0 };
+            const res = {
+              hospital: hospital.name,
+              role: role.title,
+              name: '—',
+              action: 'no results',
+              confidence: 0,
+            };
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(res)}\n\n`));
             return res;
           }
 
           const contact = await verifyWithClaude(hospital, role, laneResults);
           if (!contact || contact.confidence < 0.3) {
-            const res = { hospital: hospital.name, role: role.title, name: contact?.full_name ?? '—', action: 'skipped (low confidence)', confidence: contact?.confidence ?? 0 };
+            const res = {
+              hospital: hospital.name,
+              role: role.title,
+              name: contact?.full_name ?? '—',
+              action: 'skipped (low confidence)',
+              confidence: contact?.confidence ?? 0,
+            };
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(res)}\n\n`));
             return res;
           }
 
           const isPending = contact.confidence < 0.55;
           const action = await upsertContact(hospital.id, contact, isPending);
-          const res = { hospital: hospital.name, role: role.title, name: contact.full_name, action, confidence: contact.confidence };
+          const res = {
+            hospital: hospital.name,
+            role: role.title,
+            name: contact.full_name,
+            action,
+            confidence: contact.confidence,
+          };
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(res)}\n\n`));
           return res;
         });
@@ -300,7 +318,7 @@ export async function POST() {
     headers: {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
+      Connection: 'keep-alive',
     },
   });
 }
