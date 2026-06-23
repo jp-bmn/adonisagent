@@ -41,7 +41,10 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+const serperCache = new Map<string, { title: string; link: string; snippet: string }[]>();
+
 async function searchSerper(query: string) {
+  if (serperCache.has(query)) return serperCache.get(query)!;
   try {
     const res = await fetch('https://google.serper.dev/search', {
       method: 'POST',
@@ -49,7 +52,9 @@ async function searchSerper(query: string) {
       body: JSON.stringify({ q: query, num: 5 }),
     });
     const data = await res.json();
-    return (data.organic || []) as { title: string; link: string; snippet: string }[];
+    const results = (data.organic || []) as { title: string; link: string; snippet: string }[];
+    serperCache.set(query, results);
+    return results;
   } catch {
     return [];
   }
@@ -146,9 +151,19 @@ Rules:
   const text = data?.content?.[0]?.text ?? '';
   try {
     const json = text.match(/\{[\s\S]*\}/)?.[0];
-    return JSON.parse(json ?? 'null');
+    const parsed = JSON.parse(json ?? 'null');
+    if (!parsed) throw new Error('Null JSON');
+    return parsed;
   } catch {
-    return null;
+    return {
+      full_name: '—',
+      role: role.title,
+      linkedin_url: null,
+      prior_employer: null,
+      confidence: 0,
+      sources_agreed: 0,
+      reasoning: 'Failed to parse LLM response',
+    };
   }
 }
 
@@ -231,59 +246,61 @@ export async function POST() {
   const activeContacts = await getActiveContacts();
   const activeSet = new Set(activeContacts.map((c) => `${c.hospital_id}::${c.role.toLowerCase()}`));
 
-  const results: {
-    hospital: string;
-    role: string;
-    name: string;
-    action: string;
-    confidence: number;
-  }[] = [];
-  let searched = 0;
-
+  // Flatten iterations
+  const searchTasks: { hospital: (typeof HOSPITALS)[0]; role: (typeof ROLES)[0] }[] = [];
   for (const hospital of HOSPITALS) {
     for (const role of ROLES) {
       const key = `${hospital.id}::${role.title.toLowerCase()}`;
-      if (activeSet.has(key)) continue; // already have an active contact
-
-      searched++;
-      const laneResults = await multiLaneSearch(hospital, role);
-      if (!laneResults.length) {
-        results.push({
-          hospital: hospital.name,
-          role: role.title,
-          name: '—',
-          action: 'no results',
-          confidence: 0,
-        });
-        await sleep(300);
-        continue;
+      if (!activeSet.has(key)) {
+        searchTasks.push({ hospital, role });
       }
-
-      const contact = await verifyWithClaude(hospital, role, laneResults);
-      if (!contact || contact.confidence < 0.3) {
-        results.push({
-          hospital: hospital.name,
-          role: role.title,
-          name: contact?.full_name ?? '—',
-          action: 'skipped (low confidence)',
-          confidence: contact?.confidence ?? 0,
-        });
-        await sleep(500);
-        continue;
-      }
-
-      const isPending = contact.confidence < 0.55;
-      const action = await upsertContact(hospital.id, contact, isPending);
-      results.push({
-        hospital: hospital.name,
-        role: role.title,
-        name: contact.full_name,
-        action,
-        confidence: contact.confidence,
-      });
-      await sleep(800);
     }
   }
 
-  return NextResponse.json({ searched, results });
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        const promises = searchTasks.map(async ({ hospital, role }, index) => {
+          // Stagger starts heavily to prevent 429 rate limit
+          await sleep(index * 2000);
+
+          const laneResults = await multiLaneSearch(hospital, role);
+          if (!laneResults.length) {
+            const res = { hospital: hospital.name, role: role.title, name: '—', action: 'no results', confidence: 0 };
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(res)}\n\n`));
+            return res;
+          }
+
+          const contact = await verifyWithClaude(hospital, role, laneResults);
+          if (!contact || contact.confidence < 0.3) {
+            const res = { hospital: hospital.name, role: role.title, name: contact?.full_name ?? '—', action: 'skipped (low confidence)', confidence: contact?.confidence ?? 0 };
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(res)}\n\n`));
+            return res;
+          }
+
+          const isPending = contact.confidence < 0.55;
+          const action = await upsertContact(hospital.id, contact, isPending);
+          const res = { hospital: hospital.name, role: role.title, name: contact.full_name, action, confidence: contact.confidence };
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(res)}\n\n`));
+          return res;
+        });
+
+        await Promise.all(promises);
+        controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new NextResponse(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  });
 }

@@ -488,11 +488,28 @@ export default function DevDashboardPage() {
               disabled={restoring}
               onClick={async () => {
                 setRestoring(true);
-                setRestoreResults(null);
+                setRestoreResults([]);
                 try {
                   const res = await fetch('/api/contacts/restore', { method: 'POST' });
-                  const data = await res.json();
-                  setRestoreResults(data.results ?? []);
+                  if (!res.body) return;
+                  const reader = res.body.getReader();
+                  const decoder = new TextDecoder();
+                  while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+                    for (const line of lines) {
+                      if (line.startsWith('data: ')) {
+                        const dataStr = line.slice(6);
+                        if (dataStr === '[DONE]') return;
+                        try {
+                          const result = JSON.parse(dataStr);
+                          setRestoreResults((prev) => [...(prev ?? []), result]);
+                        } catch {}
+                      }
+                    }
+                  }
                 } finally {
                   setRestoring(false);
                 }
