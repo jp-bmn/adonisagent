@@ -12,6 +12,8 @@ from pathlib import Path
 from time import perf_counter
 from urllib.parse import urlparse
 
+import requests
+
 from adonis_data.clients.newsapi import NewsApiClient
 from adonis_data.clients.serper import SerperClient
 from adonis_data.classify.provisional_classifier import classify_signal
@@ -35,7 +37,8 @@ def _canonical_url(raw_url: str) -> str:
     scheme = parsed.scheme.lower() or "https"
     netloc = parsed.netloc.lower()
     path = parsed.path.rstrip("/")
-    return f"{scheme}://{netloc}{path}"
+    query = f"?{parsed.query}" if parsed.query else ""
+    return f"{scheme}://{netloc}{path}{query}"
 
 
 def _normalize_title(raw_title: str) -> str:
@@ -105,6 +108,49 @@ def _load_previous_signals(path: Path) -> list[RawSignal]:
                 )
             )
         except (TypeError, ValueError):
+            continue
+
+    return signals
+
+
+def _load_database_signals(supabase_url: str, supabase_key: str, hospitals: list[str], hospital_id_map: dict[str, str]) -> list[RawSignal]:
+    if not supabase_url or not supabase_key:
+        return []
+
+    signals: list[RawSignal] = []
+    headers = {
+        "apikey": supabase_key,
+        "Authorization": f"Bearer {supabase_key}"
+    }
+
+    for hospital_name in hospitals:
+        hospital_id = hospital_id_map.get(hospital_name)
+        if not hospital_id:
+            continue
+            
+        # Fetch up to 1000 recent signals for each hospital
+        url = f"{supabase_url}/rest/v1/signals?select=source_url,title,published_date&hospital_id=eq.{hospital_id}&limit=1000"
+        try:
+            res = requests.get(url, headers=headers, timeout=10)
+            if not res.ok:
+                continue
+            
+            for item in res.json():
+                try:
+                    signals.append(
+                        RawSignal(
+                            hospital=hospital_name,
+                            title=str(item.get("title", "")),
+                            source="database",
+                            url=str(item.get("source_url", "")),
+                            published_at=str(item.get("published_date", "")),
+                            matched_topics=[],
+                            excerpt="",
+                        )
+                    )
+                except (TypeError, ValueError):
+                    continue
+        except Exception:
             continue
 
     return signals
@@ -831,7 +877,18 @@ def run(quality_mode_override: str | None = None) -> Path:
 
     previous_classified = _load_previous_classified(classified_path)
 
-    previous_signals = _load_previous_signals(output_path)
+    # 1. Load from Database
+    db_signals = _load_database_signals(
+        supabase_url=settings.supabase_url,
+        supabase_key=settings.supabase_service_key,
+        hospitals=list(HOSPITAL_QUERIES.keys()),
+        hospital_id_map=settings.hospital_id_map or {},
+    )
+    
+    # 2. Fallback to Local JSON
+    local_signals = _load_previous_signals(output_path)
+    
+    previous_signals = db_signals + local_signals
     seen_urls: set[str] = set()
     seen_title_dates: dict[tuple[str, str], datetime] = {}
 

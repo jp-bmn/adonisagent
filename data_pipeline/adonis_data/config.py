@@ -37,6 +37,8 @@ class Settings:
     linkedin_recommended_match_score: float = 0.75
     hospital_id_map: dict[str, str] | None = None
     quality_mode: str = "balanced"
+    supabase_url: str = ""
+    supabase_service_key: str = ""
 
 
 def load_settings() -> Settings:
@@ -139,6 +141,9 @@ def load_settings() -> Settings:
         except json.JSONDecodeError:
             hospital_id_map = {}
 
+    supabase_url = os.getenv("SUPABASE_URL", "").strip()
+    supabase_service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", os.getenv("SUPABASE_KEY", "")).strip()
+
     if not serper_api_key:
         raise ValueError("Missing SERPER_API_KEY. Add it to data_pipeline/.env.")
     if not newsapi_api_key:
@@ -171,4 +176,6 @@ def load_settings() -> Settings:
         linkedin_recommended_match_score=linkedin_recommended_match_score,
         hospital_id_map=hospital_id_map,
         quality_mode=quality_mode,
+        supabase_url=supabase_url,
+        supabase_service_key=supabase_service_key,
     )
