@@ -136,6 +136,12 @@ ${signalsContext}`;
   });
 
   const data = await res.json();
+  if (!res.ok || data?.type === 'error') {
+    console.error('Anthropic API error:', JSON.stringify(data));
+    return NextResponse.json({
+      reply: `Iris error: ${data?.error?.message ?? data?.error?.type ?? 'Unknown error from Anthropic API'}`,
+    });
+  }
   const reply = data?.content?.[0]?.text ?? 'No response.';
   return NextResponse.json({ reply });
 }

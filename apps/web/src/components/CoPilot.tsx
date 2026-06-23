@@ -13,6 +13,7 @@ function IrisMessage({ text }: { text: string }) {
   const lines = text.split('\n');
   const nodes: React.ReactNode[] = [];
   let i = 0;
+  let k = 0;
 
   while (i < lines.length) {
     const line = lines[i] ?? '';
@@ -31,7 +32,7 @@ function IrisMessage({ text }: { text: string }) {
         i++;
       }
       nodes.push(
-        <ul key={i} className="list-disc list-outside pl-4 space-y-0.5 my-1">
+        <ul key={k++} className="list-disc list-outside pl-4 space-y-0.5 my-1">
           {items.map((item, j) => (
             <li key={j}>{renderInline(item)}</li>
           ))}
@@ -48,7 +49,7 @@ function IrisMessage({ text }: { text: string }) {
         i++;
       }
       nodes.push(
-        <ol key={i} className="list-decimal list-outside pl-4 space-y-0.5 my-1">
+        <ol key={k++} className="list-decimal list-outside pl-4 space-y-0.5 my-1">
           {items.map((item, j) => (
             <li key={j}>{renderInline(item)}</li>
           ))}
@@ -59,7 +60,7 @@ function IrisMessage({ text }: { text: string }) {
 
     // Regular paragraph
     nodes.push(
-      <p key={i} className="my-0.5">
+      <p key={k++} className="my-0.5">
         {renderInline(line)}
       </p>
     );
@@ -131,7 +132,7 @@ function defaultPos() {
   const isMobile = window.innerWidth < 768;
   return {
     x: window.innerWidth - BUBBLE_SIZE - (isMobile ? 16 : 24),
-    y: window.innerHeight - BUBBLE_SIZE - (isMobile ? 88 : 24),
+    y: window.innerHeight - BUBBLE_SIZE - (isMobile ? 96 : 48),
   };
 }
 
@@ -146,7 +147,7 @@ export default function CoPilot() {
   const [pulsing, setPulsing] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   // null = not yet mounted (SSR safe)
-  const { userId, isAdmin } = useUser();
+  const { userId, isAdmin, userName } = useUser();
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pillDismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -170,11 +171,11 @@ export default function CoPilot() {
       if (Math.abs(dx) > 5 || Math.abs(dy) > 5) drag.current.moved = true;
       const newX = Math.max(
         0,
-        Math.min(window.innerWidth - BUBBLE_SIZE, drag.current.startPosX + dx)
+        Math.min(window.innerWidth - BUBBLE_SIZE - 8, drag.current.startPosX + dx)
       );
       const newY = Math.max(
         0,
-        Math.min(window.innerHeight - BUBBLE_SIZE, drag.current.startPosY + dy)
+        Math.min(window.innerHeight - BUBBLE_SIZE - 16, drag.current.startPosY + dy)
       );
       setPos({ x: newX, y: newY });
     }
@@ -185,8 +186,8 @@ export default function CoPilot() {
       setPos((prev) => {
         if (!prev) return defaultPos();
         return {
-          x: Math.max(0, Math.min(window.innerWidth - BUBBLE_SIZE, prev.x)),
-          y: Math.max(0, Math.min(window.innerHeight - BUBBLE_SIZE, prev.y)),
+          x: Math.max(0, Math.min(window.innerWidth - BUBBLE_SIZE - 8, prev.x)),
+          y: Math.max(0, Math.min(window.innerHeight - BUBBLE_SIZE - 16, prev.y)),
         };
       });
     }
@@ -338,12 +339,10 @@ export default function CoPilot() {
       };
     }
 
-    const gap = 8;
-    let top = pos.y - PANEL_HEIGHT - gap;
-    if (top < 8) top = pos.y + BUBBLE_SIZE + gap;
-    let left = pos.x + BUBBLE_SIZE - PANEL_WIDTH;
-    left = Math.max(8, Math.min(window.innerWidth - PANEL_WIDTH - 8, left));
-    return { position: 'fixed', top, left, zIndex: 50, width: PANEL_WIDTH };
+    const gap = 12;
+    const bottom = window.innerHeight - pos.y + gap;
+    const right = Math.max(8, window.innerWidth - pos.x - BUBBLE_SIZE);
+    return { position: 'fixed', bottom, right, zIndex: 50, width: PANEL_WIDTH };
   }
 
   if (!pos) return null;
@@ -534,6 +533,11 @@ export default function CoPilot() {
           >
             {messages.length === 0 && (
               <div className="space-y-2">
+                {userName && (
+                  <p className="text-xs text-slate-500 pb-1">
+                    Hi {userName.split(' ')[0]}, what do you need?
+                  </p>
+                )}
                 <button
                   onClick={() =>
                     handleSend(
@@ -545,11 +549,18 @@ export default function CoPilot() {
                 >
                   Brief me on my territory
                 </button>
-                {[
-                  'Who should I call this week?',
-                  'Draft an outreach email for Ascension',
-                  "What's urgent across my accounts?",
-                ].map((prompt) => (
+                {(isAdmin
+                  ? [
+                      'Draft my weekly digest',
+                      "What's urgent across all accounts?",
+                      'Which AEs need a follow-up this week?',
+                    ]
+                  : [
+                      'Who should I call this week?',
+                      'Summarize my most important account',
+                      "What's urgent across my accounts?",
+                    ]
+                ).map((prompt) => (
                   <button
                     key={prompt}
                     onClick={() => handleSend(prompt)}
