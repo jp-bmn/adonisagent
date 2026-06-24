@@ -437,7 +437,7 @@ async def ingest_signal_batch(
         confidence_score = 0.75
         review_status = None  # auto-approved at 0.75
 
-        # --- Deduplication: check source_url + hospital_id ---
+        # --- Deduplication: check source_url OR title + hospital_id ---
         if source_url:
             dup_check = (
                 supabase.table("signals")
@@ -446,15 +446,25 @@ async def ingest_signal_batch(
                 .eq("source_url", source_url)
                 .execute()
             )
-            if dup_check.data:
-                duplicates += 1
-                detail.update(
-                    status="duplicate",
-                    reason="Signal with same source_url + hospital_id already exists",
-                    signal_id=dup_check.data[0]["id"],
-                )
-                details.append(detail)
-                continue
+        else:
+            # If no valid URL, fallback to checking exact title match for this hospital
+            dup_check = (
+                supabase.table("signals")
+                .select("id")
+                .eq("hospital_id", hospital_id)
+                .eq("title", title)
+                .execute()
+            )
+
+        if dup_check.data:
+            duplicates += 1
+            detail.update(
+                status="duplicate",
+                reason="Signal with same source_url or title already exists",
+                signal_id=dup_check.data[0]["id"],
+            )
+            details.append(detail)
+            continue
 
         # --- Insert ---
         insert_payload = {
