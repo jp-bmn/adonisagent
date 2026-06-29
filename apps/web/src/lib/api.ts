@@ -182,7 +182,7 @@ export async function fetchHospitalSignals(
   return apiFetch<ApiSignal[]>(`/hospitals/${hospitalId}/signals`, userId);
 }
 
-export async function fetchMe(userId: string): Promise<ApiMe> {
+export async function fetchMe(userId?: string): Promise<ApiMe> {
   return apiFetch<ApiMe>('/me', userId);
 }
 
