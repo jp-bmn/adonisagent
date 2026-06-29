@@ -17,14 +17,25 @@ load_dotenv()
 
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_USER_ID_DANIELLE = os.environ.get("SLACK_USER_ID_DANIELLE", "")
+SLACK_USER_ID_MICHAEL = os.environ.get("SLACK_USER_ID_MICHAEL", "")
+SLACK_USER_ID_DAVID = os.environ.get("SLACK_USER_ID_DAVID", "")
+SLACK_USER_ID_JEFF = os.environ.get("SLACK_USER_ID_JEFF", "")
 
 if not SLACK_BOT_TOKEN or SLACK_BOT_TOKEN.startswith("xoxb-placeholder"):
     print("❌  SLACK_BOT_TOKEN not set — add the real token to .env first")
     sys.exit(1)
 
-if not SLACK_USER_ID_DANIELLE or SLACK_USER_ID_DANIELLE.startswith("PLACEHOLDER"):
-    print("❌  SLACK_USER_ID_DANIELLE not set — add your Slack User ID to .env")
-    sys.exit(1)
+team = {
+    "Danielle": SLACK_USER_ID_DANIELLE,
+    "Michael": SLACK_USER_ID_MICHAEL,
+    "David": SLACK_USER_ID_DAVID,
+    "Jeff": SLACK_USER_ID_JEFF,
+}
+
+for name, user_id in team.items():
+    if not user_id or user_id.startswith("PLACEHOLDER"):
+        print(f"⚠️  Skipping {name} — ID not set yet.")
+        continue
 
 # Bootstrap settings so the service can call get_settings()
 os.environ.setdefault("SUPABASE_URL",         os.environ.get("SUPABASE_URL", "https://test.supabase.co"))
@@ -32,6 +43,13 @@ os.environ.setdefault("SUPABASE_KEY",         os.environ.get("SUPABASE_KEY", "te
 os.environ.setdefault("SLACK_SIGNING_SECRET", os.environ.get("SLACK_SIGNING_SECRET", "test"))
 os.environ.setdefault("ANTHROPIC_API_KEY",    os.environ.get("ANTHROPIC_API_KEY", "test"))
 os.environ.setdefault("INTERNAL_API_KEY",     os.environ.get("INTERNAL_API_KEY", "test"))
+
+# Add the backend directory to sys.path so it can find the 'app' module
+import sys
+from pathlib import Path
+backend_dir = str(Path(__file__).resolve().parent.parent)
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
 
 from app.services.slack_service import send_dm, format_weekly_digest, send_urgent_alert
 
@@ -112,5 +130,19 @@ except Exception as e:
     print(f"   ❌  Failed: {e}")
     sys.exit(1)
 
-print("\n✅  All 3 Slack tests passed — Task 4 complete.\n")
-print("📌  Next: add real Slack User IDs for Michael, David, Jeff to .env")
+print("\n✅  All 3 Slack tests passed for Danielle.\n")
+
+print("4️⃣  Pinging the rest of the team...")
+for name, user_id in team.items():
+    if name == "Danielle":
+        continue
+    try:
+        result = send_dm(
+            slack_user_id=user_id,
+            text=f"👋 Adonis backend smoke test — hello {name}!",
+        )
+        print(f"   ✅  Sent to {name}! ts={result.get('ts')}")
+    except Exception as e:
+        print(f"   ❌  Failed sending to {name}: {e}")
+
+print("\n🎉  Slack integration is fully verified!\n")

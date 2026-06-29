@@ -118,19 +118,43 @@ export const SIGNAL_TYPE_LABELS: Record<SignalType, string> = {
 // Fetch helpers
 // ---------------------------------------------------------------------------
 
+async function getAuthToken() {
+  if (typeof window !== 'undefined') {
+    const { createClient } = await import('@/utils/supabase/client');
+    const supabase = createClient();
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token;
+  } else {
+    const { createClient } = await import('@/utils/supabase/server');
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token;
+  }
+}
+
 async function apiFetch<T>(
   path: string,
-  userId: string = DEFAULT_USER_ID,
+  userId?: string, // Kept for backwards compatibility if needed
   init?: RequestInit
 ): Promise<T> {
+  const nextConfig = init?.cache === 'no-store' ? undefined : { revalidate: 60 };
+  
+  const token = await getAuthToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(init?.headers as Record<string, string>),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  } else if (userId) {
+    headers['X-User-Id'] = userId;
+  }
+
   const res = await fetch(`${BASE_URL}${path}`, {
     ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-User-Id': userId,
-      ...init?.headers,
-    },
-    next: { revalidate: 60 }, // Next.js cache: revalidate every 60s
+    headers,
+    next: nextConfig,
   });
   if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
   return res.json() as Promise<T>;
