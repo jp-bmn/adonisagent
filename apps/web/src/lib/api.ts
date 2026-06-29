@@ -4,6 +4,8 @@
  * Auth: X-User-Id header (Danielle's admin ID hardcoded until T-11 wires real auth)
  */
 
+import { getAuthTokenAction } from '@/app/actions';
+
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'https://adonisagents-production.up.railway.app/api/v1';
 
@@ -114,7 +116,7 @@ export const SIGNAL_TYPE_LABELS: Record<SignalType, string> = {
   filtered_out: 'Filtered out',
 };
 
-import { getAuthTokenAction } from '@/app/actions';
+
 
 async function getAuthToken() {
   if (typeof window !== 'undefined') {
