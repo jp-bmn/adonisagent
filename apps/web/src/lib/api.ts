@@ -114,9 +114,7 @@ export const SIGNAL_TYPE_LABELS: Record<SignalType, string> = {
   filtered_out: 'Filtered out',
 };
 
-// ---------------------------------------------------------------------------
-// Fetch helpers
-// ---------------------------------------------------------------------------
+import { getAuthTokenAction } from '@/app/actions';
 
 async function getAuthToken() {
   if (typeof window !== 'undefined') {
@@ -125,10 +123,7 @@ async function getAuthToken() {
     const { data } = await supabase.auth.getSession();
     return data.session?.access_token;
   } else {
-    const { createClient } = await import('@/utils/supabase/server');
-    const supabase = await createClient();
-    const { data } = await supabase.auth.getSession();
-    return data.session?.access_token;
+    return await getAuthTokenAction();
   }
 }
 
