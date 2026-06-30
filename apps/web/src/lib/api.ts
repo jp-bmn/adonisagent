@@ -116,8 +116,6 @@ export const SIGNAL_TYPE_LABELS: Record<SignalType, string> = {
   filtered_out: 'Filtered out',
 };
 
-
-
 async function getAuthToken() {
   if (typeof window !== 'undefined') {
     const { createClient } = await import('@/utils/supabase/client');
@@ -127,6 +125,7 @@ async function getAuthToken() {
   } else {
     return await getAuthTokenAction();
   }
+  return undefined;
 }
 
 async function apiFetch<T>(
@@ -135,7 +134,7 @@ async function apiFetch<T>(
   init?: RequestInit
 ): Promise<T> {
   const nextConfig = init?.cache === 'no-store' ? undefined : { revalidate: 60 };
-  
+
   const token = await getAuthToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',

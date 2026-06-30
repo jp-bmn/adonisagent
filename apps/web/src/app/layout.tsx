@@ -1,8 +1,13 @@
 import './globals.css';
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
 import SidebarUser from '@/components/SidebarUser';
 import ShellGuard from '@/components/ShellGuard';
+import CoPilot from '@/components/CoPilot';
+import MobileNav from '@/components/MobileNav';
+import DigestTracker from '@/components/DigestTracker';
+import UserProvider from '@/components/UserProvider';
 
 export const metadata: Metadata = {
   title: 'Adonis Account Intelligence',
@@ -13,7 +18,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-        <ShellGuard sidebar={<Sidebar />}>{children}</ShellGuard>
+        <ShellGuard shell={
+          <UserProvider>
+            <MobileNav />
+            <div className="min-h-screen flex">
+              <Sidebar />
+              <main className="flex-1 min-w-0">{children}</main>
+            </div>
+            <CoPilot />
+            <Suspense>
+              <DigestTracker />
+            </Suspense>
+          </UserProvider>
+        }>
+          {children}
+        </ShellGuard>
       </body>
     </html>
   );
