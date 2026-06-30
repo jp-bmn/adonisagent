@@ -40,3 +40,4 @@ export default function UserProvider({ children }: { children: React.ReactNode }
     <UserContext.Provider value={{ userId, userName, isAdmin }}>{children}</UserContext.Provider>
   );
 }
+

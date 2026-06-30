@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@adonis/shared', '@adonis/db'],
-  serverExternalPackages: ['@supabase/ssr', '@supabase/supabase-js'],
+  serverExternalPackages: [],
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'img.logo.dev' },
