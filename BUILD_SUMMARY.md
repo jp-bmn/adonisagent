@@ -5,7 +5,6 @@ This document lists all the features, integrations, database schemas, and workfl
 ---
 
 ## 🛠️ Repository & Architecture
-
 - **GitHub Monorepo Structure**: Set up with `pnpm` workspaces and `Turborepo` containing:
   - `apps/web`: Next.js 14 dashboard app.
   - `apps/agents`: Trigger.dev/cron scraping workers.
@@ -17,7 +16,6 @@ This document lists all the features, integrations, database schemas, and workfl
 ---
 
 ## 🗄️ Database (Supabase / PostgreSQL)
-
 - **Schema & Migrations**: Designed, migrated, and verified the relational schema ([001_initial_schema.sql](file:///Users/joel-bmn/adonisagent/backend/migrations/001_initial_schema.sql)):
   - `hospitals`: Profiles, website URLs, and account type support.
   - `ae_users`: Role permissions (admin vs AEs) and Slack credentials.
@@ -29,7 +27,6 @@ This document lists all the features, integrations, database schemas, and workfl
 ---
 
 ## ⚙️ Ingestion & Classification Pipeline
-
 - **Hospital Scrapers**: Automated news scraping utilizing `serper.dev` and `NewsAPI` queries.
 - **Deterministic Rules Engine**: Python rules engine evaluating 8 keyword pattern rules to bypass Claude AI for deterministic high-confidence signals (CRO executive hires, epic go-lives, restructuring, vendor disputes).
 - **Claude AI Classifier**: Fallback classifier calling Claude 3.5 Sonnet, returning:
@@ -42,7 +39,6 @@ This document lists all the features, integrations, database schemas, and workfl
 ---
 
 ## 🔌 FastAPI Backend Server
-
 - **Core Endpoints**:
   - `GET /api/v1/hospitals`: Hospital list filterable by AE territory.
   - `GET /api/v1/hospitals/{id}/signals`: Ordered signal feed.
@@ -52,14 +48,13 @@ This document lists all the features, integrations, database schemas, and workfl
   - `POST /api/v1/copilot`: Scaffolds LLM chat completions for territory insights.
   - `GET /api/v1/export/csv`: Bulk CSV downloader for signals.
 - **Performance**: Added response-level TTL caching (`@ttl_cache(60.0)`) and CORS preflight caching.
-- **Robustness**:
+- **Robustness**: 
   - Automated exponential backoff retry handler wrapping Claude API requests.
   - Global FastAPI exception handler dispatching unhandled 500 stack trace alerts to Danielle's Slack DM.
 
 ---
 
 ## 🎨 Next.js Frontend Dashboard
-
 - **Sidebar & Roster Layout**: Fully responsive viewport rendering:
   - Left panel shows hospital list, filterable by Michael, David, or Jeff's territories.
   - Main signal feed display with color-coded urgency badges (Urgent red, Worth Knowing blue, Low gray) and source links.
@@ -71,7 +66,6 @@ This document lists all the features, integrations, database schemas, and workfl
 ---
 
 ## 💬 Slack Integration & Bot
-
 - **Weekly Digest DM**: Compiles and sends a combined weekly digest DM to AEs every Monday morning, containing account grouping and UTM-tagged URLs.
 - **Immediate Urgent Alerts**: Direct DMs sent to AEs in real-time when an `Urgent` signal is scraper-detected.
 - **Digest Send Guard**: Enforces that the Monday digest only sends once Danielle's pending review queue is completely empty.
@@ -79,7 +73,6 @@ This document lists all the features, integrations, database schemas, and workfl
 ---
 
 ## 🧪 Testing & Verification
-
 - Over **190 unit and integration tests** verifying:
   - Rules engine keyword matching and exceptions.
   - Route authentication and pagination.

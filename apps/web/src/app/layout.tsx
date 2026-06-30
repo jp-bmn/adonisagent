@@ -18,21 +18,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-        <ShellGuard
-          shell={
-            <UserProvider>
-              <MobileNav />
-              <div className="min-h-screen flex">
-                <Sidebar />
-                <main className="flex-1 min-w-0">{children}</main>
-              </div>
-              <CoPilot />
-              <Suspense>
-                <DigestTracker />
-              </Suspense>
-            </UserProvider>
-          }
-        >
+        <ShellGuard shell={
+          <UserProvider>
+            <MobileNav />
+            <div className="min-h-screen flex">
+              <Sidebar />
+              <main className="flex-1 min-w-0">{children}</main>
+            </div>
+            <CoPilot />
+            <Suspense>
+              <DigestTracker />
+            </Suspense>
+          </UserProvider>
+        }>
           {children}
         </ShellGuard>
       </body>
